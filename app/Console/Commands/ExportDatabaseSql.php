@@ -66,10 +66,6 @@ class ExportDatabaseSql extends Command
         $sql[] = "SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';";
         $sql[] = "SET time_zone = '+00:00';";
         $sql[] = '';
-        $sql[] = '-- Create Database if not exists';
-        $sql[] = 'CREATE DATABASE IF NOT EXISTS `gbtx_appwhms` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;';
-        $sql[] = 'USE `gbtx_appwhms`;';
-        $sql[] = '';
 
         // 1. Roles table
         $sql[] = '-- --------------------------------------------------------';

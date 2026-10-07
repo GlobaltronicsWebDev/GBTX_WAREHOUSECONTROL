@@ -1,7 +1,7 @@
 -- ========================================================
 -- Globaltronics Warehouse Management System (GBTX WHMS)
 -- Complete Database Dump (Schema + Active Data)
--- Generated on: 2026-10-07 08:22:46
+-- Generated on: 2026-10-07 09:57:46
 -- Target DBMS: MySQL 5.7+ / MySQL 8.0+ / MariaDB 10.3+
 -- ========================================================
 
@@ -9,10 +9,6 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
 SET time_zone = '+00:00';
-
--- Create Database if not exists
-CREATE DATABASE IF NOT EXISTS `gbtx_appwhms` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `gbtx_appwhms`;
 
 -- --------------------------------------------------------
 -- Table structure for table `roles`
