@@ -19,11 +19,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'screen_size',
     'item_description',
     'quantity',
+    'original_quantity',
     'acu_quantity',
     'forecasted_quantity',
     'sqm',
     'location',
     'status',
+    'remarks',
+    'reservation_qty',
+    'reservation_project',
+    'reservation_remarks',
+    'history_qty',
+    'history_project',
+    'status_qty',
+    'status_particular',
+    'movement_history',
     'created_by',
 ])]
 class InventoryItem extends Model
@@ -41,8 +51,13 @@ class InventoryItem extends Model
         return [
             'check_in_date' => 'date',
             'quantity' => 'integer',
+            'original_quantity' => 'integer',
             'acu_quantity' => 'integer',
             'forecasted_quantity' => 'integer',
+            'reservation_qty' => 'integer',
+            'history_qty' => 'integer',
+            'status_qty' => 'integer',
+            'movement_history' => 'array',
             'sqm' => 'decimal:2',
         ];
     }
