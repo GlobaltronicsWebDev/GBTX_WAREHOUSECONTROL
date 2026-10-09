@@ -955,6 +955,31 @@ class InventoryController extends Controller
                         $existing = $query->first();
                     }
 
+                    $initialRes = [];
+                    if ($resQty || !empty($resProject)) {
+                        $initialRes[] = [
+                            'qty' => $resQty ?? 0,
+                            'project' => $resProject,
+                            'remarks' => $cleanStr($rowData['reservation_remarks'] ?? ''),
+                        ];
+                    }
+                    $initialHist = [];
+                    if ($histQty || !empty($histProject)) {
+                        $initialHist[] = [
+                            'qty' => $histQty ?? 0,
+                            'project' => $histProject,
+                        ];
+                    }
+                    if ($hasColumn('movement_history')) {
+                        $itemData['movement_history'] = [
+                            'reservations' => $initialRes,
+                            'history' => $initialHist,
+                            'locations' => [
+                                ['location' => $itemData['location'], 'qty' => $itemData['quantity']]
+                            ],
+                        ];
+                    }
+
                     if ($existing) {
                         $existing->update($safeData);
                         $lastItemModel = $existing;
@@ -964,38 +989,66 @@ class InventoryController extends Controller
                         $importedCount++;
                     }
                 } elseif ($lastItemModel !== null) {
-                    // Attach multi-line reservation or project history to preceding parent item
+                    // Attach multi-line reservation, project history, or sub-location to preceding parent item
                     $needsSave = false;
+                    $movements = $lastItemModel->movement_history ?? [];
+                    if (!isset($movements['reservations'])) $movements['reservations'] = [];
+                    if (!isset($movements['history'])) $movements['history'] = [];
+                    if (!isset($movements['locations'])) $movements['locations'] = [];
+
                     if ($hasColumn('reservation_qty') && ($resQty || !empty($resProject))) {
                         $lastItemModel->reservation_qty = ($lastItemModel->reservation_qty ?? 0) + ($resQty ?? 0);
                         if (!empty($resProject) && $hasColumn('reservation_project')) {
                             $existingProj = (string)($lastItemModel->reservation_project ?? '');
+                            $entryText = ($resQty ? "({$resQty} pcs) " : "") . $resProject;
                             if ($existingProj === '') {
-                                $combined = $resProject;
+                                $combined = $entryText;
                             } elseif (!str_contains($existingProj, $resProject)) {
-                                $combined = $existingProj . '; ' . $resProject;
+                                $combined = $existingProj . "\n\n• " . $entryText;
                             } else {
                                 $combined = $existingProj;
                             }
                             $lastItemModel->reservation_project = $isTextCol ? $combined : mb_substr($combined, 0, 240);
                         }
+                        $movements['reservations'][] = [
+                            'qty' => $resQty ?? 0,
+                            'project' => $resProject,
+                            'remarks' => $cleanStr($rowData['reservation_remarks'] ?? ''),
+                        ];
                         $needsSave = true;
                     }
                     if ($hasColumn('history_qty') && ($histQty || !empty($histProject))) {
                         $lastItemModel->history_qty = ($lastItemModel->history_qty ?? 0) + ($histQty ?? 0);
                         if (!empty($histProject) && $hasColumn('history_project')) {
                             $existingHist = (string)($lastItemModel->history_project ?? '');
+                            $entryText = ($histQty ? "({$histQty} pcs) " : "") . $histProject;
                             if ($existingHist === '') {
-                                $combinedHist = $histProject;
+                                $combinedHist = $entryText;
                             } elseif (!str_contains($existingHist, $histProject)) {
-                                $combinedHist = $existingHist . '; ' . $histProject;
+                                $combinedHist = $existingHist . "\n\n• " . $entryText;
                             } else {
                                 $combinedHist = $existingHist;
                             }
                             $lastItemModel->history_project = $isTextCol ? $combinedHist : mb_substr($combinedHist, 0, 240);
                         }
+                        $movements['history'][] = [
+                            'qty' => $histQty ?? 0,
+                            'project' => $histProject,
+                        ];
                         $needsSave = true;
                     }
+                    if (!empty($location) || ($onHand !== null && $onHand > 0)) {
+                        $movements['locations'][] = [
+                            'location' => $location ?: 'GLOBALTRONICS',
+                            'qty' => $onHand ?? 0,
+                        ];
+                        $needsSave = true;
+                    }
+
+                    if ($hasColumn('movement_history')) {
+                        $lastItemModel->movement_history = $movements;
+                    }
+
                     if ($needsSave) {
                         $lastItemModel->save();
                     }
