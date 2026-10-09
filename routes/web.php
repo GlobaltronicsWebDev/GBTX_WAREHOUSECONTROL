@@ -108,6 +108,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Warehouse Inventory Management (Accessible by Warehouse Admins & IT Admins)
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::get('/inventory/export', [InventoryController::class, 'export'])->name('inventory.export');
+    Route::get('/inventory/sample-csv', [InventoryController::class, 'sampleCsv'])->name('inventory.sample-csv');
+    Route::post('/inventory/import', [InventoryController::class, 'import'])->name('inventory.import');
     Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
     Route::put('/inventory/{item}', [InventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/{item}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
