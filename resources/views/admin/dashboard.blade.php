@@ -2561,21 +2561,24 @@
     // =========================================================================
     // SRF REQUISITION STOCK SEARCH & LIVE AVAILABLE QUANTITY CONTROLLER
     // =========================================================================
-    const srfInventoryStock = @json($inventoryItems->map(function($i) {
-        $divisor = ($i->acu_quantity ?: $i->quantity) ?: 1;
-        $perPanelSqm = ($i->sqm && $divisor > 0) ? round($i->sqm / $divisor, 2) : 0;
-        return [
-            'id' => (string) $i->id,
-            'model' => (string) $i->model,
-            'mfr' => (string) ($i->manufacturer ?? ''),
-            'location' => (string) ($i->location ?? 'Warehouse'),
-            'qty' => (int) $i->quantity,
-            'acu_qty' => (int) ($i->acu_quantity ?? $i->quantity),
-            'sqm' => $i->sqm ? (float) $i->sqm : 0,
-            'per_panel_sqm' => $perPanelSqm,
-            'search' => strtolower($i->model . ' ' . ($i->manufacturer ?? '') . ' ' . ($i->location ?? '') . ' ' . ($i->category ?? '')),
-        ];
-    }));
+    @php
+        $srfInventoryStockJson = $inventoryItems->map(function($i) {
+            $divisor = ($i->acu_quantity ?: $i->quantity) ?: 1;
+            $perPanelSqm = ($i->sqm && $divisor > 0) ? round($i->sqm / $divisor, 2) : 0;
+            return [
+                'id' => (string) $i->id,
+                'model' => (string) $i->model,
+                'mfr' => (string) ($i->manufacturer ?? ''),
+                'location' => (string) ($i->location ?? 'Warehouse'),
+                'qty' => (int) $i->quantity,
+                'acu_qty' => (int) ($i->acu_quantity ?? $i->quantity),
+                'sqm' => $i->sqm ? (float) $i->sqm : 0,
+                'per_panel_sqm' => $perPanelSqm,
+                'search' => strtolower($i->model . ' ' . ($i->manufacturer ?? '') . ' ' . ($i->location ?? '') . ' ' . ($i->category ?? '')),
+            ];
+        })->values();
+    @endphp
+    const srfInventoryStock = {!! json_encode($srfInventoryStockJson) !!};
 
     let srfItemIndex = 1;
 
