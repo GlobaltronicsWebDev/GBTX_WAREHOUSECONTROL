@@ -41,22 +41,41 @@ class InventoryController extends Controller
             'Kiosks',
         ];
 
-        $isServiceUnitsParent = in_array($category, ['Service Units (Events, Demo)', 'SERVICE UNITS (EVENTS, DEMO)', 'Service Units', 'SERVICE UNITS']);
+        $applyCategoryScope = function ($q, string $targetCategory) use ($serviceUnitSubCategories) {
+            $targetUpper = strtoupper(trim($targetCategory));
+            $isServiceUnitsParent = in_array($targetUpper, [
+                'SERVICE UNITS (EVENTS, DEMO)',
+                'SERVICE UNITS',
+                'SERVICE UNIT',
+            ]);
 
-        $categoryFilterCallback = function ($q) use ($category, $isServiceUnitsParent, $serviceUnitSubCategories) {
             if ($isServiceUnitsParent) {
-                $q->where(function ($sq) use ($serviceUnitSubCategories) {
-                    $sq->whereIn('category', array_merge($serviceUnitSubCategories, ['Service Units (Events, Demo)', 'SERVICE UNITS (EVENTS, DEMO)', 'Service Units', 'SERVICE UNITS']))
-                        ->orWhere('category', 'like', '%Service Unit%')
-                        ->orWhere('category', 'like', '%SERVICE UNIT%');
+                $q->where(function ($sq) {
+                    $sq->where('category', 'like', '%Service Unit%')
+                        ->orWhere('category', 'like', '%SERVICE UNIT%')
+                        ->orWhere('category', 'like', '%Service Units%')
+                        ->orWhere('category', 'like', '%SERVICE UNITS%')
+                        ->orWhereIn('category', [
+                            'LED Service Units', 'LED SERVICES UNITS', 'LED SERVICE UNITS', 'LED Service Unit',
+                            'Philips Service Units', 'PHILIPS SERVICE UNITS', 'Philips Service Unit', 'PHILIPS SERVICE UNIT',
+                            'Video Controllers / Processors', 'VIDEO CONTROLLERS / PROCESSORS', 'Video Controllers', 'Video Processors',
+                            'Shuttle', 'SHUTTLE',
+                            'Aver', 'AVER',
+                            'Digital iPoster', 'DIGITAL IPOSTER', 'iPoster', 'IPoster',
+                            'Kiosks', 'KIOSKS', 'Kiosk', 'KIOSK',
+                        ]);
                 });
             } else {
-                $q->where('category', $category);
+                $variants = $this->getCategoryVariants($targetCategory);
+                $q->where(function ($sq) use ($targetCategory, $variants) {
+                    $sq->whereIn('category', $variants)
+                        ->orWhereRaw('LOWER(category) = ?', [strtolower(trim($targetCategory))]);
+                });
             }
         };
 
         if ($category && $category !== 'all') {
-            $categoryFilterCallback($query);
+            $applyCategoryScope($query, $category);
         }
 
         if ($location && $location !== 'all') {
@@ -85,26 +104,30 @@ class InventoryController extends Controller
 
         $categoryTotalQty = (int) (clone $filterBaseQuery)->sum('quantity');
         $categoryTotalAcuQty = (int) (clone $filterBaseQuery)->sum(DB::raw('COALESCE(acu_quantity, quantity)'));
-        $categoryTotalForecastedQty = (int) (clone $filterBaseQuery)->sum('forecasted_quantity');
+        $categoryTotalForecastedQty = (int) (clone $filterBaseQuery)->sum(DB::raw('COALESCE(forecasted_quantity, CASE WHEN quantity - COALESCE(reservation_qty, 0) > 0 THEN quantity - COALESCE(reservation_qty, 0) ELSE 0 END)'));
         $categoryTotalHistoryQty = (int) (clone $filterBaseQuery)->sum('history_qty');
         $categoryTotalReservedQty = (int) (clone $filterBaseQuery)->sum('reservation_qty');
         $categoryTotalStatusQty = (int) (clone $filterBaseQuery)->sum('status_qty');
-        $categoryTotalOriginalQty = (int) (clone $filterBaseQuery)->sum('original_quantity');
+        $categoryTotalOriginalQty = (int) (clone $filterBaseQuery)->sum(DB::raw('COALESCE(original_quantity, quantity)'));
         $categoryTotalSqm = (float) (clone $filterBaseQuery)->sum('sqm');
 
         // Limit to 10 items per page with next page navigation
         $perPage = (int) $request->query('per_page', 10);
         $items = $query->paginate($perPage)->withQueryString();
 
-        $totalUnits = InventoryItem::when($category && $category !== 'all', $categoryFilterCallback)->sum('quantity');
-        $totalSqm = InventoryItem::when($category && $category !== 'all', $categoryFilterCallback)->sum('sqm');
-        $overallUnits = InventoryItem::sum('quantity');
-        $totalModels = InventoryItem::when($category && $category !== 'all', $categoryFilterCallback)->count();
-        $totalManufacturers = InventoryItem::when($category && $category !== 'all', $categoryFilterCallback)->distinct('manufacturer')->count('manufacturer');
-        $lowStockCount = InventoryItem::when($category && $category !== 'all', $categoryFilterCallback)->where('quantity', '<=', 5)->count();
+        $categoryScopeCallback = function ($q) use ($applyCategoryScope, $category) {
+            $applyCategoryScope($q, $category);
+        };
 
-        $globaltronicsUnits = InventoryItem::when($category && $category !== 'all', $categoryFilterCallback)->where('location', 'Globaltronics')->sum('quantity');
-        $ajuanUnits = InventoryItem::when($category && $category !== 'all', $categoryFilterCallback)->where('location', 'AJUAN')->sum('quantity');
+        $totalUnits = InventoryItem::when($category && $category !== 'all', $categoryScopeCallback)->sum('quantity');
+        $totalSqm = InventoryItem::when($category && $category !== 'all', $categoryScopeCallback)->sum('sqm');
+        $overallUnits = InventoryItem::sum('quantity');
+        $totalModels = InventoryItem::when($category && $category !== 'all', $categoryScopeCallback)->count();
+        $totalManufacturers = InventoryItem::when($category && $category !== 'all', $categoryScopeCallback)->distinct('manufacturer')->count('manufacturer');
+        $lowStockCount = InventoryItem::when($category && $category !== 'all', $categoryScopeCallback)->where('quantity', '<=', 5)->count();
+
+        $globaltronicsUnits = InventoryItem::when($category && $category !== 'all', $categoryScopeCallback)->where('location', 'Globaltronics')->sum('quantity');
+        $ajuanUnits = InventoryItem::when($category && $category !== 'all', $categoryScopeCallback)->where('location', 'AJUAN')->sum('quantity');
 
         $standardManufacturers = [
             'UNILUMIN',
@@ -167,17 +190,54 @@ class InventoryController extends Controller
             ->values();
         $screenSizes = InventoryItem::select('screen_size')->whereNotNull('screen_size')->distinct()->pluck('screen_size');
 
-        $ledCount = InventoryItem::where('category', 'CENTRALIZED LED INVENTORY')->count();
-        $philipsCount = InventoryItem::where('category', 'EOL PHILIPS UNITS')->count();
-        $serviceUnitsCount = InventoryItem::where(function ($q) use ($serviceUnitSubCategories) {
-            $q->whereIn('category', array_merge($serviceUnitSubCategories, ['Service Units (Events, Demo)', 'SERVICE UNITS (EVENTS, DEMO)', 'Service Units', 'SERVICE UNITS']))
-                ->orWhere('category', 'like', '%Service Unit%')
-                ->orWhere('category', 'like', '%SERVICE UNIT%');
+        $ledVariants = $this->getCategoryVariants('CENTRALIZED LED INVENTORY');
+        $ledCount = InventoryItem::where(function ($q) use ($ledVariants) {
+            $q->whereIn('category', $ledVariants)
+                ->orWhereRaw('LOWER(category) = ?', ['centralized led inventory']);
         })->count();
+        $ledTotalUnits = (int) InventoryItem::where(function ($q) use ($ledVariants) {
+            $q->whereIn('category', $ledVariants)
+                ->orWhereRaw('LOWER(category) = ?', ['centralized led inventory']);
+        })->sum('quantity');
+
+        $philipsVariants = $this->getCategoryVariants('EOL PHILIPS UNITS');
+        $philipsCount = InventoryItem::where(function ($q) use ($philipsVariants) {
+            $q->whereIn('category', $philipsVariants)
+                ->orWhereRaw('LOWER(category) = ?', ['eol philips units']);
+        })->count();
+        $philipsTotalUnits = (int) InventoryItem::where(function ($q) use ($philipsVariants) {
+            $q->whereIn('category', $philipsVariants)
+                ->orWhereRaw('LOWER(category) = ?', ['eol philips units']);
+        })->sum('quantity');
+
+        $serviceUnitsQuery = InventoryItem::where(function ($q) {
+            $q->where('category', 'like', '%Service Unit%')
+                ->orWhere('category', 'like', '%SERVICE UNIT%')
+                ->orWhere('category', 'like', '%Service Units%')
+                ->orWhere('category', 'like', '%SERVICE UNITS%')
+                ->orWhereIn('category', [
+                    'LED Service Units', 'LED SERVICES UNITS', 'LED SERVICE UNITS', 'LED Service Unit',
+                    'Philips Service Units', 'PHILIPS SERVICE UNITS', 'Philips Service Unit', 'PHILIPS SERVICE UNIT',
+                    'Video Controllers / Processors', 'VIDEO CONTROLLERS / PROCESSORS', 'Video Controllers', 'Video Processors',
+                    'Shuttle', 'SHUTTLE',
+                    'Aver', 'AVER',
+                    'Digital iPoster', 'DIGITAL IPOSTER', 'iPoster', 'IPoster',
+                    'Kiosks', 'KIOSKS', 'Kiosk', 'KIOSK',
+                ]);
+        });
+        $serviceUnitsCount = (clone $serviceUnitsQuery)->count();
+        $serviceUnitsTotalUnits = (int) (clone $serviceUnitsQuery)->sum('quantity');
 
         $subCategoryCounts = [];
+        $subCategoryQuantities = [];
         foreach ($serviceUnitSubCategories as $sub) {
-            $subCategoryCounts[$sub] = InventoryItem::where('category', $sub)->count();
+            $subVariants = $this->getCategoryVariants($sub);
+            $subQ = InventoryItem::where(function ($q) use ($sub, $subVariants) {
+                $q->whereIn('category', $subVariants)
+                    ->orWhereRaw('LOWER(category) = ?', [strtolower(trim($sub))]);
+            });
+            $subCategoryCounts[$sub] = (clone $subQ)->count();
+            $subCategoryQuantities[$sub] = (int) (clone $subQ)->sum('quantity');
         }
 
         return view('admin.inventory.index', [
@@ -202,10 +262,14 @@ class InventoryController extends Controller
             'availableLocations' => $availableLocations,
             'screenSizes' => $screenSizes,
             'ledCount' => $ledCount,
+            'ledTotalUnits' => $ledTotalUnits,
             'philipsCount' => $philipsCount,
+            'philipsTotalUnits' => $philipsTotalUnits,
             'serviceUnitsCount' => $serviceUnitsCount,
+            'serviceUnitsTotalUnits' => $serviceUnitsTotalUnits,
             'serviceUnitSubCategories' => $serviceUnitSubCategories,
             'subCategoryCounts' => $subCategoryCounts,
+            'subCategoryQuantities' => $subCategoryQuantities,
             'categoryTotalQty' => $categoryTotalQty,
             'categoryTotalAcuQty' => $categoryTotalAcuQty,
             'categoryTotalForecastedQty' => $categoryTotalForecastedQty,
@@ -1362,4 +1426,85 @@ class InventoryController extends Controller
                 ->withErrors(['file' => 'Import could not complete: ' . $e->getMessage()]);
         }
     }
+
+    /**
+     * Resolve all possible category naming variants (case, plural/singular, formatting).
+     *
+     * @return array<int, string>
+     */
+    protected function getCategoryVariants(string $cat): array
+    {
+        $c = trim($cat);
+        $variants = [$c, strtolower($c), strtoupper($c), ucwords(strtolower($c))];
+
+        if (stripos($c, 'LED Service') !== false || stripos($c, 'LED SERVICES') !== false) {
+            $variants = array_merge($variants, [
+                'LED Service Units',
+                'LED SERVICES UNITS',
+                'LED SERVICE UNITS',
+                'LED Service Unit',
+                'LED SERVICES UNIT',
+                'LED SERVICE UNIT',
+            ]);
+        } elseif (stripos($c, 'Philips Service') !== false) {
+            $variants = array_merge($variants, [
+                'Philips Service Units',
+                'PHILIPS SERVICE UNITS',
+                'Philips Service Unit',
+                'PHILIPS SERVICE UNIT',
+            ]);
+        } elseif (stripos($c, 'Centralized LED') !== false) {
+            $variants = array_merge($variants, [
+                'CENTRALIZED LED INVENTORY',
+                'Centralized LED Inventory',
+                'CENTRALIZED LED',
+                'Centralized LED',
+            ]);
+        } elseif (stripos($c, 'EOL Philips') !== false) {
+            $variants = array_merge($variants, [
+                'EOL PHILIPS UNITS',
+                'EOL Philips Units',
+                'EOL PHILIPS UNIT',
+                'EOL Philips Unit',
+                'EOL PHILIPS',
+                'EOL Philips',
+            ]);
+        } elseif (stripos($c, 'Video Controller') !== false || stripos($c, 'Processor') !== false) {
+            $variants = array_merge($variants, [
+                'Video Controllers / Processors',
+                'VIDEO CONTROLLERS / PROCESSORS',
+                'Video Controllers',
+                'Video Processors',
+                'Processors',
+            ]);
+        } elseif (stripos($c, 'Digital iPoster') !== false || stripos($c, 'iPoster') !== false) {
+            $variants = array_merge($variants, [
+                'Digital iPoster',
+                'DIGITAL IPOSTER',
+                'Digital IPoster',
+                'iPoster',
+                'IPoster',
+            ]);
+        } elseif (stripos($c, 'Kiosk') !== false) {
+            $variants = array_merge($variants, [
+                'Kiosks',
+                'KIOSKS',
+                'Kiosk',
+                'KIOSK',
+            ]);
+        } elseif (stripos($c, 'Shuttle') !== false) {
+            $variants = array_merge($variants, [
+                'Shuttle',
+                'SHUTTLE',
+            ]);
+        } elseif (stripos($c, 'Aver') !== false) {
+            $variants = array_merge($variants, [
+                'Aver',
+                'AVER',
+            ]);
+        }
+
+        return array_values(array_unique($variants));
+    }
 }
+

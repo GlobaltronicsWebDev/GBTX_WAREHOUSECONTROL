@@ -16,10 +16,18 @@
             <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3 flex-wrap">
                 <span>Warehouse Inventory System</span>
                 @php
-                    $isServiceUnitCategory = in_array($selectedCategory, array_merge($serviceUnitSubCategories ?? [], ['Service Units (Events, Demo)', 'SERVICE UNITS (EVENTS, DEMO)', 'Service Units', 'SERVICE UNITS']));
+                    $normSelectedCat = strtoupper(trim($selectedCategory));
+                    $isCentralLedCat = ($normSelectedCat === 'CENTRALIZED LED INVENTORY');
+                    $isEolPhilipsCat = in_array($normSelectedCat, ['EOL PHILIPS UNITS', 'EOL PHILIPS UNIT', 'EOL PHILIPS']);
+                    $isLedServiceCat = in_array($normSelectedCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT']);
+                    $isPhilipsServiceCat = in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT']);
+                    $isServiceUnitsTabActive = in_array($normSelectedCat, ['SERVICE UNITS (EVENTS, DEMO)', 'SERVICE UNITS', 'SERVICE UNIT'])
+                        || $isLedServiceCat
+                        || $isPhilipsServiceCat
+                        || in_array($normSelectedCat, ['VIDEO CONTROLLERS / PROCESSORS', 'VIDEO CONTROLLERS', 'SHUTTLE', 'AVER', 'DIGITAL IPOSTER', 'KIOSKS']);
                 @endphp
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono-code font-bold {{ $selectedCategory === 'CENTRALIZED LED INVENTORY' ? 'bg-amber-100 text-amber-900 border border-amber-300' : ($selectedCategory === 'EOL PHILIPS UNITS' ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' : ($isServiceUnitCategory ? 'bg-purple-100 text-purple-900 border border-purple-300' : 'bg-blue-100 text-blue-900 border border-blue-300')) }}">
-                    {{ $selectedCategory === 'CENTRALIZED LED INVENTORY' ? 'LED Inventory' : ($selectedCategory === 'EOL PHILIPS UNITS' ? 'Philips Units' : ($isServiceUnitCategory ? 'Service Units: ' . $selectedCategory : 'All Inventory')) }}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono-code font-bold {{ $isCentralLedCat ? 'bg-amber-100 text-amber-900 border border-amber-300' : ($isEolPhilipsCat ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' : ($isServiceUnitsTabActive ? 'bg-purple-100 text-purple-900 border border-purple-300' : 'bg-blue-100 text-blue-900 border border-blue-300')) }}">
+                    {{ $isCentralLedCat ? 'LED Inventory' : ($isEolPhilipsCat ? 'Philips Units' : ($isServiceUnitsTabActive ? 'Service Units: ' . $selectedCategory : 'All Inventory')) }}
                 </span>
             </h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-1">
@@ -83,13 +91,13 @@
             </div>
             <div class="mt-3 flex items-baseline gap-2">
                 <span class="text-3xl font-extrabold text-slate-900 font-mono-code">{{ number_format($totalUnits) }}</span>
-                <span class="text-xs text-emerald-600 font-semibold">{{ $selectedCategory === 'CENTRALIZED LED INVENTORY' ? 'LED Cabinets' : 'Units' }}</span>
+                <span class="text-xs text-emerald-600 font-semibold">{{ $isCentralLedCat ? 'LED Cabinets' : 'Units' }}</span>
             </div>
             <p class="mt-2 text-xs text-slate-500">{{ $totalModels }} active SKU lines recorded</p>
         </div>
 
         <!-- Total SQM (if LED) or Overall Facility Units -->
-        @if ($selectedCategory === 'CENTRALIZED LED INVENTORY')
+        @if ($isCentralLedCat)
             <div class="glass-card bg-white p-5 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50/40 via-white to-white shadow-sm relative overflow-hidden">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-bold text-amber-800 uppercase tracking-wider">Total Area (SQM)</span>
@@ -162,45 +170,55 @@
     <!-- Category Tabs & Filters Bar -->
     <div class="glass-panel bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3.5">
         
-        <!-- Top Row: Category Tabs & Quick Location Pil        <!-- Top Row: Category Tabs & Quick Location Pills -->
+        <!-- Top Row: Category Tabs & Quick Location Pills -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-2">
+                @php
+                    $normCat = strtoupper(trim($selectedCategory));
+                    $isCentralActive = ($normCat === 'CENTRALIZED LED INVENTORY');
+                    $isEolPhilipsActive = in_array($normCat, ['EOL PHILIPS UNITS', 'EOL PHILIPS UNIT', 'EOL PHILIPS']);
+                    $isServiceUnitsTabActive = in_array($normCat, ['SERVICE UNITS (EVENTS, DEMO)', 'SERVICE UNITS', 'SERVICE UNIT'])
+                        || in_array($normCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT'])
+                        || in_array($normCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT'])
+                        || in_array($normCat, ['VIDEO CONTROLLERS / PROCESSORS', 'VIDEO CONTROLLERS', 'SHUTTLE', 'AVER', 'DIGITAL IPOSTER', 'KIOSKS']);
+                @endphp
+
                 <!-- Centralized LED Tab -->
                 <a 
                     href="{{ route('admin.inventory.index', ['category' => 'CENTRALIZED LED INVENTORY', 'location' => $selectedLocation]) }}" 
-                    class="px-3.5 py-2 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shrink-0 flex items-center gap-2 {{ $selectedCategory === 'CENTRALIZED LED INVENTORY' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}"
+                    class="px-3.5 py-2 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shrink-0 flex items-center gap-2 {{ $isCentralActive ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}"
+                    title="CENTRALIZED LED INVENTORY: {{ number_format($ledTotalUnits ?? 0) }} total units ({{ $ledCount }} models)"
                 >
-                    <span class="w-2 h-2 rounded-full {{ $selectedCategory === 'CENTRALIZED LED INVENTORY' ? 'bg-emerald-400' : 'bg-slate-400' }}"></span>
+                    <span class="w-2 h-2 rounded-full {{ $isCentralActive ? 'bg-emerald-400' : 'bg-slate-400' }}"></span>
                     <span>CENTRALIZED LED INVENTORY</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono-code {{ $selectedCategory === 'CENTRALIZED LED INVENTORY' ? 'bg-slate-800 text-slate-200' : 'bg-slate-200 text-slate-700' }}">
-                        {{ $ledCount }}
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono-code {{ $isCentralActive ? 'bg-slate-800 text-slate-200' : 'bg-slate-200 text-slate-700' }}">
+                        {{ number_format($ledTotalUnits ?? $ledCount) }}
                     </span>
                 </a>
 
                 <!-- EOL Philips Units Tab -->
                 <a 
                     href="{{ route('admin.inventory.index', ['category' => 'EOL PHILIPS UNITS', 'location' => $selectedLocation]) }}" 
-                    class="px-3.5 py-2 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shrink-0 flex items-center gap-2 {{ $selectedCategory === 'EOL PHILIPS UNITS' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}"
+                    class="px-3.5 py-2 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shrink-0 flex items-center gap-2 {{ $isEolPhilipsActive ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}"
+                    title="EOL PHILIPS UNITS: {{ number_format($philipsTotalUnits ?? 0) }} total units ({{ $philipsCount }} models)"
                 >
-                    <span class="w-2 h-2 rounded-full {{ $selectedCategory === 'EOL PHILIPS UNITS' ? 'bg-emerald-400' : 'bg-slate-400' }}"></span>
+                    <span class="w-2 h-2 rounded-full {{ $isEolPhilipsActive ? 'bg-emerald-400' : 'bg-slate-400' }}"></span>
                     <span>EOL PHILIPS UNITS</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono-code {{ $selectedCategory === 'EOL PHILIPS UNITS' ? 'bg-slate-800 text-slate-200' : 'bg-slate-200 text-slate-700' }}">
-                        {{ $philipsCount }}
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono-code {{ $isEolPhilipsActive ? 'bg-slate-800 text-slate-200' : 'bg-slate-200 text-slate-700' }}">
+                        {{ number_format($philipsTotalUnits ?? $philipsCount) }}
                     </span>
                 </a>
 
                 <!-- Service Units (Events, Demo) Tab -->
-                @php
-                    $isServiceUnitsTabActive = in_array($selectedCategory, array_merge($serviceUnitSubCategories ?? [], ['Service Units (Events, Demo)', 'SERVICE UNITS (EVENTS, DEMO)', 'Service Units', 'SERVICE UNITS']));
-                @endphp
                 <a 
                     href="{{ route('admin.inventory.index', ['category' => 'Service Units (Events, Demo)', 'location' => $selectedLocation]) }}" 
                     class="px-3.5 py-2 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shrink-0 flex items-center gap-2 {{ $isServiceUnitsTabActive ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}"
+                    title="SERVICE UNITS (EVENTS, DEMO): {{ number_format($serviceUnitsTotalUnits ?? 0) }} total units ({{ $serviceUnitsCount ?? 0 }} models)"
                 >
                     <span class="w-2 h-2 rounded-full {{ $isServiceUnitsTabActive ? 'bg-emerald-400' : 'bg-slate-400' }}"></span>
                     <span>SERVICE UNITS (EVENTS, DEMO)</span>
                     <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono-code {{ $isServiceUnitsTabActive ? 'bg-slate-800 text-slate-200' : 'bg-slate-200 text-slate-700' }}">
-                        {{ $serviceUnitsCount ?? 0 }}
+                        {{ number_format($serviceUnitsTotalUnits ?? $serviceUnitsCount ?? 0) }}
                     </span>
                 </a>
 
@@ -209,7 +227,7 @@
                     href="{{ route('admin.inventory.index', ['category' => 'all', 'location' => $selectedLocation]) }}" 
                     class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 {{ $selectedCategory === 'all' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}"
                 >
-                    All Categories
+                    All Categories ({{ number_format($overallUnits) }})
                 </a>
             </div>
 
@@ -220,13 +238,13 @@
                     href="{{ route('admin.inventory.index', ['category' => $selectedCategory, 'location' => 'Globaltronics']) }}" 
                     class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shrink-0 {{ $selectedLocation === 'Globaltronics' ? 'bg-slate-900 text-white font-bold' : 'text-slate-500 hover:bg-slate-100' }}"
                 >
-                    Globaltronics ({{ $globaltronicsUnits }})
+                    Globaltronics ({{ number_format($globaltronicsUnits) }})
                 </a>
                 <a 
                     href="{{ route('admin.inventory.index', ['category' => $selectedCategory, 'location' => 'AJUAN']) }}" 
                     class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shrink-0 {{ $selectedLocation === 'AJUAN' ? 'bg-slate-900 text-white font-bold' : 'text-slate-500 hover:bg-slate-100' }}"
                 >
-                    AJUAN ({{ $ajuanUnits }})
+                    AJUAN ({{ number_format($ajuanUnits) }})
                 </a>
             </div>
         </div>
@@ -235,21 +253,31 @@
             <!-- Service Units Sub-Categories Filter Strip -->
             <div class="flex flex-wrap items-center gap-1.5 pt-2 pb-1 border-t border-slate-200 text-xs bg-slate-50/70 p-2.5 rounded-xl">
                 <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mr-1">Sub-Categories:</span>
+                @php
+                    $isAllServiceUnitsActive = in_array($normCat, ['SERVICE UNITS (EVENTS, DEMO)', 'SERVICE UNITS', 'SERVICE UNIT']);
+                @endphp
                 <a 
                     href="{{ route('admin.inventory.index', ['category' => 'Service Units (Events, Demo)', 'location' => $selectedLocation]) }}"
-                    class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all {{ $selectedCategory === 'Service Units (Events, Demo)' || $selectedCategory === 'SERVICE UNITS (EVENTS, DEMO)' ? 'bg-slate-800 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}"
+                    class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all {{ $isAllServiceUnitsActive ? 'bg-slate-800 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}"
+                    title="All Service Units: {{ number_format($serviceUnitsTotalUnits ?? 0) }} total units"
                 >
-                    All Service Units ({{ $serviceUnitsCount ?? 0 }})
+                    All Service Units ({{ number_format($serviceUnitsTotalUnits ?? $serviceUnitsCount ?? 0) }})
                 </a>
                 @foreach ($serviceUnitSubCategories ?? [] as $sub)
                     @php
-                        $subC = $subCategoryCounts[$sub] ?? 0;
+                        $subQty = $subCategoryQuantities[$sub] ?? 0;
+                        $subRows = $subCategoryCounts[$sub] ?? 0;
+                        $subDisplay = $subQty > 0 ? $subQty : $subRows;
+                        $isSubActive = (strtolower(trim($selectedCategory)) === strtolower(trim($sub)))
+                            || ($sub === 'LED Service Units' && in_array($normCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT']))
+                            || ($sub === 'Philips Service Units' && in_array($normCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT']));
                     @endphp
                     <a 
                         href="{{ route('admin.inventory.index', ['category' => $sub, 'location' => $selectedLocation]) }}"
-                        class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-all {{ $selectedCategory === $sub ? 'bg-slate-800 text-white font-bold shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}"
+                        class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-all {{ $isSubActive ? 'bg-slate-800 text-white font-bold shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}"
+                        title="{{ $sub }}: {{ number_format($subQty) }} total units ({{ $subRows }} models)"
                     >
-                        {{ $sub }} ({{ $subC }})
+                        {{ $sub }} ({{ number_format($subDisplay) }})
                     </a>
                 @endforeach
             </div>
@@ -284,7 +312,7 @@
             </select>
 
             <!-- Screen Size Filter (only if Philips or All) -->
-            @if ($selectedCategory !== 'CENTRALIZED LED INVENTORY' && count($screenSizes) > 0)
+            @if (!$isCentralLedCat && count($screenSizes) > 0)
                 <select 
                     name="screen_size" 
                     onchange="this.form.submit()" 
@@ -332,13 +360,20 @@
         <div class="bg-white border-b border-slate-200 py-3.5 px-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="text-left">
                 <h2 class="text-lg sm:text-xl font-bold tracking-wide text-slate-900 uppercase select-none">
-                    @if ($selectedCategory === 'LED Service Units' || $selectedCategory === 'LED SERVICES UNITS')
+                    @php
+                        $normSelectedCat = strtoupper(trim($selectedCategory));
+                        $isLedServiceCat = in_array($normSelectedCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT']);
+                        $isPhilipsServiceCat = in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT']);
+                        $isCentralLedCat = ($normSelectedCat === 'CENTRALIZED LED INVENTORY');
+                        $isEolPhilipsCat = in_array($normSelectedCat, ['EOL PHILIPS UNITS', 'EOL PHILIPS UNIT', 'EOL PHILIPS']);
+                    @endphp
+                    @if ($isLedServiceCat)
                         LED SERVICE UNITS
-                    @elseif ($selectedCategory === 'Philips Service Units' || $selectedCategory === 'PHILIPS SERVICE UNITS')
+                    @elseif ($isPhilipsServiceCat)
                         PHILIPS SERVICE UNITS
-                    @elseif ($selectedCategory === 'CENTRALIZED LED INVENTORY')
+                    @elseif ($isCentralLedCat)
                         CENTRALIZED LED INVENTORY
-                    @elseif ($selectedCategory === 'EOL PHILIPS UNITS')
+                    @elseif ($isEolPhilipsCat)
                         EOL PHILIPS UNITS
                     @elseif ($isServiceUnitsTabActive)
                         {{ strtoupper($selectedCategory) }}
@@ -349,7 +384,7 @@
                 <p class="text-xs text-slate-500">Click on the Model / Description item or the drawer icon to view full SKU specifications & movement logs</p>
             </div>
 
-            @if ($selectedCategory === 'CENTRALIZED LED INVENTORY')
+            @if ($isCentralLedCat)
             <!-- Centralized LED Toggle for Reservations, History & Status -->
             <div class="flex items-center gap-2 overflow-x-auto pb-1">
                 <button 
@@ -366,7 +401,7 @@
                     <span id="badgeToggleLedDetails" class="px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-slate-100 text-slate-600">HIDDEN</span>
                 </button>
             </div>
-            @elseif ($selectedCategory === 'EOL PHILIPS UNITS')
+            @elseif ($isEolPhilipsCat)
             <!-- EOL Philips Units Toggle for Reservations, History, Unfound & Remarks -->
             <div class="flex items-center gap-2 overflow-x-auto pb-1">
                 <button 
@@ -469,9 +504,17 @@
                 z-index: 15 !important;
                 background-color: #ffffff;
             }
+            #centralLedTable tfoot {
+                position: sticky;
+                bottom: 0;
+                z-index: 20;
+            }
+            #centralLedTable tfoot td {
+                background-color: #f1f5f9;
+            }
             #centralLedTable tfoot td.col-actions-sticky {
-                z-index: 15 !important;
-                background-color: #ea580c;
+                z-index: 22 !important;
+                background-color: #f1f5f9;
             }
             #centralLedTable tr:hover td.col-actions-sticky {
                 background-color: #f8fafc;
@@ -482,7 +525,7 @@
         <div id="tableScrollContainer" class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-200px)] min-h-[480px] relative border-t border-slate-200 bg-white">
             <table id="centralLedTable" class="w-full min-w-[1300px] text-left hide-central-ext hide-philips-ext">
                 
-                @if ($selectedCategory === 'LED Service Units' || $selectedCategory === 'LED SERVICES UNITS')
+                @if ($isLedServiceCat)
                     <!-- CLEAN 2-TIER SPREADSHEET HEADER FOR LED SERVICE UNITS (NO BACKGROUND COLORS) -->
                     <thead>
                         <tr class="h-8 bg-white text-slate-800 font-bold uppercase text-[11px] sm:text-xs tracking-wider divide-x divide-slate-200 border-b border-slate-200">
@@ -827,17 +870,17 @@
                             $ledTotalQty = $categoryTotalQty ?? $items->sum('quantity');
                             $ledTotalAcuQty = $categoryTotalAcuQty ?? $items->sum(function($i) { return (int)($i->acu_quantity ?: $i->quantity); });
                             $ledTotalOrigQty = $categoryTotalOriginalQty ?? $items->sum(function($i) { return (int)($i->original_quantity !== null ? $i->original_quantity : $i->quantity); });
-                            $ledTotalReservedQty = $categoryTotalReservedQty ?? $items->sum(function($i) { return (int)($i->reserved_quantity ?: 0); });
+                            $ledTotalReservedQty = $categoryTotalReservedQty ?? $items->sum(function($i) { return (int)($i->reservation_qty ?: 0); });
                             $ledTotalHistoryQty = $categoryTotalHistoryQty ?? $items->sum(function($i) { return (int)($i->history_qty ?: 0); });
                             $ledTotalStatusQty = $categoryTotalStatusQty ?? $items->sum(function($i) { return (int)($i->status_qty ?: 0); });
                             $ledTotalAvailQty = $categoryTotalForecastedQty ?? $items->sum(function($i) {
-                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reserved_quantity ?? 0));
+                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reservation_qty ?? 0));
                                 return max(0, (int)$avail);
                             });
                             $ledTotalAvailSqm = $categoryTotalSqm ?? $items->sum(function($i) {
                                 $divisor = ($i->acu_quantity ?: $i->quantity) ?: 1;
                                 $perPanel = ($i->sqm && $divisor > 0) ? ($i->sqm / $divisor) : 0;
-                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reserved_quantity ?? 0));
+                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reservation_qty ?? 0));
                                 return $i->sqm !== null ? ($perPanel * max(0, (int)$avail)) : 0;
                             });
                         @endphp
@@ -926,7 +969,7 @@
                         </tfoot>
                     @endif
 
-                @elseif ($selectedCategory === 'Philips Service Units' || $selectedCategory === 'PHILIPS SERVICE UNITS')
+                @elseif ($isPhilipsServiceCat)
                     <!-- CLEAN 2-TIER SPREADSHEET HEADER FOR PHILIPS SERVICE UNITS (NO BACKGROUND COLORS) -->
                     <thead>
                         <tr class="h-8 bg-white text-slate-800 font-bold uppercase text-[11px] sm:text-xs tracking-wider divide-x divide-slate-200 border-b border-slate-200">
@@ -1063,7 +1106,7 @@
 
                                 <!-- FORECASTED QTY -->
                                 @php
-                                    $philAvail = $item->forecasted_quantity !== null ? $item->forecasted_quantity : ($item->quantity - ($item->reserved_quantity ?? 0));
+                                    $philAvail = $item->forecasted_quantity !== null ? $item->forecasted_quantity : ($item->quantity - ($item->reservation_qty ?? 0));
                                 @endphp
                                 <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
@@ -1168,7 +1211,7 @@
                             $philTotalQty = $categoryTotalQty ?? $items->sum('quantity');
                             $philTotalAcuQty = $categoryTotalAcuQty ?? $items->sum(function($i) { return (int)($i->acu_quantity ?: $i->quantity); });
                             $philTotalAvailQty = $categoryTotalForecastedQty ?? $items->sum(function($i) {
-                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reserved_quantity ?? 0));
+                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reservation_qty ?? 0));
                                 return max(0, (int)$avail);
                             });
                             $philTotalHistoryQty = $categoryTotalHistoryQty ?? $items->sum(function($i) { return (int)($i->history_qty ?: 0); });
@@ -1211,7 +1254,7 @@
                         </tfoot>
                     @endif
 
-                @elseif ($selectedCategory === 'CENTRALIZED LED INVENTORY')
+                @elseif ($isCentralLedCat)
                     <!-- CLEAN SPREADSHEET HEADER FOR CENTRALIZED LED (WITH TOGGLEABLE RESERVATIONS, HISTORY & STATUS) -->
                     <thead>
                         <tr class="h-8 divide-x divide-slate-300 border-b border-slate-300 text-[11px] sm:text-xs tracking-wider">
@@ -1580,11 +1623,11 @@
                             $cLedTotalQty = $categoryTotalQty ?? $items->sum('quantity');
                             $cLedTotalAcuQty = $categoryTotalAcuQty ?? $items->sum(function($i) { return (int)($i->acu_quantity ?: $i->quantity); });
                             $cLedTotalOrigQty = $categoryTotalOriginalQty ?? $items->sum(function($i) { return (int)($i->original_quantity !== null ? $i->original_quantity : $i->quantity); });
-                            $cLedTotalReservedQty = $categoryTotalReservedQty ?? $items->sum(function($i) { return (int)($i->reserved_quantity ?: 0); });
+                            $cLedTotalReservedQty = $categoryTotalReservedQty ?? $items->sum(function($i) { return (int)($i->reservation_qty ?: 0); });
                             $cLedTotalHistoryQty = $categoryTotalHistoryQty ?? $items->sum(function($i) { return (int)($i->history_qty ?: 0); });
                             $cLedTotalStatusQty = $categoryTotalStatusQty ?? $items->sum(function($i) { return (int)($i->status_qty ?: 0); });
                             $cLedTotalAvailQty = $categoryTotalForecastedQty ?? $items->sum(function($i) {
-                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reserved_quantity ?? 0));
+                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reservation_qty ?? 0));
                                 return max(0, (int)$avail);
                             });
                             $cLedTotalAvailSqm = $categoryTotalSqm ?? $items->sum('sqm');
@@ -1674,7 +1717,7 @@
                         </tfoot>
                     @endif
 
-                @elseif ($selectedCategory === 'EOL PHILIPS UNITS')
+                @elseif ($isEolPhilipsCat)
                     <!-- CLEAN SPREADSHEET HEADER FOR EOL PHILIPS UNITS (NO BLUE BACKGROUND) -->
                     <thead>
                         <tr class="h-8 bg-white text-slate-800 font-bold uppercase text-[11px] sm:text-xs tracking-wider divide-x divide-slate-200 border-b border-slate-200">
@@ -2095,11 +2138,11 @@
                         @php
                             $genTotalQty = $categoryTotalQty ?? $items->sum('quantity');
                             $genTotalAvailQty = $categoryTotalForecastedQty ?? $items->sum(function($i) {
-                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reserved_quantity ?? 0));
+                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reservation_qty ?? 0));
                                 return max(0, (int)$avail);
                             });
                             $genTotalSqm = $categoryTotalSqm ?? $items->sum('sqm');
-                            $genTotalReserved = $categoryTotalReservedQty ?? $items->sum(function($i) { return (int)($i->reserved_quantity ?: 0); });
+                            $genTotalReserved = $categoryTotalReservedQty ?? $items->sum(function($i) { return (int)($i->reservation_qty ?: 0); });
                             $prefixCols = ($selectedCategory === 'all') ? 6 : 5;
                         @endphp
                         <tfoot class="border-t-2 border-slate-300 font-bold bg-slate-100 text-slate-900 select-none">
