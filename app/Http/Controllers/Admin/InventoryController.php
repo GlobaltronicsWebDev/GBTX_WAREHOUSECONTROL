@@ -79,6 +79,19 @@ class InventoryController extends Controller
             $query->search($search);
         }
 
+        // Compute full query totals across all matching rows for sticky summary count footers
+        $filterBaseQuery = clone $query;
+        $filterBaseQuery->getQuery()->orders = null;
+
+        $categoryTotalQty = (int) (clone $filterBaseQuery)->sum('quantity');
+        $categoryTotalAcuQty = (int) (clone $filterBaseQuery)->sum(DB::raw('COALESCE(acu_quantity, quantity)'));
+        $categoryTotalForecastedQty = (int) (clone $filterBaseQuery)->sum('forecasted_quantity');
+        $categoryTotalHistoryQty = (int) (clone $filterBaseQuery)->sum('history_qty');
+        $categoryTotalReservedQty = (int) (clone $filterBaseQuery)->sum('reservation_qty');
+        $categoryTotalStatusQty = (int) (clone $filterBaseQuery)->sum('status_qty');
+        $categoryTotalOriginalQty = (int) (clone $filterBaseQuery)->sum('original_quantity');
+        $categoryTotalSqm = (float) (clone $filterBaseQuery)->sum('sqm');
+
         // Limit to 10 items per page with next page navigation
         $perPage = (int) $request->query('per_page', 10);
         $items = $query->paginate($perPage)->withQueryString();
@@ -193,6 +206,14 @@ class InventoryController extends Controller
             'serviceUnitsCount' => $serviceUnitsCount,
             'serviceUnitSubCategories' => $serviceUnitSubCategories,
             'subCategoryCounts' => $subCategoryCounts,
+            'categoryTotalQty' => $categoryTotalQty,
+            'categoryTotalAcuQty' => $categoryTotalAcuQty,
+            'categoryTotalForecastedQty' => $categoryTotalForecastedQty,
+            'categoryTotalHistoryQty' => $categoryTotalHistoryQty,
+            'categoryTotalReservedQty' => $categoryTotalReservedQty,
+            'categoryTotalStatusQty' => $categoryTotalStatusQty,
+            'categoryTotalOriginalQty' => $categoryTotalOriginalQty,
+            'categoryTotalSqm' => $categoryTotalSqm,
         ]);
     }
 
@@ -387,11 +408,17 @@ class InventoryController extends Controller
     /**
      * Remove the specified inventory item from stock.
      */
-    public function destroy(InventoryItem $item): RedirectResponse
+    public function destroy(Request $request, $item): RedirectResponse
     {
-        $model = $item->model;
-        $category = $item->category;
-        $item->delete();
+        $inventoryItem = $item instanceof InventoryItem ? $item : InventoryItem::find($item);
+        if (! $inventoryItem) {
+            return redirect()->route('admin.inventory.index')
+                ->with('status', 'Inventory unit has already been removed or does not exist.');
+        }
+
+        $model = $inventoryItem->model;
+        $category = $inventoryItem->category;
+        $inventoryItem->delete();
 
         return redirect()->route('admin.inventory.index', ['category' => $category])
             ->with('status', "Inventory unit '{$model}' deleted from warehouse records.");
