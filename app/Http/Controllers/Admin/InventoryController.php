@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
@@ -627,6 +628,23 @@ class InventoryController extends Controller
 
             // Safe user ID for foreign key constraint
             $creatorId = Auth::id() ?: (User::value('id') ?: null);
+
+            // Attempt to expand reservation_project and history_project to TEXT on MySQL
+            try {
+                DB::statement('ALTER TABLE inventory_items MODIFY COLUMN reservation_project TEXT NULL');
+                DB::statement('ALTER TABLE inventory_items MODIFY COLUMN history_project TEXT NULL');
+            } catch (\Throwable $ignored) {
+            }
+
+            // Detect if reservation_project column is TEXT or VARCHAR
+            $isTextCol = false;
+            try {
+                $colType = DB::selectOne("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'inventory_items' AND COLUMN_NAME = 'reservation_project'");
+                if ($colType && in_array(strtolower($colType->DATA_TYPE), ['text', 'mediumtext', 'longtext'])) {
+                    $isTextCol = true;
+                }
+            } catch (\Throwable $ignored) {
+            }
 
             // Helper for numbers (handles commas like "2,888", units like "500 pcs", "-242 pcs", "101.25 sqm", "-12.39 sqm", etc.)
             $parseNum = function ($val, $isFloat = false) {
