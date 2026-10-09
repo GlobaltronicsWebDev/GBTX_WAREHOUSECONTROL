@@ -537,6 +537,7 @@
                             <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[130px] whitespace-nowrap bg-white font-extrabold">PO / SKU No.</th>
                             <th rowspan="2" class="py-1.5 px-3 text-left text-slate-800 select-none min-w-[280px] bg-white font-extrabold">ITEM DESCRIPTION</th>
                             <th colspan="4" class="py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">INVENTORY</th>
+                            <th colspan="2" class="py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">FORECASTED QTY</th>
                             <th colspan="2" class="py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">RESERVATION</th>
                             <th colspan="2" class="py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">HISTORY</th>
                             <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[95px] whitespace-nowrap bg-white font-extrabold">ORIGINAL QTY</th>
@@ -550,6 +551,10 @@
                             <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[70px] whitespace-nowrap bg-white font-bold">ACU. QTY</th>
                             <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[100px] whitespace-nowrap bg-white font-bold">PER PANEL SQM</th>
                             <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[130px] whitespace-nowrap bg-white font-bold">TOTAL AVAILABLE SQM</th>
+
+                            <!-- FORECASTED QTY SUBHEADERS -->
+                            <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[65px] whitespace-nowrap bg-white font-bold">QTY</th>
+                            <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[75px] whitespace-nowrap bg-white font-bold">SQM</th>
 
                             <!-- RESERVATION SUBHEADERS -->
                             <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[65px] whitespace-nowrap bg-white font-bold">QTY</th>
@@ -634,16 +639,20 @@
                                     {{ $item->po_number ?? '—' }}
                                 </td>
 
-                                <!-- ITEM DESCRIPTION -->
-                                <td class="py-2 px-3 text-slate-800 uppercase font-medium border-r border-slate-200 min-w-[260px] max-w-sm align-top">
-                                    <button 
-                                        type="button" 
-                                        onclick="openDrawer({{ json_encode($item) }})" 
-                                        class="text-left font-medium text-slate-800 hover:text-blue-600 cursor-pointer block w-full leading-normal uppercase transition-colors line-clamp-2 text-xs"
-                                        title="{{ $item->item_description }}"
-                                    >
-                                        {{ $item->item_description }}
-                                    </button>
+                                <!-- ITEM DESCRIPTION (INLINE EDITABLE) -->
+                                <td class="py-1 px-2 text-slate-800 border-r border-slate-200 min-w-[260px] max-w-sm align-top">
+                                    <div class="relative group/edit">
+                                        <textarea 
+                                            rows="2"
+                                            data-item-id="{{ $item->id }}" 
+                                            data-field="item_description" 
+                                            data-original-val="{{ $item->item_description }}"
+                                            onblur="handleInlineSave(this)" 
+                                            onkeydown="handleInlineKey(event, this)" 
+                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-y leading-tight"
+                                            title="Click to edit item description (auto-saves on blur or Ctrl+Enter)"
+                                        >{{ $item->item_description }}</textarea>
+                                    </div>
                                 </td>
 
                                 <!-- INVENTORY: QTY -->
@@ -653,11 +662,20 @@
                                     </span>
                                 </td>
 
-                                <!-- INVENTORY: ACU. QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
-                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
-                                        {{ ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity }}
-                                    </span>
+                                <!-- INVENTORY: ACU. QTY (INLINE EDITABLE) -->
+                                <td class="py-1 px-1.5 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <input 
+                                        type="number" 
+                                        min="0" 
+                                        value="{{ ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity }}" 
+                                        data-item-id="{{ $item->id }}" 
+                                        data-field="acu_quantity" 
+                                        data-original-val="{{ ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity }}"
+                                        onchange="handleInlineSave(this)" 
+                                        onkeydown="if(event.key==='Enter') this.blur();" 
+                                        class="inline-edit-input editable-acu-qty editable-acu-qty-led w-16 text-center font-mono-code font-bold text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 hover:border-slate-300 focus:border-blue-500 rounded-lg py-1 px-1 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-900 transition-all select-all shadow-2xs"
+                                        title="Click to edit Acu. Qty (auto-saves on blur/Enter)"
+                                    />
                                 </td>
 
                                 <!-- INVENTORY: PER PANEL SQM -->
@@ -671,6 +689,24 @@
                                 <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     <span class="inline-flex items-center justify-center min-w-[2.5rem] px-1.5 py-0.5 rounded font-semibold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $item->sqm !== null ? number_format($item->sqm, 2) : '—' }}
+                                    </span>
+                                </td>
+
+                                <!-- FORECASTED QTY: QTY & SQM -->
+                                @php
+                                    $availQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : ($item->quantity - ($item->reservation_qty ?? 0));
+                                    $divisor = ($item->acu_quantity ?: $item->quantity) ?: 1;
+                                    $perPanelSqm = ($item->sqm && $divisor > 0) ? ($item->sqm / $divisor) : 0;
+                                    $availSqm = $item->sqm !== null ? ($perPanelSqm * $availQty) : null;
+                                @endphp
+                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs {{ $availQty < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-800 border border-slate-200' }}">
+                                        {{ number_format(max(0, $availQty)) }}
+                                    </span>
+                                </td>
+                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <span class="font-bold text-xs text-slate-900">
+                                        {{ $availSqm !== null ? number_format($availSqm, 2) . ' m²' : '—' }}
                                     </span>
                                 </td>
 
@@ -824,7 +860,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="20" class="py-12 text-center text-slate-500">
+                                <td colspan="22" class="py-12 text-center text-slate-500">
                                     <div class="max-w-xs mx-auto space-y-2">
                                         <p class="font-bold text-slate-700">No LED service units found</p>
                                         <p class="text-xs text-slate-400">Add an LED service unit using the button above to populate this list.</p>
@@ -842,6 +878,7 @@
                             $ledTotalReservedQty = $categoryTotalReservedQty ?? $items->sum(function($i) { return (int)($i->reservation_qty ?: 0); });
                             $ledTotalHistoryQty = $categoryTotalHistoryQty ?? $items->sum(function($i) { return (int)($i->history_qty ?: 0); });
                             $ledTotalStatusQty = $categoryTotalStatusQty ?? $items->sum(function($i) { return (int)($i->status_qty ?: 0); });
+                            $ledTotalAvailQty = $categoryTotalForecastedQty ?? $items->sum(function($i) { return max(0, (int)($i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reservation_qty ?? 0)))); });
                             $ledTotalAvailSqm = $categoryTotalSqm ?? $items->sum('sqm');
                         @endphp
                         <tfoot class="border-t-2 border-slate-300 font-bold bg-slate-100 text-slate-900 select-none">
@@ -852,12 +889,12 @@
                                 </td>
 
                                 <!-- INVENTORY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td id="footerLedQty" class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalQty) }}
                                 </td>
 
                                 <!-- INVENTORY: ACU. QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td id="footerLedAcuQty" class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalAcuQty) }}
                                 </td>
 
@@ -868,6 +905,16 @@
 
                                 <!-- INVENTORY: TOTAL AVAILABLE SQM -->
                                 <td class="py-2 px-2 text-center font-mono-code font-bold text-xs text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ $ledTotalAvailSqm > 0 ? number_format($ledTotalAvailSqm, 2) . ' m²' : '—' }}
+                                </td>
+
+                                <!-- FORECASTED QTY: QTY -->
+                                <td id="footerLedAvailQty" class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($ledTotalAvailQty) }}
+                                </td>
+
+                                <!-- FORECASTED QTY: SQM -->
+                                <td id="footerLedAvailSqm" class="py-2 px-2 text-center font-mono-code font-bold text-xs text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ $ledTotalAvailSqm > 0 ? number_format($ledTotalAvailSqm, 2) . ' m²' : '—' }}
                                 </td>
 
@@ -986,16 +1033,20 @@
                                     {{ $item->po_number ?? '—' }}
                                 </td>
 
-                                <!-- ITEM DESCRIPTION: PARTICULAR -->
-                                <td class="py-2 px-3 text-slate-800 uppercase font-medium border-r border-slate-200 min-w-[240px] max-w-sm align-top">
-                                    <button 
-                                        type="button" 
-                                        onclick="openDrawer({{ json_encode($item) }})" 
-                                        class="text-left font-medium text-slate-800 hover:text-blue-600 cursor-pointer block w-full leading-normal uppercase transition-colors line-clamp-2 text-xs"
-                                        title="{{ $item->item_description }}"
-                                    >
-                                        {{ $item->item_description }}
-                                    </button>
+                                <!-- ITEM DESCRIPTION: PARTICULAR (INLINE EDITABLE) -->
+                                <td class="py-1 px-2 text-slate-800 border-r border-slate-200 min-w-[240px] max-w-sm align-top">
+                                    <div class="relative group/edit">
+                                        <textarea 
+                                            rows="2"
+                                            data-item-id="{{ $item->id }}" 
+                                            data-field="item_description" 
+                                            data-original-val="{{ $item->item_description }}"
+                                            onblur="handleInlineSave(this)" 
+                                            onkeydown="handleInlineKey(event, this)" 
+                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-y leading-tight"
+                                            title="Click to edit particular description (auto-saves on blur or Ctrl+Enter)"
+                                        >{{ $item->item_description }}</textarea>
+                                    </div>
                                 </td>
 
                                 <!-- ITEM DESCRIPTION: SERIAL NO. -->
@@ -1047,11 +1098,20 @@
                                     </span>
                                 </td>
 
-                                <!-- INVENTORY: ACU. QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
-                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
-                                        {{ number_format($item->acu_quantity ?? $item->quantity) }}
-                                    </span>
+                                <!-- INVENTORY: ACU. QTY (INLINE EDITABLE) -->
+                                <td class="py-1 px-1.5 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <input 
+                                        type="number" 
+                                        min="0" 
+                                        value="{{ ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity }}" 
+                                        data-item-id="{{ $item->id }}" 
+                                        data-field="acu_quantity" 
+                                        data-original-val="{{ ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity }}"
+                                        onchange="handleInlineSave(this)" 
+                                        onkeydown="if(event.key==='Enter') this.blur();" 
+                                        class="inline-edit-input editable-acu-qty editable-acu-qty-phil w-16 text-center font-mono-code font-bold text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 hover:border-slate-300 focus:border-blue-500 rounded-lg py-1 px-1 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-900 transition-all select-all shadow-2xs"
+                                        title="Click to edit Acu. Qty (auto-saves on blur/Enter)"
+                                    />
                                 </td>
 
                                 <!-- FORECASTED QTY -->
@@ -1173,15 +1233,15 @@
                                     TOTAL COUNT
                                 </td>
                                 <!-- INVENTORY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td id="footerPhilQty" class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($philTotalQty) }}
                                 </td>
                                 <!-- INVENTORY: ACU. QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td id="footerPhilAcuQty" class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($philTotalAcuQty) }}
                                 </td>
                                 <!-- FORECASTED QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td id="footerPhilAvailQty" class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($philTotalAvailQty) }}
                                 </td>
                                 <!-- HISTORY: QTY -->
@@ -1318,16 +1378,20 @@
                                     </button>
                                 </td>
 
-                                <!-- ITEM DESCRIPTION -->
-                                <td class="py-2 px-3 text-slate-800 uppercase font-medium border-r border-slate-200 min-w-[260px] max-w-sm">
-                                    <button 
-                                        type="button" 
-                                        onclick="openDrawer({{ json_encode($item) }})" 
-                                        class="text-left font-medium text-slate-800 hover:text-blue-600 cursor-pointer block w-full leading-normal uppercase transition-colors line-clamp-2 text-xs"
-                                        title="{{ $item->item_description }}"
-                                    >
-                                        {{ $item->item_description }}
-                                    </button>
+                                <!-- ITEM DESCRIPTION (INLINE EDITABLE) -->
+                                <td class="py-1 px-2 text-slate-800 border-r border-slate-200 min-w-[260px] max-w-sm align-top">
+                                    <div class="relative group/edit">
+                                        <textarea 
+                                            rows="2"
+                                            data-item-id="{{ $item->id }}" 
+                                            data-field="item_description" 
+                                            data-original-val="{{ $item->item_description }}"
+                                            onblur="handleInlineSave(this)" 
+                                            onkeydown="handleInlineKey(event, this)" 
+                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-y leading-tight"
+                                            title="Click to edit item description (auto-saves on blur or Ctrl+Enter)"
+                                        >{{ $item->item_description }}</textarea>
+                                    </div>
                                 </td>
 
                                 <!-- LOCATION -->
@@ -1355,15 +1419,20 @@
                                     </span>
                                 </td>
 
-                                <!-- TOTAL ON-HAND -->
-                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
-                                    @if ($item->acu_quantity !== null)
-                                        <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-yellow-50 text-amber-900 border border-yellow-200">
-                                            {{ number_format($item->acu_quantity) }}
-                                        </span>
-                                    @else
-                                        <span class="text-slate-400">—</span>
-                                    @endif
+                                <!-- TOTAL ON-HAND (ACU. QTY INLINE EDITABLE) -->
+                                <td class="py-1 px-1.5 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <input 
+                                        type="number" 
+                                        min="0" 
+                                        value="{{ ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity }}" 
+                                        data-item-id="{{ $item->id }}" 
+                                        data-field="acu_quantity" 
+                                        data-original-val="{{ ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity }}"
+                                        onchange="handleInlineSave(this)" 
+                                        onkeydown="if(event.key==='Enter') this.blur();" 
+                                        class="inline-edit-input editable-acu-qty editable-acu-qty-cled w-16 text-center font-mono-code font-bold text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 hover:border-slate-300 focus:border-blue-500 rounded-lg py-1 px-1 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-900 transition-all select-all shadow-2xs"
+                                        title="Click to edit Total On-Hand / Acu. Qty (auto-saves on blur/Enter)"
+                                    />
                                 </td>
 
                                 <!-- PER PANEL SQM -->
@@ -1590,12 +1659,12 @@
                                 </td>
 
                                 <!-- INVENTORY: ON-HAND -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td id="footerCLedQty" class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($cLedTotalQty) }}
                                 </td>
 
                                 <!-- INVENTORY: TOTAL ON-HAND -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td id="footerCLedAcuQty" class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($cLedTotalAcuQty) }}
                                 </td>
 
@@ -1610,7 +1679,7 @@
                                 </td>
 
                                 <!-- AVAILABLE QTY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td id="footerCLedAvailQty" class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($cLedTotalAvailQty) }}
                                 </td>
 
