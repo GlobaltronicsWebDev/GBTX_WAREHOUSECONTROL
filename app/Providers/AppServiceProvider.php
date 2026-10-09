@@ -57,20 +57,30 @@ class AppServiceProvider extends ServiceProvider
                         ->where('is_read', false)
                         ->count();
 
+                    $threshold = now()->subMinutes(5)->timestamp;
+                    $onlineUsersCount = max(1, (int) \Illuminate\Support\Facades\DB::table('sessions')
+                        ->whereNotNull('user_id')
+                        ->where('last_activity', '>=', $threshold)
+                        ->distinct('user_id')
+                        ->count('user_id'));
+
                     $view->with([
                         'headerNotifications' => $notifications,
                         'unreadNotificationCount' => $unreadCount,
+                        'onlineUsersCount' => $onlineUsersCount,
                     ]);
                 } catch (\Throwable $e) {
                     $view->with([
                         'headerNotifications' => collect(),
                         'unreadNotificationCount' => 0,
+                        'onlineUsersCount' => 1,
                     ]);
                 }
             } else {
                 $view->with([
                     'headerNotifications' => collect(),
                     'unreadNotificationCount' => 0,
+                    'onlineUsersCount' => 0,
                 ]);
             }
         });

@@ -118,6 +118,11 @@
                     </span>
                     <span class="font-mono-code text-[11px] text-emerald-600 font-bold">WMS LIVE</span>
                     <span class="text-slate-300">|</span>
+                    <span class="inline-flex items-center gap-1.5 font-mono-code text-[11px] text-slate-700 font-semibold" title="Active users in last 5 minutes">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        {{ $onlineUsersCount ?? 1 }} Online
+                    </span>
+                    <span class="text-slate-300">|</span>
                     <span class="text-slate-500 text-[11px]">Hub: Globaltronics Warehouse</span>
                 </div>
             </div>

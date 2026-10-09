@@ -8,9 +8,11 @@ use App\Models\Role;
 use App\Models\SrfRequisition;
 use App\Models\TransactionNotification;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -81,9 +83,67 @@ class DashboardController extends Controller
         $distinctSrfCount = SrfRequisition::distinct('srf_number')->count('srf_number');
         $autoSsoNumber = 'SSO-'.date('Y').'-'.str_pad($distinctSrfCount + 101, 4, '0', STR_PAD_LEFT);
 
+        // Calculate Online Users (users with session activity in last 5 minutes)
+        $activityThreshold = now()->subMinutes(5)->timestamp;
+        $onlineUsers = collect();
+        $onlineUsersCount = 1;
+
+        try {
+            $activeSessions = DB::table('sessions')
+                ->whereNotNull('user_id')
+                ->where('last_activity', '>=', $activityThreshold)
+                ->orderBy('last_activity', 'desc')
+                ->get(['user_id', 'ip_address', 'last_activity']);
+
+            if ($activeSessions->isNotEmpty()) {
+                $userIds = $activeSessions->pluck('user_id')->unique();
+                $usersById = User::with('roles')->whereIn('id', $userIds)->get()->keyBy('id');
+
+                $onlineUsers = $activeSessions->unique('user_id')->map(function ($session) use ($usersById) {
+                    $user = $usersById->get($session->user_id);
+                    if (! $user) {
+                        return null;
+                    }
+
+                    return (object) [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'role' => $user->roles->first()?->name ?? 'System User',
+                        'role_slug' => $user->roles->first()?->slug ?? 'user',
+                        'ip_address' => $session->ip_address ?: '127.0.0.1',
+                        'last_activity' => Carbon::createFromTimestamp($session->last_activity),
+                        'is_current' => $user->id === Auth::id(),
+                    ];
+                })->filter()->values();
+
+                $onlineUsersCount = max(1, $onlineUsers->count());
+            }
+        } catch (\Throwable $e) {
+            $onlineUsersCount = 1;
+        }
+
+        // Always ensure current authenticated user is included in the online list
+        if (Auth::check() && $onlineUsers->where('id', Auth::id())->isEmpty()) {
+            $currentUser = Auth::user();
+            $onlineUsers->prepend((object) [
+                'id' => $currentUser->id,
+                'name' => $currentUser->name,
+                'email' => $currentUser->email,
+                'role' => $currentUser->roles->first()?->name ?? 'Administrator',
+                'role_slug' => $currentUser->roles->first()?->slug ?? 'it-admin',
+                'ip_address' => $request->ip() ?: '127.0.0.1',
+                'last_activity' => now(),
+                'is_current' => true,
+            ]);
+            $onlineUsersCount = max(1, $onlineUsers->count());
+        }
+
         return view('admin.dashboard', [
             'totalUsers' => $totalUsers,
             'totalRoles' => $totalRoles,
+            'onlineUsersCount' => $onlineUsersCount,
+            'onlineUsers' => $onlineUsers,
             'adminCount' => $adminCount,
             'staffCount' => $staffCount,
             'salesCount' => $salesCount,

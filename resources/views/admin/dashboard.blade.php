@@ -73,8 +73,8 @@
 
 <!-- LIVE METRICS CARDS -->
 @if (Auth::user()->isItAdmin())
-    <!-- IT ADMIN: 5 DEPARTMENT ACCOUNTS METRIC TILES -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <!-- IT ADMIN: 6 DEPARTMENT ACCOUNTS & ACTIVE USERS METRIC TILES -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         
         <!-- Total User Accounts -->
         <a href="{{ route('admin.settings.credentials', ['tab' => 'users']) }}" class="glass-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-blue-400 hover:shadow-md transition-all block">
@@ -160,6 +160,27 @@
             </div>
             <p class="mt-2 text-xs text-slate-500">Custom clearance levels &amp; RBAC profiles</p>
         </a>
+
+        <!-- Active Users Online -->
+        <div onclick="openOnlineUsersModal()" class="glass-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-emerald-400 hover:shadow-md transition-all block cursor-pointer">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Users Online</span>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors relative">
+                    <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-3 flex items-baseline gap-2">
+                <span class="text-3xl font-extrabold text-emerald-600 font-mono-code">{{ $onlineUsersCount ?? 1 }}</span>
+                <span class="text-xs text-emerald-600 font-semibold group-hover:underline">View Live →</span>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">Active sessions (past 5 min)</p>
+        </div>
 
     </div>
 @elseif (Auth::user()->isTechnical())
@@ -2957,3 +2978,134 @@
 </div>
 @endif
 @endsection
+
+@section('modals')
+@if (Auth::user()->isItAdmin())
+<!-- ========================================== -->
+<!-- MODAL: ACTIVE ONLINE SESSIONS (IT ADMIN)   -->
+<!-- ========================================== -->
+<div id="onlineUsersModal" data-modal class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm hidden animate-fadeIn" onclick="if(event.target === this) closeOnlineUsersModal()">
+    <div class="relative w-full max-w-2xl rounded-3xl bg-white border border-slate-200 shadow-2xl p-6 sm:p-7 max-h-[90vh] flex flex-col overflow-hidden">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 relative">
+                    <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-lg font-bold text-slate-900">Active Online Users</h3>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-mono-code font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            {{ $onlineUsersCount ?? 1 }} Active
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500">Real-time authenticated sessions active within the last 5 minutes</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeOnlineUsersModal()" class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer" title="Close Modal">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Body / Users Table -->
+        <div class="mt-4 flex-1 overflow-y-auto divide-y divide-slate-100 pr-1">
+            @if(isset($onlineUsers) && $onlineUsers->isNotEmpty())
+                <div class="space-y-2.5">
+                    @foreach($onlineUsers as $online)
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-slate-100/60 transition-colors">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="relative shrink-0">
+                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-950 text-white font-bold text-sm flex items-center justify-center shadow-xs">
+                                        {{ strtoupper(substr($online->name, 0, 2)) }}
+                                    </div>
+                                    <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white"></span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-bold text-sm text-slate-900 truncate">{{ $online->name }}</span>
+                                        @if($online->is_current)
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-blue-100 text-blue-700 border border-blue-200">
+                                                YOU
+                                            </span>
+                                        @endif
+                                        @if(in_array($online->role_slug, ['it-admin', 'warehouse-admin']))
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-purple-100 text-purple-700 border border-purple-200">
+                                                {{ $online->role }}
+                                            </span>
+                                        @elseif(in_array($online->role_slug, ['warehouse-staff']))
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                                                {{ $online->role }}
+                                            </span>
+                                        @elseif(in_array($online->role_slug, ['sales-executive']))
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-sky-100 text-sky-700 border border-sky-200">
+                                                {{ $online->role }}
+                                            </span>
+                                        @else
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                                {{ $online->role }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <p class="text-xs text-slate-500 truncate">{{ $online->email }}</p>
+                                </div>
+                            </div>
+                            <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center text-xs shrink-0 pl-12 sm:pl-0">
+                                <span class="font-mono-code text-[11px] text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+                                    IP: {{ $online->ip_address }}
+                                </span>
+                                <span class="text-[11px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    {{ $online->last_activity->diffForHumans() }}
+                                </span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-8 text-slate-500 text-sm">
+                    No active sessions found.
+                </div>
+            @endif
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-4 mt-4 border-t border-slate-200 flex items-center justify-between">
+            <span class="text-xs text-slate-500 font-mono-code">
+                Auto-refreshed on reload • Inactivity timeout: 5m
+            </span>
+            <button type="button" onclick="closeOnlineUsersModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer">
+                Close
+            </button>
+        </div>
+
+    </div>
+</div>
+@endif
+@endsection
+
+@push('scripts')
+<script>
+    function openOnlineUsersModal() {
+        const modal = document.getElementById('onlineUsersModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
+
+    function closeOnlineUsersModal() {
+        const modal = document.getElementById('onlineUsersModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+</script>
+@endpush
