@@ -219,11 +219,20 @@ class InventoryController extends Controller
             'screen_size' => ['nullable', 'string', 'max:50'],
             'item_description' => ['required', 'string'],
             'quantity' => ['required', 'integer', 'min:0'],
+            'original_quantity' => ['nullable', 'integer', 'min:0'],
             'acu_quantity' => ['nullable', 'integer', 'min:0'],
             'forecasted_quantity' => ['nullable', 'integer', 'min:0'],
             'sqm' => ['nullable', 'numeric', 'min:0'],
             'location' => ['required', 'string', Rule::in($allowedLocations)],
-            'status' => ['nullable', 'string', Rule::in(['in_stock', 'low_stock', 'out_of_stock', 'eol'])],
+            'status' => ['nullable', 'string'],
+            'remarks' => ['nullable', 'string', 'max:2000'],
+            'reservation_qty' => ['nullable', 'integer', 'min:0'],
+            'reservation_project' => ['nullable', 'string', 'max:255'],
+            'reservation_remarks' => ['nullable', 'string', 'max:1000'],
+            'history_qty' => ['nullable', 'integer', 'min:0'],
+            'history_project' => ['nullable', 'string', 'max:255'],
+            'status_qty' => ['nullable', 'integer', 'min:0'],
+            'status_particular' => ['nullable', 'string', 'max:1000'],
         ]);
 
         if (empty($validated['category'])) {
@@ -233,6 +242,22 @@ class InventoryController extends Controller
         if (empty($validated['status'])) {
             $validated['status'] = $validated['quantity'] <= 3 ? 'low_stock' : 'in_stock';
         }
+
+        if (empty($validated['original_quantity'])) {
+            $validated['original_quantity'] = $validated['quantity'];
+        }
+
+        if (empty($validated['remarks'])) {
+            $validated['remarks'] = 'New shipment in good condition';
+        }
+
+        // Initialize default movement history
+        $validated['movement_history'] = [
+            [
+                'date' => ($validated['check_in_date'] ?? date('Y-m-d')) . ' 09:30',
+                'action' => 'RECEIVED: Received initial batch of ' . $validated['quantity'] . ' pcs',
+            ],
+        ];
 
         // Auto-extract screen size if not provided (e.g. from 55" or description)
         if (empty($validated['screen_size']) && preg_match('/(\d+(?:\.\d+)?)\s*"/i', $validated['item_description'], $matches)) {
@@ -277,11 +302,20 @@ class InventoryController extends Controller
             'screen_size' => ['nullable', 'string', 'max:50'],
             'item_description' => ['required', 'string'],
             'quantity' => ['required', 'integer', 'min:0'],
+            'original_quantity' => ['nullable', 'integer', 'min:0'],
             'acu_quantity' => ['nullable', 'integer', 'min:0'],
             'forecasted_quantity' => ['nullable', 'integer', 'min:0'],
             'sqm' => ['nullable', 'numeric', 'min:0'],
             'location' => ['required', 'string', Rule::in($allowedLocations)],
-            'status' => ['nullable', 'string', Rule::in(['in_stock', 'low_stock', 'out_of_stock', 'eol'])],
+            'status' => ['nullable', 'string'],
+            'remarks' => ['nullable', 'string', 'max:2000'],
+            'reservation_qty' => ['nullable', 'integer', 'min:0'],
+            'reservation_project' => ['nullable', 'string', 'max:255'],
+            'reservation_remarks' => ['nullable', 'string', 'max:1000'],
+            'history_qty' => ['nullable', 'integer', 'min:0'],
+            'history_project' => ['nullable', 'string', 'max:255'],
+            'status_qty' => ['nullable', 'integer', 'min:0'],
+            'status_particular' => ['nullable', 'string', 'max:1000'],
         ]);
 
         if (empty($validated['category'])) {
@@ -296,10 +330,52 @@ class InventoryController extends Controller
             $validated['screen_size'] = $matches[1].'"';
         }
 
+        // If quantity changed, record in movement history
+        if ((int)$validated['quantity'] !== (int)$item->quantity) {
+            $history = is_array($item->movement_history) ? $item->movement_history : [];
+            $history[] = [
+                'date' => date('Y-m-d H:i'),
+                'action' => 'ADJUSTMENT: Quantity updated from ' . $item->quantity . ' to ' . $validated['quantity'] . ' pcs',
+            ];
+            $validated['movement_history'] = $history;
+        }
+
         $item->update($validated);
 
         return redirect()->route('admin.inventory.index', ['category' => $item->category])
             ->with('status', "Inventory unit '{$item->model}' updated successfully.");
+    }
+
+    /**
+     * Add project reservation to the specified inventory item.
+     */
+    public function reserve(Request $request, InventoryItem $item): RedirectResponse
+    {
+        $validated = $request->validate([
+            'reservation_qty' => ['required', 'integer', 'min:1'],
+            'reservation_project' => ['required', 'string', 'max:255'],
+            'reservation_remarks' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $history = is_array($item->movement_history) ? $item->movement_history : [];
+        $history[] = [
+            'date' => date('Y-m-d H:i'),
+            'action' => 'RESERVATION: Allocated ' . $validated['reservation_qty'] . ' pcs for ' . $validated['reservation_project'],
+        ];
+
+        $avail = max(0, (int)$item->quantity - (int)$validated['reservation_qty']);
+
+        $item->update([
+            'reservation_qty' => (int)($item->reservation_qty ?? 0) + (int)$validated['reservation_qty'],
+            'reservation_project' => $validated['reservation_project'],
+            'reservation_remarks' => $validated['reservation_remarks'] ?? $item->reservation_remarks,
+            'forecasted_quantity' => $avail,
+            'movement_history' => $history,
+        ]);
+
+        return redirect()->route('admin.inventory.index', ['category' => $item->category])
+            ->with('status', "Reserved {$validated['reservation_qty']} pcs of '{$item->model}' for {$validated['reservation_project']}.");
+    }
     }
 
     /**
