@@ -1479,7 +1479,7 @@
                     </div>
                 </div>
 
-                <!-- REQUISITION ITEMS: COMPACT HORIZONTAL ROW (QTY | UOM | ITEM DESCRIPTION | REMARKS) -->
+                <!-- REQUISITION ITEMS: COMPACT HORIZONTAL ROW (QTY | UOM | ITEM DESCRIPTION | AVAILABLE QTY | REMARKS) -->
                 <div class="space-y-2 pt-1">
                     <div class="flex items-center justify-between pb-1.5 border-b border-slate-200">
                         <div class="flex items-center gap-2">
@@ -1488,16 +1488,31 @@
                             <span id="srfItemCountBadge" class="text-[10px] font-mono-code font-bold text-cyan-800 bg-cyan-100 px-2 py-0.5 rounded-full border border-cyan-200">1 Item</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none text-slate-400 text-xs">🔍</span>
+                            <!-- Quick Stock Search Bar with Autocomplete Dropdown -->
+                            <div class="relative srf-top-search-container">
+                                <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400 text-xs">🔍</span>
                                 <input 
                                     type="text" 
+                                    id="srfTopSearchInput"
                                     placeholder="Search stock..." 
-                                    oninput="filterSrfStockItems(this.value)" 
-                                    class="pl-6 pr-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-1 focus:ring-cyan-500 w-32 sm:w-44 font-medium"
+                                    autocomplete="off"
+                                    oninput="handleSrfTopSearch(this.value)" 
+                                    onfocus="handleSrfTopSearch(this.value)"
+                                    class="pl-7 pr-7 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-cyan-500 w-36 sm:w-56 font-medium transition-all"
                                     title="Quick search hardware stock items"
                                 >
+                                <button 
+                                    type="button" 
+                                    id="srfTopSearchClear"
+                                    onclick="clearSrfTopSearch()" 
+                                    class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-slate-600 hidden text-xs font-bold"
+                                    title="Clear search"
+                                >✕</button>
+                                
+                                <!-- Floating Top Search Results -->
+                                <div id="srfTopSearchResults" class="absolute right-0 top-full mt-1.5 w-80 sm:w-96 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 max-h-64 overflow-y-auto hidden divide-y divide-slate-100"></div>
                             </div>
+
                             <button 
                                 type="button" 
                                 onclick="addSrfItemRow()" 
@@ -1514,17 +1529,20 @@
 
                     <!-- Column Header Labels -->
                     <div class="hidden sm:flex items-center gap-2.5 px-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider font-mono-code">
-                        <div class="w-20 shrink-0">QTY *</div>
-                        <div class="w-32 shrink-0">UOM *</div>
+                        <div class="w-20 shrink-0 text-center">QTY *</div>
+                        <div class="w-28 shrink-0">UOM *</div>
                         <div class="flex-1 min-w-[220px]">ITEM Description *</div>
-                        <div class="flex-1 min-w-[200px]">Remarks</div>
+                        <div class="w-40 shrink-0 text-center text-amber-700 bg-amber-50/80 rounded py-0.5 border border-amber-200/60">
+                            Available QTY <span class="text-[9px] text-slate-400 font-normal">(QTY | SQM)</span>
+                        </div>
+                        <div class="flex-1 min-w-[180px]">Remarks</div>
                         <div class="w-8 shrink-0 text-center"></div>
                     </div>
 
                     <!-- Items Container -->
                     <div id="srfItemsContainer" class="space-y-2">
-                        <!-- Item Row #1: QTY | UOM | ITEM DESCRIPTION | REMARKS -->
-                        <div class="srf-item-row flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 p-2 rounded-xl bg-slate-50/80 border border-slate-200 hover:border-slate-300 transition-colors" data-index="0">
+                        <!-- Item Row #1: QTY | UOM | ITEM DESCRIPTION | AVAILABLE QTY | REMARKS -->
+                        <div class="srf-item-row flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 p-2 rounded-xl bg-slate-50/80 border border-slate-200 hover:border-slate-300 transition-all" data-index="0">
                             <!-- QTY -->
                             <div class="w-full sm:w-20 shrink-0">
                                 <input 
@@ -1534,12 +1552,13 @@
                                     value="10" 
                                     required 
                                     placeholder="10"
-                                    class="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold font-mono-code focus:ring-2 focus:ring-cyan-500 text-center"
+                                    oninput="checkSrfRowStockSufficiency(this)"
+                                    class="srf-item-qty-input w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold font-mono-code focus:ring-2 focus:ring-cyan-500 text-center"
                                 >
                             </div>
 
                             <!-- UOM (PCS, KG, ETC) -->
-                            <div class="w-full sm:w-32 shrink-0">
+                            <div class="w-full sm:w-28 shrink-0">
                                 <select 
                                     name="items[0][uom]" 
                                     required 
@@ -1556,28 +1575,68 @@
                                 </select>
                             </div>
 
-                            <!-- ITEM DESCRIPTION -->
-                            <div class="w-full sm:flex-1 sm:min-w-[220px]">
+                            <!-- ITEM DESCRIPTION: LIVE SEARCHABLE COMBOBOX -->
+                            <div class="w-full sm:flex-1 sm:min-w-[220px] relative srf-row-item-container">
+                                <div class="relative">
+                                    <input 
+                                        type="text" 
+                                        placeholder="🔍 Search or choose item..." 
+                                        autocomplete="off"
+                                        oninput="handleSrfRowItemSearch(this)"
+                                        onfocus="showSrfRowItemDropdown(this)"
+                                        class="srf-item-search-input w-full pl-7 pr-7 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 truncate"
+                                        required
+                                    >
+                                    <span class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none text-slate-400 text-xs">🔍</span>
+                                    <button 
+                                        type="button" 
+                                        onclick="clearSrfRowItem(this)" 
+                                        class="srf-item-search-clear absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-rose-600 hidden text-xs font-bold"
+                                        title="Clear item selection"
+                                    >✕</button>
+                                </div>
+
+                                <!-- Hidden native select holding inventory_item_id for submission -->
                                 <select 
                                     name="items[0][inventory_item_id]" 
-                                    required 
-                                    class="inventory-item-select w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-cyan-500 truncate"
+                                    class="inventory-item-select srf-row-item-select hidden"
+                                    tabindex="-1"
                                 >
                                     <option value="">-- Choose Item Description --</option>
                                     @foreach ($inventoryItems as $inv)
-                                        <option value="{{ $inv->id }}" data-search="{{ strtolower($inv->model . ' ' . $inv->manufacturer . ' ' . $inv->location . ' ' . $inv->category) }}">
+                                        <option 
+                                            value="{{ $inv->id }}" 
+                                            data-model="{{ $inv->model }}" 
+                                            data-mfr="{{ $inv->manufacturer ?? '' }}" 
+                                            data-location="{{ $inv->location ?? '' }}" 
+                                            data-qty="{{ (int) $inv->quantity }}"
+                                            data-acu-qty="{{ (int) ($inv->acu_quantity ?? $inv->quantity) }}"
+                                            data-sqm="{{ $inv->sqm ? (float) $inv->sqm : 0 }}"
+                                            data-search="{{ strtolower($inv->model . ' ' . ($inv->manufacturer ?? '') . ' ' . ($inv->location ?? '') . ' ' . ($inv->category ?? '')) }}">
                                             {{ $inv->model }} • {{ $inv->location }} [{{ $inv->quantity }} pcs]
                                         </option>
                                     @endforeach
                                 </select>
+
+                                <!-- Floating Results Dropdown for Row -->
+                                <div class="srf-row-results-dropdown absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 max-h-56 overflow-y-auto hidden divide-y divide-slate-100"></div>
+                            </div>
+
+                            <!-- AVAILABLE QTY DISPLAY (QTY | SQM) -->
+                            <div class="w-full sm:w-40 shrink-0 flex items-center justify-center">
+                                <div class="srf-row-avail-badge w-full py-1.5 px-2 rounded-lg bg-slate-100/90 border border-slate-200 text-center transition-all flex items-center justify-center gap-1.5 font-mono-code text-[11px]">
+                                    <span class="srf-avail-qty-val font-bold text-slate-600">—</span>
+                                    <span class="text-slate-300">|</span>
+                                    <span class="srf-avail-sqm-val font-semibold text-slate-500">—</span>
+                                </div>
                             </div>
 
                             <!-- REMARKS -->
-                            <div class="w-full sm:flex-1 sm:min-w-[200px]">
+                            <div class="w-full sm:flex-1 sm:min-w-[180px]">
                                 <input 
                                     type="text" 
                                     name="items[0][remarks]" 
-                                    placeholder="Remarks (e.g. staging notes, packaging, test...)" 
+                                    placeholder="Remarks (e.g. staging notes, test...)" 
                                     class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-cyan-500"
                                 >
                             </div>
@@ -2499,6 +2558,328 @@
     // ==========================================
     let srfItemIndex = 1;
 
+    // =========================================================================
+    // SRF REQUISITION STOCK SEARCH & LIVE AVAILABLE QUANTITY CONTROLLER
+    // =========================================================================
+    const srfInventoryStock = @json($inventoryItems->map(function($i) {
+        $divisor = ($i->acu_quantity ?: $i->quantity) ?: 1;
+        $perPanelSqm = ($i->sqm && $divisor > 0) ? round($i->sqm / $divisor, 2) : 0;
+        return [
+            'id' => (string) $i->id,
+            'model' => (string) $i->model,
+            'mfr' => (string) ($i->manufacturer ?? ''),
+            'location' => (string) ($i->location ?? 'Warehouse'),
+            'qty' => (int) $i->quantity,
+            'acu_qty' => (int) ($i->acu_quantity ?? $i->quantity),
+            'sqm' => $i->sqm ? (float) $i->sqm : 0,
+            'per_panel_sqm' => $perPanelSqm,
+            'search' => strtolower($i->model . ' ' . ($i->manufacturer ?? '') . ' ' . ($i->location ?? '') . ' ' . ($i->category ?? '')),
+        ];
+    }));
+
+    let srfItemIndex = 1;
+
+    // TOP SEARCH: Quick Stock Search Bar in Header
+    function handleSrfTopSearch(query) {
+        const q = (query || '').trim().toLowerCase();
+        const resultsBox = document.getElementById('srfTopSearchResults');
+        const clearBtn = document.getElementById('srfTopSearchClear');
+        if (!resultsBox) return;
+
+        if (clearBtn) clearBtn.classList.toggle('hidden', q.length === 0);
+
+        if (q.length === 0) {
+            resultsBox.classList.add('hidden');
+            resultsBox.innerHTML = '';
+            return;
+        }
+
+        const matches = srfInventoryStock.filter(item => item.search.includes(q));
+
+        if (matches.length === 0) {
+            resultsBox.innerHTML = `<div class="p-3 text-center text-xs text-slate-400 italic">No matching items found in stock for "${escapeHtml(query)}"</div>`;
+        } else {
+            resultsBox.innerHTML = `
+                <div class="px-3 py-1.5 bg-slate-50 text-[11px] font-bold text-slate-500 border-b border-slate-100 flex items-center justify-between">
+                    <span>${matches.length} matching item${matches.length === 1 ? '' : 's'}</span>
+                    <span class="text-[10px] text-cyan-600 font-semibold">Click to assign or add</span>
+                </div>
+                ${matches.slice(0, 30).map(item => `
+                    <div class="p-2.5 hover:bg-cyan-50/70 cursor-pointer flex items-center justify-between text-xs transition-colors group"
+                         onclick="selectSrfItemFromTopSearch('${item.id}')">
+                        <div class="min-w-0 pr-2">
+                            <div class="font-bold text-slate-800 group-hover:text-cyan-700 truncate">${escapeHtml(item.model)}</div>
+                            <div class="text-[11px] text-slate-500 font-mono-code flex flex-wrap items-center gap-1.5 mt-0.5">
+                                ${item.mfr ? '<span class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-semibold">' + escapeHtml(item.mfr) + '</span>' : ''}
+                                <span>Bay: <strong class="text-slate-700">${escapeHtml(item.location)}</strong></span>
+                                ${item.sqm > 0 ? '<span class="text-slate-400">• ' + item.sqm + ' sqm</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="shrink-0 flex items-center gap-2">
+                            <div class="text-right">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono-code ${item.qty > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                                    ${item.qty} pcs
+                                </span>
+                            </div>
+                            <span class="px-2 py-1 rounded bg-cyan-600 text-white font-bold text-[10px] group-hover:bg-cyan-500 transition-colors shadow-xs">+ Add</span>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+        resultsBox.classList.remove('hidden');
+    }
+
+    function clearSrfTopSearch() {
+        const input = document.getElementById('srfTopSearchInput');
+        const clearBtn = document.getElementById('srfTopSearchClear');
+        const resultsBox = document.getElementById('srfTopSearchResults');
+        if (input) input.value = '';
+        if (clearBtn) clearBtn.classList.add('hidden');
+        if (resultsBox) {
+            resultsBox.classList.add('hidden');
+            resultsBox.innerHTML = '';
+        }
+    }
+
+    function selectSrfItemFromTopSearch(itemId) {
+        const item = srfInventoryStock.find(i => String(i.id) === String(itemId));
+        if (!item) return;
+
+        const container = document.getElementById('srfItemsContainer');
+        if (!container) return;
+
+        // Find first row without an item selected
+        const rows = container.querySelectorAll('.srf-item-row');
+        let targetRow = null;
+
+        for (const row of rows) {
+            const sel = row.querySelector('.srf-row-item-select');
+            if (sel && !sel.value) {
+                targetRow = row;
+                break;
+            }
+        }
+
+        // If no empty row exists, add a new one
+        if (!targetRow) {
+            addSrfItemRow();
+            const updatedRows = container.querySelectorAll('.srf-item-row');
+            targetRow = updatedRows[updatedRows.length - 1];
+        }
+
+        if (targetRow) {
+            setRowSelectedItem(targetRow, item);
+            targetRow.classList.add('ring-2', 'ring-cyan-400', 'bg-cyan-50/50');
+            setTimeout(() => targetRow.classList.remove('ring-2', 'ring-cyan-400', 'bg-cyan-50/50'), 1500);
+            targetRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        clearSrfTopSearch();
+    }
+
+    // ROW-LEVEL SEARCH: Autocomplete Combobox
+    function handleSrfRowItemSearch(input) {
+        const container = input.closest('.srf-row-item-container');
+        if (!container) return;
+
+        const query = (input.value || '').trim().toLowerCase();
+        const clearBtn = container.querySelector('.srf-item-search-clear');
+        const select = container.querySelector('.srf-row-item-select');
+        const row = container.closest('.srf-item-row');
+
+        if (clearBtn) clearBtn.classList.toggle('hidden', input.value.trim().length === 0);
+
+        // If user is typing new search query, clear current item ID and availability badge
+        if (select && select.value) {
+            const currentItem = srfInventoryStock.find(i => String(i.id) === String(select.value));
+            const expectedText = currentItem ? `${currentItem.model} • ${currentItem.location} [${currentItem.qty} pcs]` : '';
+            if (input.value !== expectedText) {
+                select.value = '';
+                resetRowAvailabilityBadge(row);
+            }
+        }
+
+        renderSrfRowResults(container, query);
+    }
+
+    function showSrfRowItemDropdown(input) {
+        const container = input.closest('.srf-row-item-container');
+        if (!container) return;
+        const query = (input.value || '').trim().toLowerCase();
+        renderSrfRowResults(container, query);
+    }
+
+    function renderSrfRowResults(container, query) {
+        const resultsBox = container.querySelector('.srf-row-results-dropdown');
+        if (!resultsBox) return;
+
+        // Dismiss other row dropdowns
+        document.querySelectorAll('.srf-row-results-dropdown').forEach(b => {
+            if (b !== resultsBox) b.classList.add('hidden');
+        });
+        const topResults = document.getElementById('srfTopSearchResults');
+        if (topResults) topResults.classList.add('hidden');
+
+        const q = (query || '').toLowerCase();
+        let matches = srfInventoryStock;
+        if (q.length > 0) {
+            matches = srfInventoryStock.filter(item => item.search.includes(q));
+        }
+
+        if (matches.length === 0) {
+            resultsBox.innerHTML = `<div class="p-3 text-center text-xs text-slate-400 italic">No matching warehouse items found.</div>`;
+        } else {
+            resultsBox.innerHTML = `
+                <div class="px-2.5 py-1 bg-slate-50 text-[10px] font-bold text-slate-500 border-b border-slate-100 flex items-center justify-between">
+                    <span>${q.length > 0 ? matches.length + ' matching' : 'All available items (' + matches.length + ')'}</span>
+                    <span class="text-cyan-600 font-semibold">Select item</span>
+                </div>
+                ${matches.slice(0, 35).map(item => `
+                    <div class="p-2 hover:bg-cyan-50/70 cursor-pointer flex items-center justify-between text-xs transition-colors group"
+                         onclick="selectSrfRowItem(this, '${item.id}')">
+                        <div class="min-w-0 pr-2">
+                            <div class="font-bold text-slate-800 group-hover:text-cyan-700 truncate">${escapeHtml(item.model)}</div>
+                            <div class="text-[11px] text-slate-500 font-mono-code flex flex-wrap items-center gap-1.5 mt-0.5">
+                                ${item.mfr ? '<span class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-semibold">' + escapeHtml(item.mfr) + '</span>' : ''}
+                                <span>Bay: <strong class="text-slate-700">${escapeHtml(item.location)}</strong></span>
+                                ${item.sqm > 0 ? '<span class="text-slate-400">• ' + item.sqm + ' sqm</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="shrink-0 text-right">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono-code ${item.qty > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                                ${item.qty} pcs
+                            </span>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+        resultsBox.classList.remove('hidden');
+    }
+
+    function selectSrfRowItem(el, itemId) {
+        const container = el.closest('.srf-row-item-container');
+        if (!container) return;
+        const row = container.closest('.srf-item-row');
+        const item = srfInventoryStock.find(i => String(i.id) === String(itemId));
+        if (!row || !item) return;
+
+        setRowSelectedItem(row, item);
+    }
+
+    function setRowSelectedItem(row, item) {
+        const input = row.querySelector('.srf-item-search-input');
+        const select = row.querySelector('.srf-row-item-select');
+        const clearBtn = row.querySelector('.srf-item-search-clear');
+        const resultsBox = row.querySelector('.srf-row-results-dropdown');
+
+        if (input) {
+            input.value = `${item.model} • ${item.location} [${item.qty} pcs]`;
+        }
+        if (select) {
+            select.value = item.id;
+        }
+        if (clearBtn) {
+            clearBtn.classList.remove('hidden');
+        }
+        if (resultsBox) {
+            resultsBox.classList.add('hidden');
+            resultsBox.innerHTML = '';
+        }
+
+        updateRowAvailabilityBadge(row, item);
+        checkSrfRowStockSufficiency(row.querySelector('.srf-item-qty-input'));
+    }
+
+    function updateRowAvailabilityBadge(row, item) {
+        const qtyVal = row.querySelector('.srf-avail-qty-val');
+        const sqmVal = row.querySelector('.srf-avail-sqm-val');
+        const badge = row.querySelector('.srf-row-avail-badge');
+
+        if (qtyVal) {
+            qtyVal.textContent = `${item.qty} pcs`;
+            qtyVal.classList.remove('text-slate-600', 'text-rose-600', 'text-emerald-700');
+            qtyVal.classList.add(item.qty > 0 ? 'text-emerald-700' : 'text-rose-600');
+        }
+        if (sqmVal) {
+            sqmVal.textContent = item.sqm > 0 ? `${item.sqm} sqm` : '—';
+        }
+        if (badge) {
+            badge.classList.remove('bg-slate-100/90', 'border-slate-200');
+            badge.classList.add('bg-amber-50/80', 'border-amber-200');
+        }
+    }
+
+    function resetRowAvailabilityBadge(row) {
+        if (!row) return;
+        const qtyVal = row.querySelector('.srf-avail-qty-val');
+        const sqmVal = row.querySelector('.srf-avail-sqm-val');
+        const badge = row.querySelector('.srf-row-avail-badge');
+
+        if (qtyVal) {
+            qtyVal.textContent = '—';
+            qtyVal.className = 'srf-avail-qty-val font-bold text-slate-600';
+        }
+        if (sqmVal) {
+            sqmVal.textContent = '—';
+            sqmVal.className = 'srf-avail-sqm-val font-semibold text-slate-500';
+        }
+        if (badge) {
+            badge.className = 'srf-row-avail-badge w-full py-1.5 px-2 rounded-lg bg-slate-100/90 border border-slate-200 text-center transition-all flex items-center justify-center gap-1.5 font-mono-code text-[11px]';
+        }
+    }
+
+    function checkSrfRowStockSufficiency(qtyInput) {
+        if (!qtyInput) return;
+        const row = qtyInput.closest('.srf-item-row');
+        if (!row) return;
+
+        const select = row.querySelector('.srf-row-item-select');
+        const badge = row.querySelector('.srf-row-avail-badge');
+        if (!select || !select.value || !badge) return;
+
+        const item = srfInventoryStock.find(i => String(i.id) === String(select.value));
+        if (!item) return;
+
+        const reqQty = parseInt(qtyInput.value) || 0;
+        if (reqQty > item.qty) {
+            badge.classList.remove('bg-amber-50/80', 'border-amber-200');
+            badge.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-800');
+            badge.title = `Requested quantity (${reqQty}) exceeds available warehouse stock (${item.qty} pcs). System will flag for PR & MRR.`;
+        } else {
+            badge.classList.remove('bg-rose-50', 'border-rose-300', 'text-rose-800');
+            badge.classList.add('bg-amber-50/80', 'border-amber-200');
+            badge.title = `Stock is available in warehouse (${item.qty} pcs).`;
+        }
+    }
+
+    function clearSrfRowItem(btn) {
+        const container = btn.closest('.srf-row-item-container');
+        if (!container) return;
+        const row = container.closest('.srf-item-row');
+
+        const input = container.querySelector('.srf-item-search-input');
+        const select = container.querySelector('.srf-row-item-select');
+        const resultsBox = container.querySelector('.srf-row-results-dropdown');
+
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+        if (select) {
+            select.value = '';
+        }
+        btn.classList.add('hidden');
+
+        resetRowAvailabilityBadge(row);
+        renderSrfRowResults(container, '');
+    }
+
+    function filterSrfStockItems(query) {
+        handleSrfTopSearch(query);
+    }
+
     function addSrfItemRow() {
         const container = document.getElementById('srfItemsContainer');
         if (!container) return;
@@ -2514,7 +2895,7 @@
         const qtyInput = newRow.querySelector('input[name*="[quantity]"], input[name="quantity"]');
         if (qtyInput) {
             qtyInput.name = `items[${currentIndex}][quantity]`;
-            qtyInput.value = 1;
+            qtyInput.value = 10;
         }
 
         const uomSelect = newRow.querySelector('select[name*="[uom]"], select[name="uom"]');
@@ -2527,8 +2908,25 @@
         if (itemSelect) {
             itemSelect.name = `items[${currentIndex}][inventory_item_id]`;
             itemSelect.value = '';
-            Array.from(itemSelect.querySelectorAll('option')).forEach(opt => { opt.hidden = false; });
         }
+
+        const itemSearchInput = newRow.querySelector('.srf-item-search-input');
+        if (itemSearchInput) {
+            itemSearchInput.value = '';
+        }
+
+        const itemClearBtn = newRow.querySelector('.srf-item-search-clear');
+        if (itemClearBtn) {
+            itemClearBtn.classList.add('hidden');
+        }
+
+        const itemResultsDropdown = newRow.querySelector('.srf-row-results-dropdown');
+        if (itemResultsDropdown) {
+            itemResultsDropdown.classList.add('hidden');
+            itemResultsDropdown.innerHTML = '';
+        }
+
+        resetRowAvailabilityBadge(newRow);
 
         const remarksInput = newRow.querySelector('input[name*="[remarks]"], input[name="remarks"]');
         if (remarksInput) {
@@ -2540,6 +2938,9 @@
         updateSrfItemsUI();
 
         newRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (itemSearchInput) {
+            itemSearchInput.focus();
+        }
     }
 
     function removeSrfItemRow(btn) {
@@ -2579,31 +2980,62 @@
         });
     }
 
-    function filterSrfStockItems(query) {
-        const q = (query || '').trim().toLowerCase();
-        const selects = document.querySelectorAll('#srfItemsContainer select.inventory-item-select');
-        selects.forEach(select => {
-            Array.from(select.querySelectorAll('option')).forEach(opt => {
-                if (!opt.value) return; // Keep placeholder
-                const search = (opt.getAttribute('data-search') || opt.textContent).toLowerCase();
-                opt.hidden = q.length > 0 && !search.includes(q);
-            });
-        });
-    }
-
-    // Close any search results dropdown on outside click
+    // Dismiss search result dropdowns on outside click or Escape
     document.addEventListener('click', function(e) {
+        if (!e.target.closest('.srf-row-item-container')) {
+            document.querySelectorAll('.srf-row-results-dropdown').forEach(d => d.classList.add('hidden'));
+        }
+        if (!e.target.closest('.srf-top-search-container')) {
+            const topResults = document.getElementById('srfTopSearchResults');
+            if (topResults) topResults.classList.add('hidden');
+        }
         if (!e.target.closest('.item-search-container')) {
             document.querySelectorAll('.item-search-results').forEach(box => box.classList.add('hidden'));
         }
     });
 
-    // Close on Escape
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
+            document.querySelectorAll('.srf-row-results-dropdown').forEach(d => d.classList.add('hidden'));
+            const topResults = document.getElementById('srfTopSearchResults');
+            if (topResults) topResults.classList.add('hidden');
             document.querySelectorAll('.item-search-results').forEach(box => box.classList.add('hidden'));
         }
     });
+
+    // Validate SRF Form on submission: ensure each row has a valid inventory item
+    document.addEventListener('DOMContentLoaded', function() {
+        const srfForm = document.querySelector('form[action*="operations.installation.srf"]');
+        if (srfForm) {
+            srfForm.addEventListener('submit', function(e) {
+                const rows = document.querySelectorAll('#srfItemsContainer .srf-item-row');
+                for (const row of rows) {
+                    const sel = row.querySelector('.srf-row-item-select, select.inventory-item-select');
+                    const input = row.querySelector('.srf-item-search-input');
+                    if (!sel || !sel.value) {
+                        e.preventDefault();
+                        if (input) {
+                            input.focus();
+                            input.classList.add('ring-2', 'ring-rose-500', 'border-rose-500');
+                            setTimeout(() => input.classList.remove('ring-2', 'ring-rose-500', 'border-rose-500'), 2500);
+                        }
+                        alert('Please choose or search a valid inventory item description for each row.');
+                        return false;
+                    }
+                }
+            });
+        }
+    });
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 </script>
 
 @if (Auth::user()->isItAdmin())
