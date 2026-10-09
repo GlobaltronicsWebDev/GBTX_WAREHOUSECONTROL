@@ -302,23 +302,46 @@
     <!-- MAIN SPREADSHEET TABLE CARD (Clean & Simple Style) -->
     <div class="glass-panel bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         
-        <!-- Clean & Simple Title Banner -->
-        <div class="bg-white border-b border-slate-200 py-3.5 px-6 text-center">
-            <h2 class="text-lg sm:text-xl font-bold tracking-wide text-slate-900 uppercase select-none">
-                @if ($selectedCategory === 'LED Service Units' || $selectedCategory === 'LED SERVICES UNITS')
-                    LED SERVICE UNITS
-                @elseif ($selectedCategory === 'Philips Service Units' || $selectedCategory === 'PHILIPS SERVICE UNITS')
-                    PHILIPS SERVICE UNITS
-                @elseif ($selectedCategory === 'CENTRALIZED LED INVENTORY')
-                    CENTRALIZED LED INVENTORY
-                @elseif ($selectedCategory === 'EOL PHILIPS UNITS')
-                    EOL PHILIPS UNITS
-                @elseif ($isServiceUnitsTabActive)
-                    {{ strtoupper($selectedCategory) }}
-                @else
-                    ALL WAREHOUSE INVENTORY
-                @endif
-            </h2>
+        <!-- Clean & Simple Title Banner with Column Group Toggles -->
+        <div class="bg-white border-b border-slate-200 py-3.5 px-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div class="text-left">
+                <h2 class="text-lg sm:text-xl font-bold tracking-wide text-slate-900 uppercase select-none">
+                    @if ($selectedCategory === 'LED Service Units' || $selectedCategory === 'LED SERVICES UNITS')
+                        LED SERVICE UNITS
+                    @elseif ($selectedCategory === 'Philips Service Units' || $selectedCategory === 'PHILIPS SERVICE UNITS')
+                        PHILIPS SERVICE UNITS
+                    @elseif ($selectedCategory === 'CENTRALIZED LED INVENTORY')
+                        CENTRALIZED LED INVENTORY
+                    @elseif ($selectedCategory === 'EOL PHILIPS UNITS')
+                        EOL PHILIPS UNITS
+                    @elseif ($isServiceUnitsTabActive)
+                        {{ strtoupper($selectedCategory) }}
+                    @else
+                        ALL WAREHOUSE INVENTORY
+                    @endif
+                </h2>
+                <p class="text-xs text-slate-500">Click any row to open the full item drawer & movement logs</p>
+            </div>
+
+            <!-- Interactive Column Group Toggles -->
+            <div class="flex items-center flex-wrap gap-1 p-1 bg-slate-100/90 rounded-xl border border-slate-200">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2 select-none">Views:</span>
+                <button type="button" onclick="setColumnGroupView('all', this)" class="col-toggle-btn active-col-toggle px-3 py-1 rounded-lg text-xs font-bold transition-all bg-slate-900 text-white shadow-xs">
+                    All Columns
+                </button>
+                <button type="button" onclick="setColumnGroupView('basic', this)" class="col-toggle-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/80 transition-all">
+                    Basic Specs
+                </button>
+                <button type="button" onclick="setColumnGroupView('inventory', this)" class="col-toggle-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/80 transition-all">
+                    Inventory & SQM
+                </button>
+                <button type="button" onclick="setColumnGroupView('reservation', this)" class="col-toggle-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/80 transition-all">
+                    Reservation Details
+                </button>
+                <button type="button" onclick="setColumnGroupView('history', this)" class="col-toggle-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/80 transition-all">
+                    History & Remarks
+                </button>
+            </div>
         </div>
 
         <!-- Spreadsheet Grid Table -->
