@@ -301,7 +301,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="12" class="py-16 text-center text-slate-400">te-400">
+                            <td colspan="12" class="py-16 text-center text-slate-400">
                                 <div class="flex flex-col items-center justify-center gap-2">
                                     <div class="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400">
                                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
