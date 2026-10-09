@@ -3,34 +3,30 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-echo "<h2>Laravel Diagnostic Log Inspector</h2>";
+echo "<h2>Vendor & File Path Inspector</h2>";
 
-$logFile = __DIR__ . '/../storage/logs/laravel.log';
-if (file_exists($logFile)) {
-    echo "<h3>Recent Laravel Logs:</h3>";
-    $lines = file($logFile);
-    $lastLines = array_slice($lines, -60);
-    echo "<pre style='background:#1e1e1e;color:#00ff00;padding:15px;border-radius:8px;overflow-x:auto;'>" . htmlspecialchars(implode('', $lastLines)) . "</pre>";
+$parentDir = realpath(__DIR__ . '/..') ?: (__DIR__ . '/..');
+echo "<strong>Current Directory:</strong> " . __DIR__ . "<br>";
+echo "<strong>Parent Directory:</strong> " . $parentDir . "<br>";
+
+echo "<h3>Checking Parent Directory Contents:</h3>";
+if (is_dir($parentDir)) {
+    $files = scandir($parentDir);
+    echo "<pre style='background:#f4f4f4;padding:10px;'>" . print_r($files, true) . "</pre>";
 } else {
-    echo "<h3>No log file found at: " . htmlspecialchars($logFile) . "</h3>";
+    echo "<p style='color:red;'>Parent dir is not a directory!</p>";
 }
 
-try {
-    require __DIR__ . '/../vendor/autoload.php';
-    $app = require_once __DIR__ . '/../bootstrap/app.php';
-    
-    // Force debug mode
-    config(['app.debug' => true]);
-    
-    $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
-    $request = \Illuminate\Http\Request::create('/', 'GET');
-    $response = $kernel->handle($request);
-    
-    echo "<h3>Direct Request Status: " . $response->getStatusCode() . "</h3>";
-    if ($response->getStatusCode() !== 200) {
-        echo "<div style='background:#fff0f0;border:2px solid red;padding:15px;'>" . $response->getContent() . "</div>";
-    }
-} catch (\Throwable $e) {
-    echo "<h3 style='color:red;'>Caught Exception: " . $e->getMessage() . "</h3>";
-    echo "<pre>" . $e->getTraceAsString() . "</pre>";
+$vendorDir = $parentDir . '/vendor';
+echo "<h3>Checking Vendor Directory:</h3>";
+echo "<strong>is_dir(\$vendorDir):</strong> " . (is_dir($vendorDir) ? 'YES' : 'NO') . "<br>";
+echo "<strong>is_readable(\$vendorDir):</strong> " . (is_readable($vendorDir) ? 'YES' : 'NO') . "<br>";
+
+$autoloadFile = $vendorDir . '/autoload.php';
+echo "<strong>file_exists(\$autoloadFile):</strong> " . (file_exists($autoloadFile) ? 'YES' : 'NO') . "<br>";
+echo "<strong>is_readable(\$autoloadFile):</strong> " . (is_readable($autoloadFile) ? 'YES' : 'NO') . "<br>";
+
+if (is_dir($vendorDir)) {
+    echo "<h4>Vendor directory contents:</h4>";
+    echo "<pre style='background:#f4f4f4;padding:10px;'>" . print_r(scandir($vendorDir), true) . "</pre>";
 }
