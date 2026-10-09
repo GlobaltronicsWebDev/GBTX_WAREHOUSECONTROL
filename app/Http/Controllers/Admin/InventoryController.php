@@ -376,7 +376,7 @@ class InventoryController extends Controller
             $value = $request->input('value');
 
             $allowedFields = [
-                'item_description' => ['required', 'string', 'max:5000'],
+                'item_description' => ['nullable', 'string', 'max:5000'],
                 'acu_quantity' => ['nullable', 'integer', 'min:0'],
                 'quantity' => ['nullable', 'integer', 'min:0'],
                 'forecasted_quantity' => ['nullable', 'integer', 'min:0'],
@@ -389,6 +389,12 @@ class InventoryController extends Controller
 
             if (!array_key_exists($field, $allowedFields)) {
                 return response()->json(['success' => false, 'message' => "Field '{$field}' is not allowed for inline update."], 422);
+            }
+
+            // Normalization for numeric fields
+            if (in_array($field, ['acu_quantity', 'quantity', 'forecasted_quantity', 'original_quantity', 'reservation_qty', 'history_qty', 'status_qty'])) {
+                $value = ($value === '' || $value === null) ? null : (int) $value;
+                $request->merge(['value' => $value]);
             }
 
             $validated = $request->validate([
@@ -409,12 +415,31 @@ class InventoryController extends Controller
 
             $item->save();
 
+            // Calculate updated category totals so client footers stay 100% in sync
+            $categoryVariants = $this->getCategoryVariants($item->category ?? '');
+            $catBaseQuery = InventoryItem::where(function ($q) use ($categoryVariants, $item) {
+                if (!empty($categoryVariants)) {
+                    $q->whereIn('category', $categoryVariants);
+                } elseif ($item->category) {
+                    $q->where('category', $item->category);
+                }
+            });
+
+            $newCategoryTotalQty = (int) (clone $catBaseQuery)->sum('quantity');
+            $newCategoryTotalAcuQty = (int) (clone $catBaseQuery)->sum(DB::raw('CASE WHEN acu_quantity IS NOT NULL AND acu_quantity > 0 THEN acu_quantity ELSE quantity END'));
+            $newCategoryTotalForecastedQty = (int) (clone $catBaseQuery)->sum(DB::raw('COALESCE(forecasted_quantity, CASE WHEN quantity - COALESCE(reservation_qty, 0) > 0 THEN quantity - COALESCE(reservation_qty, 0) ELSE 0 END)'));
+
             return response()->json([
                 'success' => true,
                 'message' => "Field '{$field}' updated successfully.",
                 'item' => $item,
                 'field' => $field,
                 'value' => $item->{$field},
+                'totals' => [
+                    'total_qty' => $newCategoryTotalQty,
+                    'total_acu_qty' => $newCategoryTotalAcuQty,
+                    'total_forecasted_qty' => $newCategoryTotalForecastedQty,
+                ],
             ]);
         }
 
