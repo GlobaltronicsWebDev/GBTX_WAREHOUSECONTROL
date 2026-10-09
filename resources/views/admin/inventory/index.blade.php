@@ -323,24 +323,14 @@
                 <p class="text-xs text-slate-500">Click any row to open the full item drawer & movement logs</p>
             </div>
 
-            <!-- Interactive Column Group Toggles -->
-            <div class="flex items-center flex-wrap gap-1 p-1 bg-slate-100/90 rounded-xl border border-slate-200">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2 select-none">Views:</span>
-                <button type="button" onclick="setColumnGroupView('all', this)" class="col-toggle-btn active-col-toggle px-3 py-1 rounded-lg text-xs font-bold transition-all bg-slate-900 text-white shadow-xs">
-                    All Columns
-                </button>
-                <button type="button" onclick="setColumnGroupView('basic', this)" class="col-toggle-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/80 transition-all">
-                    Basic Specs
-                </button>
-                <button type="button" onclick="setColumnGroupView('inventory', this)" class="col-toggle-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/80 transition-all">
-                    Inventory & SQM
-                </button>
-                <button type="button" onclick="setColumnGroupView('reservation', this)" class="col-toggle-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/80 transition-all">
-                    Reservation Details
-                </button>
-                <button type="button" onclick="setColumnGroupView('history', this)" class="col-toggle-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/80 transition-all">
-                    History & Remarks
-                </button>
+            <!-- Column View Mode Selectors (LuminaSpec Reference) -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+                <span class="text-xs text-slate-500 font-semibold mr-1 whitespace-nowrap">View Columns:</span>
+                <button type="button" onclick="setColumnView('all')" id="btnViewAll" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-white transition whitespace-nowrap shadow-sm" style="background-color: #0284c7 !important; color: #ffffff !important;">All</button>
+                <button type="button" onclick="setColumnView('specs')" id="btnViewSpecs" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition whitespace-nowrap">Specs</button>
+                <button type="button" onclick="setColumnView('inventory')" id="btnViewInventory" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition whitespace-nowrap">Inventory & SQM</button>
+                <button type="button" onclick="setColumnView('reservation')" id="btnViewReservation" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition whitespace-nowrap">Reservations</button>
+                <button type="button" onclick="setColumnView('history')" id="btnViewHistory" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition whitespace-nowrap">Status & History</button>
             </div>
         </div>
 
@@ -626,20 +616,20 @@
                     <!-- CLEAN SPREADSHEET HEADER FOR CENTRALIZED LED WITH EXPANDED GROUPS -->
                     <thead>
                         <tr class="bg-slate-50 text-slate-700 font-bold uppercase text-[11px] sm:text-xs tracking-wider divide-x divide-slate-200 border-b border-slate-200">
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[130px] whitespace-nowrap">TAG #</th>
-                            <th rowspan="2" class="col-group col-group-basic py-2.5 px-3 text-center text-slate-700 select-none min-w-[120px] whitespace-nowrap">DATE RECEIVED</th>
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[130px] whitespace-nowrap">PO #</th>
-                            <th rowspan="2" class="col-group col-group-basic py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">MANUFACTURER</th>
-                            <th rowspan="2" class="col-group col-group-basic py-2.5 px-3 text-center text-slate-700 select-none min-w-[160px] whitespace-nowrap">MODEL / PIXEL PITCH</th>
-                            <th rowspan="2" class="col-group col-group-basic py-2.5 px-4 text-left text-slate-700 select-none min-w-[320px]">ITEM DESCRIPTION</th>
-                            <th rowspan="2" class="col-group col-group-basic py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">LOCATION</th>
+                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[100px] whitespace-nowrap">TAG #</th>
+                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[110px] whitespace-nowrap">DATE RECEIVED</th>
+                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[130px] whitespace-nowrap">PO #</th>
+                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">MANUFACTURER</th>
+                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[160px] whitespace-nowrap">MODEL / PIXEL PITCH</th>
+                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-4 text-left text-slate-700 select-none min-w-[300px]">ITEM DESCRIPTION</th>
+                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">LOCATION</th>
                             <th colspan="4" class="col-group col-group-inventory py-1 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none border-b border-yellow-400 whitespace-nowrap bg-yellow-300 text-slate-900 tracking-wider">INVENTORY</th>
                             <th colspan="2" class="col-group col-group-inventory py-1 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none border-b border-amber-300 whitespace-nowrap bg-amber-200 text-slate-900 tracking-wider">AVAILABLE QTY</th>
                             <th colspan="2" class="col-group col-group-reservation py-1 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none border-b border-orange-500 whitespace-nowrap bg-orange-500 text-white tracking-wider">RESERVATION</th>
                             <th colspan="2" class="col-group col-group-history py-1 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none border-b border-red-600 whitespace-nowrap bg-red-600 text-white tracking-wider">HISTORY</th>
                             <th rowspan="2" class="col-group col-group-inventory py-2.5 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none whitespace-nowrap bg-emerald-600 text-white tracking-wider">ORIGINAL QTY</th>
                             <th colspan="2" class="col-group col-group-history py-1 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none border-b border-slate-900 whitespace-nowrap bg-slate-900 text-white tracking-wider">STATUS</th>
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[90px] whitespace-nowrap">ACTIONS</th>
+                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[90px] whitespace-nowrap sticky right-0 bg-slate-50">ACTIONS</th>
                         </tr>
                         <tr class="divide-x divide-slate-200 border-b border-slate-200">
                             <!-- INVENTORY SUBHEADERS -->
@@ -663,42 +653,42 @@
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-xs sm:text-sm font-medium">
                         @forelse ($items as $item)
-                            <tr onclick="openItemDrawer({{ json_encode($item) }})" class="hover:bg-blue-50/70 transition-colors cursor-pointer group">
+                            <tr onclick="openDrawer({{ json_encode($item) }})" class="hover:bg-blue-50/70 transition-colors cursor-pointer group">
                                 
                                 <!-- TAG # -->
-                                <td class="py-3 px-3 font-mono-code font-bold text-center text-slate-800 border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group col-group-specs py-3 px-3 font-mono-code font-bold text-center text-slate-800 border-r border-slate-200 whitespace-nowrap">
                                     <span class="inline-block px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-xs font-bold text-slate-800">
                                         {{ $item->tag_number ?? 'TAG-LED-'.str_pad($item->id, 3, '0', STR_PAD_LEFT) }}
                                     </span>
                                 </td>
 
                                 <!-- DATE RECEIVED -->
-                                <td class="col-group col-group-basic py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group col-group-specs py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap">
                                     {{ $item->check_in_date ? $item->check_in_date->format('n/j/Y') : '—' }}
                                 </td>
 
                                 <!-- PO # -->
-                                <td class="py-3 px-3 font-mono-code text-center text-slate-800 border-r border-slate-200 whitespace-nowrap font-bold">
+                                <td class="col-group col-group-specs py-3 px-3 font-mono-code text-center text-slate-800 border-r border-slate-200 whitespace-nowrap font-bold">
                                     {{ $item->po_number ?? '—' }}
                                 </td>
 
                                 <!-- MANUFACTURER -->
-                                <td class="col-group col-group-basic py-3 px-3 font-semibold text-slate-800 uppercase font-mono-code border-r border-slate-200 text-center whitespace-nowrap">
+                                <td class="col-group col-group-specs py-3 px-3 font-semibold text-slate-800 uppercase font-mono-code border-r border-slate-200 text-center whitespace-nowrap">
                                     {{ $item->manufacturer }}
                                 </td>
 
                                 <!-- MODEL / PIXEL PITCH -->
-                                <td class="col-group col-group-basic py-3 px-3 font-mono-code font-semibold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap">
+                                <td class="col-group col-group-specs py-3 px-3 font-mono-code font-semibold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap">
                                     {{ $item->model }}
                                 </td>
 
                                 <!-- ITEM DESCRIPTION -->
-                                <td class="col-group col-group-basic py-3 px-4 text-slate-800 uppercase font-medium leading-relaxed border-r border-slate-200 min-w-[320px]">
+                                <td class="col-group col-group-specs py-3 px-4 text-slate-800 uppercase font-medium leading-relaxed border-r border-slate-200 min-w-[300px]">
                                     {{ $item->item_description }}
                                 </td>
 
                                 <!-- LOCATION -->
-                                <td class="col-group col-group-basic py-3 px-3 text-center border-r border-slate-200 font-mono-code whitespace-nowrap">
+                                <td class="col-group col-group-specs py-3 px-3 text-center border-r border-slate-200 font-mono-code whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $item->location }}
                                     </span>
@@ -827,7 +817,7 @@
                                 </td>
 
                                 <!-- ACTIONS -->
-                                <td class="py-3 px-3 text-center whitespace-nowrap">
+                                <td class="py-3 px-3 text-center whitespace-nowrap sticky right-0 bg-white">
                                     <div class="flex items-center justify-center gap-1.5">
                                         <button 
                                             type="button" 
