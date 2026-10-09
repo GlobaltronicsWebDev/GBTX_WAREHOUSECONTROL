@@ -17,7 +17,9 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => (env('DB_CONNECTION') === 'sqlite' && env('DB_DATABASE') !== ':memory:' && !str_ends_with(env('DB_DATABASE', ''), '.sqlite'))
+        ? 'mysql'
+        : env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------

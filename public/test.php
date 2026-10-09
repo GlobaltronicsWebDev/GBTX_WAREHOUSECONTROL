@@ -55,8 +55,25 @@ foreach ($hostsToTry as $host) {
     }
 }
 
-// 3. Test Laravel's configuration
-echo "<h3>3. Laravel Database Configuration</h3>";
+// 3. Check and clean bootstrap cache
+echo "<h3>3. Checking Bootstrap Cache</h3>";
+$cacheFiles = glob($basePath . '/bootstrap/cache/*.php');
+if (!empty($cacheFiles)) {
+    echo "<p style='color:orange;'>⚠ Found cached files: " . htmlspecialchars(implode(', ', array_map('basename', $cacheFiles))) . "</p>";
+    foreach ($cacheFiles as $cf) {
+        @unlink($cf);
+        echo "<p style='color:green;'>✔ Deleted " . htmlspecialchars(basename($cf)) . "</p>";
+    }
+} else {
+    echo "<p style='color:green;'>✔ Bootstrap cache is completely clean (no stale config.php).</p>";
+}
+
+echo "<p>getenv('DB_CONNECTION'): <strong>" . var_export(getenv('DB_CONNECTION'), true) . "</strong></p>";
+echo "<p>\$_SERVER['DB_CONNECTION']: <strong>" . var_export($_SERVER['DB_CONNECTION'] ?? null, true) . "</strong></p>";
+echo "<p>\$_ENV['DB_CONNECTION']: <strong>" . var_export($_ENV['DB_CONNECTION'] ?? null, true) . "</strong></p>";
+
+// 4. Test Laravel's configuration
+echo "<h3>4. Laravel Database Configuration</h3>";
 try {
     require $basePath . '/vendor/autoload.php';
     $app = require_once $basePath . '/bootstrap/app.php';
