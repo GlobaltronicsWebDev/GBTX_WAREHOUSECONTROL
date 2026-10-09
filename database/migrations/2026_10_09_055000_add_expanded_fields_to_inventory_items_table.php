@@ -22,7 +22,7 @@ return new class extends Migration
                 $table->integer('reservation_qty')->nullable()->after('remarks');
             }
             if (!Schema::hasColumn('inventory_items', 'reservation_project')) {
-                $table->string('reservation_project')->nullable()->after('reservation_qty');
+                $table->text('reservation_project')->nullable()->after('reservation_qty');
             }
             if (!Schema::hasColumn('inventory_items', 'reservation_remarks')) {
                 $table->text('reservation_remarks')->nullable()->after('reservation_project');
@@ -31,7 +31,7 @@ return new class extends Migration
                 $table->integer('history_qty')->nullable()->after('reservation_remarks');
             }
             if (!Schema::hasColumn('inventory_items', 'history_project')) {
-                $table->string('history_project')->nullable()->after('history_qty');
+                $table->text('history_project')->nullable()->after('history_qty');
             }
             if (!Schema::hasColumn('inventory_items', 'status_qty')) {
                 $table->integer('status_qty')->nullable()->after('history_project');
