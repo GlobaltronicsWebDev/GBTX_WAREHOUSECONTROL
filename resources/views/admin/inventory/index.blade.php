@@ -1591,6 +1591,7 @@
                         >
                             <option value="">-- Select Location --</option>
                             <option value="GLOBALTRONICS" selected>GLOBALTRONICS</option>
+                            <option value="A-JUAN - 3RD FLR">A-JUAN - 3RD FLR</option>
                             <option value="A JUAN - 2ND FLR">A JUAN - 2ND FLR</option>
                             <option value="MARIKINA">MARIKINA</option>
                             <option value="2ND FLR OCAP">2ND FLR OCAP</option>
@@ -1919,6 +1920,7 @@
                         >
                             <option value="">-- Select Location --</option>
                             <option value="GLOBALTRONICS">GLOBALTRONICS</option>
+                            <option value="A-JUAN - 3RD FLR">A-JUAN - 3RD FLR</option>
                             <option value="A JUAN - 2ND FLR">A JUAN - 2ND FLR</option>
                             <option value="MARIKINA">MARIKINA</option>
                             <option value="2ND FLR OCAP">2ND FLR OCAP</option>
