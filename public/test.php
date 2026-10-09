@@ -3,30 +3,26 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-echo "<h2>Laravel Exception Inspector</h2>";
+echo "<h2>Vendor Diagnostic Details</h2>";
 
-try {
-    require __DIR__ . '/../vendor/autoload.php';
-    $app = require_once __DIR__ . '/../bootstrap/app.php';
-    
-    // Enable debug to see full error
-    config(['app.debug' => true]);
-    
-    $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
-    $request = \Illuminate\Http\Request::create('/', 'GET');
-    $response = $kernel->handle($request);
-    
-    echo "<h3>Response Status: " . $response->getStatusCode() . "</h3>";
-    echo "<div>" . $response->getContent() . "</div>";
-} catch (\Throwable $e) {
-    echo "<h3 style='color:red;'>Caught Exception: " . $e->getMessage() . "</h3>";
-    echo "<p><strong>File:</strong> " . $e->getFile() . " on line " . $e->getLine() . "</p>";
-    echo "<pre style='background:#f4f4f4;padding:10px;'>" . $e->getTraceAsString() . "</pre>";
+$autoload = realpath(__DIR__ . '/../vendor/autoload.php') ?: (__DIR__ . '/../vendor/autoload.php');
+echo "<p><strong>Autoload Path:</strong> " . htmlspecialchars($autoload) . "</p>";
+echo "<p><strong>file_exists:</strong> " . (file_exists($autoload) ? 'YES' : 'NO') . "</p>";
+echo "<p><strong>is_file:</strong> " . (is_file($autoload) ? 'YES' : 'NO') . "</p>";
+echo "<p><strong>is_readable:</strong> " . (is_readable($autoload) ? 'YES' : 'NO') . "</p>";
+
+$vendorDir = dirname($autoload);
+echo "<p><strong>Vendor Dir:</strong> " . htmlspecialchars($vendorDir) . "</p>";
+echo "<p><strong>is_dir(vendor):</strong> " . (is_dir($vendorDir) ? 'YES' : 'NO') . "</p>";
+echo "<p><strong>is_readable(vendor):</strong> " . (is_readable($vendorDir) ? 'YES' : 'NO') . "</p>";
+
+if (is_dir($vendorDir)) {
+    echo "<h3>Vendor contents (first 10):</h3>";
+    $items = scandir($vendorDir);
+    echo "<pre>" . print_r(array_slice($items, 0, 10), true) . "</pre>";
 }
 
-$logFile = __DIR__ . '/../storage/logs/laravel.log';
-if (file_exists($logFile)) {
-    echo "<h3>Recent Logs:</h3>";
-    $lines = file($logFile);
-    echo "<pre style='background:#222;color:#0f0;padding:10px;'>" . htmlspecialchars(implode('', array_slice($lines, -40))) . "</pre>";
-}
+$parentDir = dirname($vendorDir);
+echo "<h3>Parent Directory items:</h3>";
+$parentItems = scandir($parentDir);
+echo "<pre>" . print_r($parentItems, true) . "</pre>";
