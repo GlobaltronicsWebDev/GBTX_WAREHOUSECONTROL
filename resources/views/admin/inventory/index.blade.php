@@ -746,22 +746,29 @@
 
                                 <!-- AVAILABLE QTY: QTY -->
                                 <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
-                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-amber-50 text-amber-900 border border-amber-200">
-                                        {{ number_format($item->forecasted_quantity !== null ? $item->forecasted_quantity : $item->quantity) }}
+                                    @php
+                                        $availQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : $item->quantity;
+                                    @endphp
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs {{ $availQty < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : ($availQty == 0 ? 'bg-slate-100 text-slate-600 border border-slate-200' : 'bg-amber-50 text-amber-900 border border-amber-200') }}">
+                                        {{ number_format($availQty) }}
                                     </span>
                                 </td>
 
                                 <!-- AVAILABLE QTY: SQM -->
                                 <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
-                                    <span class="font-bold text-xs text-slate-900">
-                                        @php
-                                            $availQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : $item->quantity;
-                                            $divisor = $item->acu_quantity ?: $item->quantity;
-                                            $perPanelSqm = ($item->sqm && $divisor > 0) ? ($item->sqm / $divisor) : 0;
-                                            $availSqm = $perPanelSqm > 0 ? ($availQty * $perPanelSqm) : ($item->sqm ?? 0);
-                                        @endphp
-                                        {{ $availSqm > 0 ? number_format($availSqm, 2) : ($item->sqm !== null ? number_format($item->sqm, 2) : '—') }}
-                                    </span>
+                                    @php
+                                        $availQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : $item->quantity;
+                                        $divisor = ($item->acu_quantity ?: $item->quantity) ?: 1;
+                                        $perPanelSqm = ($item->sqm && $divisor > 0) ? ($item->sqm / $divisor) : 0;
+                                        $availSqm = $item->sqm !== null ? ($perPanelSqm * $availQty) : null;
+                                    @endphp
+                                    @if ($availSqm !== null)
+                                        <span class="font-bold text-xs {{ $availSqm < 0 ? 'text-rose-600' : ($availSqm == 0 ? 'text-slate-400' : 'text-slate-900') }}">
+                                            {{ number_format($availSqm, 2) }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
                                 </td>
 
                                 <!-- ACTIONS -->
@@ -2250,10 +2257,10 @@
             if (modelInput) modelInput.placeholder = 'e.g. P2.5 Indoor';
             if (descLabel) descLabel.textContent = 'Item Description *';
             if (screenSizeGroup) screenSizeGroup.classList.add('hidden');
-            if (acuQtyGroup) acuQtyGroup.classList.add('hidden');
-            if (forecastedQtyGroup) forecastedQtyGroup.classList.add('hidden');
+            if (acuQtyGroup) acuQtyGroup.classList.remove('hidden');
+            if (forecastedQtyGroup) forecastedQtyGroup.classList.remove('hidden');
             if (sqmGroup) sqmGroup.classList.remove('hidden');
-            if (sqmLabel) sqmLabel.textContent = 'SQM (Area m²)';
+            if (sqmLabel) sqmLabel.textContent = 'Total Available SQM (m²)';
             if (sqmInput) sqmInput.placeholder = 'e.g. 12.50';
             if (breakdownCard) breakdownCard.classList.remove('hidden');
             if (descInput) descInput.placeholder = 'e.g. 500x500mm Die-Cast Aluminum Cabinet, High Refresh Rate';
@@ -2366,8 +2373,8 @@
         document.getElementById('editStatus').value = item.status || 'in_stock';
         document.getElementById('editRemarks').value = item.remarks || '';
         document.getElementById('editAcuQty').value = item.acu_quantity !== null && item.acu_quantity !== undefined ? item.acu_quantity : '';
-        document.getElementById('editForecastedQty').value = item.forecasted_quantity || '';
-        document.getElementById('editSqm').value = item.sqm || '';
+        document.getElementById('editForecastedQty').value = item.forecasted_quantity !== null && item.forecasted_quantity !== undefined ? item.forecasted_quantity : '';
+        document.getElementById('editSqm').value = item.sqm !== null && item.sqm !== undefined ? item.sqm : '';
         
         // Location dropdown selection
         let locSelect = document.getElementById('editLocation');

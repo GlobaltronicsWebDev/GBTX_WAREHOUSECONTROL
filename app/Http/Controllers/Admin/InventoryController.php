@@ -222,9 +222,9 @@ class InventoryController extends Controller
             'quantity' => ['required', 'integer', 'min:0'],
             'original_quantity' => ['nullable', 'integer', 'min:0'],
             'acu_quantity' => ['nullable', 'integer', 'min:0'],
-            'forecasted_quantity' => ['nullable', 'integer', 'min:0'],
-            'sqm' => ['nullable', 'numeric', 'min:0'],
-            'location' => ['required', 'string', Rule::in($allowedLocations)],
+            'forecasted_quantity' => ['nullable', 'integer'],
+            'sqm' => ['nullable', 'numeric'],
+            'location' => ['required', 'string', 'max:255'],
             'status' => ['nullable', 'string'],
             'remarks' => ['nullable', 'string', 'max:2000'],
             'reservation_qty' => ['nullable', 'integer', 'min:0'],
@@ -305,9 +305,9 @@ class InventoryController extends Controller
             'quantity' => ['required', 'integer', 'min:0'],
             'original_quantity' => ['nullable', 'integer', 'min:0'],
             'acu_quantity' => ['nullable', 'integer', 'min:0'],
-            'forecasted_quantity' => ['nullable', 'integer', 'min:0'],
-            'sqm' => ['nullable', 'numeric', 'min:0'],
-            'location' => ['required', 'string', Rule::in($allowedLocations)],
+            'forecasted_quantity' => ['nullable', 'integer'],
+            'sqm' => ['nullable', 'numeric'],
+            'location' => ['required', 'string', 'max:255'],
             'status' => ['nullable', 'string'],
             'remarks' => ['nullable', 'string', 'max:2000'],
             'reservation_qty' => ['nullable', 'integer', 'min:0'],
@@ -604,128 +604,291 @@ class InventoryController extends Controller
             return back()->withErrors(['file' => 'Could not open the uploaded CSV file.']);
         }
 
-        // Read and strip BOM if present
-        $rawHeaders = fgetcsv($handle);
-        if (! $rawHeaders) {
-            fclose($handle);
+        // Read all rows into memory for structure detection
+        $rows = [];
+        while (($row = fgetcsv($handle)) !== false) {
+            $rows[] = $row;
+        }
+        fclose($handle);
+
+        if (empty($rows)) {
             return back()->withErrors(['file' => 'The uploaded CSV file is empty.']);
         }
 
-        $headerMap = [];
-        foreach ($rawHeaders as $index => $h) {
-            $clean = strtolower(trim(preg_replace('/[\x{FEFF}\x{200B}]/u', '', $h)));
-            $clean = preg_replace('/[^a-z0-9]/', '', $clean);
-            $headerMap[$index] = $clean;
+        // Helper for numbers (handles commas like "2,888", units like "500 pcs", "-242 pcs", "101.25 sqm", "-12.39 sqm", etc.)
+        $parseNum = function ($val, $isFloat = false) {
+            if ($val === null || $val === '') return null;
+            $val = trim((string)$val);
+            if ($val === '' || $val === '—' || $val === '-') return null;
+            $cleaned = preg_replace('/[^\d\.\-]/', '', $val);
+            if ($cleaned === '' || $cleaned === '-') return null;
+            return $isFloat ? (float)$cleaned : (int)$cleaned;
+        };
+
+        $cleanStr = function ($val) {
+            if ($val === null) return '';
+            $val = preg_replace('/[\x{FEFF}\x{200B}]/u', '', (string)$val);
+            return trim(preg_replace('/\s+/', ' ', $val));
+        };
+
+        // 1. Detect Header Row 1 (skips any pre-header titles or blank rows)
+        $headerRow1Idx = null;
+        $headerRow2Idx = null;
+
+        foreach ($rows as $idx => $r) {
+            $joined = strtolower(implode(' ', $r));
+            $score = 0;
+            foreach (['tag', 'date', 'po', 'sku', 'manufacturer', 'model', 'description', 'location', 'inventory', 'on-hand'] as $kw) {
+                if (str_contains($joined, $kw)) $score++;
+            }
+            if ($score >= 3) {
+                $headerRow1Idx = $idx;
+                break;
+            }
         }
 
+        if ($headerRow1Idx === null) {
+            $headerRow1Idx = 0;
+        }
+
+        // 2. Check if the next row is a secondary subheader row (2-tier header)
+        if (isset($rows[$headerRow1Idx + 1])) {
+            $nextJoined = strtolower(implode(' ', $rows[$headerRow1Idx + 1]));
+            $subScore = 0;
+            foreach (['on-hand', 'total', 'sqm', 'panel', 'qty', 'particular', 'project'] as $kw) {
+                if (str_contains($nextJoined, $kw)) $subScore++;
+            }
+            if ($subScore >= 2) {
+                $headerRow2Idx = $headerRow1Idx + 1;
+            }
+        }
+
+        // 3. Build Column Map from Header 1 and Header 2
+        $columnMap = [];
+        $h1 = $rows[$headerRow1Idx];
+        $h2 = $headerRow2Idx !== null ? $rows[$headerRow2Idx] : [];
+
+        $currentParent = '';
+        foreach ($h1 as $colIdx => $colVal) {
+            $colClean = preg_replace('/[^a-z0-9]/', '', strtolower((string)$colVal));
+            if (!empty($colClean)) {
+                $currentParent = $colClean;
+            }
+
+            $subVal = isset($h2[$colIdx]) ? preg_replace('/[^a-z0-9]/', '', strtolower((string)$h2[$colIdx])) : '';
+            $colKey = null;
+
+            if (in_array($colClean, ['tag', 'tagno', 'tagnumber', 'tagid']) || str_starts_with($colClean, 'tag')) {
+                $colKey = 'tag_number';
+            } elseif (in_array($colClean, ['datereceived', 'date', 'checkindate'])) {
+                $colKey = 'check_in_date';
+            } elseif (str_contains($colClean, 'po') || str_contains($colClean, 'sku')) {
+                $colKey = 'po_number';
+            } elseif (str_contains($colClean, 'manufacturer') || str_contains($colClean, 'brand') || str_contains($colClean, 'mfr')) {
+                $colKey = 'manufacturer';
+            } elseif (str_contains($colClean, 'model') || str_contains($colClean, 'pixelpitch')) {
+                $colKey = 'model';
+            } elseif (str_contains($colClean, 'description') || str_contains($colClean, 'item')) {
+                $colKey = 'item_description';
+            } elseif (str_contains($colClean, 'location') || str_contains($colClean, 'warehouse') || str_contains($colClean, 'facility')) {
+                $colKey = 'location';
+            } elseif (str_contains($currentParent, 'inventory')) {
+                if (str_contains($subVal, 'sqm')) {
+                    if (str_contains($subVal, 'perpanel') || str_contains($subVal, 'panel')) {
+                        $colKey = 'per_panel_sqm';
+                    } else {
+                        $colKey = 'sqm';
+                    }
+                } elseif (str_contains($subVal, 'total') || str_contains($subVal, 'acu')) {
+                    $colKey = 'acu_quantity';
+                } elseif (str_contains($subVal, 'onhand') || str_contains($subVal, 'qty')) {
+                    $colKey = 'quantity';
+                }
+            } elseif (str_contains($currentParent, 'available') || str_contains($colClean, 'available')) {
+                if (str_contains($subVal, 'sqm') || str_contains($colClean, 'availablesqm')) {
+                    $colKey = 'available_sqm';
+                } else {
+                    $colKey = 'forecasted_quantity';
+                }
+            } elseif (str_contains($currentParent, 'reservation')) {
+                if (str_contains($subVal, 'project') || str_contains($subVal, 'detail')) {
+                    $colKey = 'reservation_project';
+                } else {
+                    $colKey = 'reservation_qty';
+                }
+            } elseif (str_contains($currentParent, 'history')) {
+                if (str_contains($subVal, 'project')) {
+                    $colKey = 'history_project';
+                } else {
+                    $colKey = 'history_qty';
+                }
+            } elseif (str_contains($currentParent, 'original') || str_contains($colClean, 'original')) {
+                $colKey = 'original_quantity';
+            } elseif (str_contains($currentParent, 'status') || str_contains($colClean, 'status')) {
+                if (str_contains($subVal, 'particular')) {
+                    $colKey = 'status_particular';
+                } else {
+                    $colKey = 'status';
+                }
+            } elseif (str_contains($colClean, 'screensize') || str_contains($colClean, 'size')) {
+                $colKey = 'screen_size';
+            } elseif (str_contains($colClean, 'category')) {
+                $colKey = 'category';
+            } elseif (str_contains($colClean, 'remark') || str_contains($colClean, 'note')) {
+                $colKey = 'remarks';
+            }
+
+            // Fallbacks based directly on subVal if header was empty
+            if (!$colKey && !empty($subVal)) {
+                if ($subVal === 'onhand') $colKey = 'quantity';
+                elseif (str_contains($subVal, 'totalonhand')) $colKey = 'acu_quantity';
+                elseif (str_contains($subVal, 'totalsqm') || str_contains($subVal, 'totalavailablesqm')) $colKey = 'sqm';
+                elseif (str_contains($subVal, 'perpanelsqm')) $colKey = 'per_panel_sqm';
+                elseif ($subVal === 'qty') $colKey = 'quantity';
+                elseif ($subVal === 'sqm') $colKey = 'sqm';
+            }
+
+            $columnMap[$colIdx] = $colKey;
+        }
+
+        $startDataIdx = ($headerRow2Idx ?? $headerRow1Idx) + 1;
         $importedCount = 0;
         $updatedCount = 0;
-        $allowedLocations = ['Globaltronics', 'AJUAN', 'DEFECTIVE', 'SHOWROOM', 'OTHER'];
+        $lastItemModel = null;
 
-        while (($row = fgetcsv($handle)) !== false) {
+        for ($i = $startDataIdx; $i < count($rows); $i++) {
+            $row = $rows[$i];
             if (empty(array_filter($row))) {
                 continue; // Skip empty rows
             }
 
-            $data = [];
-            foreach ($row as $idx => $val) {
-                $colKey = $headerMap[$idx] ?? null;
-                if (! $colKey) continue;
-                $val = trim($val);
-
-                if (in_array($colKey, ['tag', 'tagno', 'tagnumber', 'tagid'])) {
-                    $data['tag_number'] = $val;
-                } elseif (in_array($colKey, ['datereceived', 'date', 'checkindate'])) {
-                    $data['check_in_date'] = $val;
-                } elseif (in_array($colKey, ['poskuno', 'pono', 'ponumber', 'po', 'sku', 'skuno'])) {
-                    $data['po_number'] = $val;
-                } elseif (in_array($colKey, ['manufacturer', 'mfr', 'brand'])) {
-                    $data['manufacturer'] = $val;
-                } elseif (in_array($colKey, ['modelpixelpitch', 'model', 'pixelpitch'])) {
-                    $data['model'] = $val;
-                } elseif (in_array($colKey, ['itemdescription', 'description', 'itemname', 'name'])) {
-                    $data['item_description'] = $val;
-                } elseif (in_array($colKey, ['location', 'warehouse', 'facility'])) {
-                    $data['location'] = $val;
-                } elseif (in_array($colKey, ['onhand', 'quantity', 'qty'])) {
-                    $data['quantity'] = (int) $val;
-                } elseif (in_array($colKey, ['totalonhand', 'acuquantity', 'acuqty'])) {
-                    $data['acu_quantity'] = (int) $val;
-                } elseif (in_array($colKey, ['totalavailablesqm', 'sqm', 'totalsqm'])) {
-                    $data['sqm'] = (float) $val;
-                } elseif (in_array($colKey, ['originalqty', 'originalquantity'])) {
-                    $data['original_quantity'] = (int) $val;
-                } elseif (in_array($colKey, ['screensize', 'size'])) {
-                    $data['screen_size'] = $val;
-                } elseif (in_array($colKey, ['status'])) {
-                    $data['status'] = $val;
-                } elseif (in_array($colKey, ['remarks', 'notes', 'particulars'])) {
-                    $data['remarks'] = $val;
-                } elseif (in_array($colKey, ['reservationqty', 'reservedqty'])) {
-                    $data['reservation_qty'] = (int) $val;
-                } elseif (in_array($colKey, ['reservationproject', 'reservedproject', 'project'])) {
-                    $data['reservation_project'] = $val;
-                } elseif (in_array($colKey, ['reservationremarks', 'reservedremarks'])) {
-                    $data['reservation_remarks'] = $val;
-                } elseif (in_array($colKey, ['category'])) {
-                    $data['category'] = $val;
-                }
-            }
-
-            if (empty($data['model']) && empty($data['item_description'])) {
+            // Check if summary row
+            $rowJoined = strtolower(implode(' ', $row));
+            if (str_contains($rowJoined, 'total count') || str_contains($rowJoined, 'total inventory')) {
                 continue;
             }
 
-            if (empty($data['model'])) {
-                $data['model'] = substr($data['item_description'], 0, 50);
-            }
-            if (empty($data['item_description'])) {
-                $data['item_description'] = $data['model'];
-            }
-            if (empty($data['manufacturer'])) {
-                $data['manufacturer'] = 'UNSPECIFIED';
-            }
-            if (empty($data['location']) || ! in_array($data['location'], $allowedLocations)) {
-                $data['location'] = 'Globaltronics';
-            }
-            if (! isset($data['quantity'])) {
-                $data['quantity'] = 0;
+            $rowData = [];
+            foreach ($row as $cIdx => $rawVal) {
+                $key = $columnMap[$cIdx] ?? null;
+                if ($key) {
+                    $rowData[$key] = $rawVal;
+                }
             }
 
-            $data['category'] = ! empty($data['category']) ? $data['category'] : $category;
+            $model = $cleanStr($rowData['model'] ?? '');
+            $desc = $cleanStr($rowData['item_description'] ?? '');
+            $po = $cleanStr($rowData['po_number'] ?? '');
+            $mfg = $cleanStr($rowData['manufacturer'] ?? '');
+            $location = $cleanStr($rowData['location'] ?? '');
 
-            // Format check-in date
-            if (! empty($data['check_in_date'])) {
-                $parsedDate = strtotime($data['check_in_date']);
-                $data['check_in_date'] = $parsedDate ? date('Y-m-d', $parsedDate) : date('Y-m-d');
-            } else {
-                $data['check_in_date'] = date('Y-m-d');
+            $onHand = $parseNum($rowData['quantity'] ?? null);
+            $totalOnHand = $parseNum($rowData['acu_quantity'] ?? null);
+            $sqm = $parseNum($rowData['sqm'] ?? null, true);
+            $availQty = $parseNum($rowData['forecasted_quantity'] ?? null);
+            $origQty = $parseNum($rowData['original_quantity'] ?? null);
+            $resQty = $parseNum($rowData['reservation_qty'] ?? null);
+            $resProject = $cleanStr($rowData['reservation_project'] ?? '');
+            $histQty = $parseNum($rowData['history_qty'] ?? null);
+            $histProject = $cleanStr($rowData['history_project'] ?? '');
+
+            // Sub-batch check (e.g., PO specified on subsequent row under the same model)
+            if (empty($model) && empty($desc) && !empty($po) && ($onHand !== null || $totalOnHand !== null) && $lastItemModel) {
+                $model = $lastItemModel->model;
+                $desc = $lastItemModel->item_description;
+                if (empty($mfg)) $mfg = $lastItemModel->manufacturer;
+                if (empty($location)) $location = $lastItemModel->location;
             }
 
-            // Screen size auto extraction
-            if (empty($data['screen_size']) && preg_match('/(\d+(?:\.\d+)?)\s*"/i', $data['item_description'], $m)) {
-                $data['screen_size'] = $m[1].'"';
-            }
+            if (!empty($model) || !empty($desc)) {
+                $itemData = [
+                    'category' => !empty($rowData['category']) ? $cleanStr($rowData['category']) : $category,
+                    'tag_number' => $cleanStr($rowData['tag_number'] ?? ''),
+                    'po_number' => $po,
+                    'manufacturer' => $mfg ?: 'UNILUMIN',
+                    'model' => $model ?: substr($desc, 0, 50),
+                    'item_description' => $desc ?: $model,
+                    'location' => $location ?: 'Globaltronics',
+                    'quantity' => $onHand ?? 0,
+                    'acu_quantity' => $totalOnHand !== null ? $totalOnHand : $onHand,
+                    'sqm' => $sqm,
+                    'forecasted_quantity' => $availQty,
+                    'original_quantity' => $origQty !== null ? $origQty : ($totalOnHand ?? $onHand),
+                    'reservation_qty' => $resQty ?? 0,
+                    'reservation_project' => $resProject,
+                    'reservation_remarks' => $cleanStr($rowData['reservation_remarks'] ?? ''),
+                    'history_qty' => $histQty ?? 0,
+                    'history_project' => $histProject,
+                    'screen_size' => $cleanStr($rowData['screen_size'] ?? ''),
+                    'status' => !empty($rowData['status']) ? $cleanStr($rowData['status']) : 'in_stock',
+                    'remarks' => $cleanStr($rowData['remarks'] ?? ''),
+                    'created_by' => Auth::id() ?: 1,
+                ];
 
-            $data['created_by'] = Auth::id() ?: 1;
+                // Auto extract screen size if empty
+                if (empty($itemData['screen_size']) && preg_match('/(\d+(?:\.\d+)?)\s*"/i', $itemData['item_description'], $m)) {
+                    $itemData['screen_size'] = $m[1] . '"';
+                }
 
-            if (! empty($data['tag_number'])) {
-                InventoryItem::updateOrCreate(
-                    ['tag_number' => $data['tag_number']],
-                    $data
-                );
-                $updatedCount++;
-            } else {
-                InventoryItem::create($data);
-                $importedCount++;
+                // Parse check-in date
+                $rawDate = $cleanStr($rowData['check_in_date'] ?? '');
+                if (!empty($rawDate)) {
+                    $parsedTime = strtotime($rawDate);
+                    $itemData['check_in_date'] = $parsedTime ? date('Y-m-d', $parsedTime) : date('Y-m-d');
+                } else {
+                    $itemData['check_in_date'] = date('Y-m-d');
+                }
+
+                // Match existing item by Tag # if present, or by [Category, PO, Model, Location]
+                $existing = null;
+                if (!empty($itemData['tag_number'])) {
+                    $existing = InventoryItem::where('category', $itemData['category'])
+                        ->where('tag_number', $itemData['tag_number'])
+                        ->first();
+                } else {
+                    $query = InventoryItem::where('category', $itemData['category'])
+                        ->where('model', $itemData['model'])
+                        ->where('location', $itemData['location']);
+                    if (!empty($itemData['po_number'])) {
+                        $query->where('po_number', $itemData['po_number']);
+                    }
+                    $existing = $query->first();
+                }
+
+                if ($existing) {
+                    $existing->update($itemData);
+                    $lastItemModel = $existing;
+                    $updatedCount++;
+                } else {
+                    $lastItemModel = InventoryItem::create($itemData);
+                    $importedCount++;
+                }
+            } elseif ($lastItemModel !== null) {
+                // Attach multi-line reservation or project history to preceding parent item
+                $needsSave = false;
+                if ($resQty || !empty($resProject)) {
+                    $lastItemModel->reservation_qty = ($lastItemModel->reservation_qty ?? 0) + ($resQty ?? 0);
+                    if (!empty($resProject)) {
+                        $lastItemModel->reservation_project = trim(($lastItemModel->reservation_project ? $lastItemModel->reservation_project . '; ' : '') . $resProject);
+                    }
+                    $needsSave = true;
+                }
+                if ($histQty || !empty($histProject)) {
+                    $lastItemModel->history_qty = ($lastItemModel->history_qty ?? 0) + ($histQty ?? 0);
+                    if (!empty($histProject) && empty($lastItemModel->history_project)) {
+                        $lastItemModel->history_project = $histProject;
+                    }
+                    $needsSave = true;
+                }
+                if ($needsSave) {
+                    $lastItemModel->save();
+                }
             }
         }
 
-        fclose($handle);
-
         $msg = "Import complete for {$category}: {$importedCount} new items created";
         if ($updatedCount > 0) {
-            $msg .= ", {$updatedCount} existing items updated by Tag #";
+            $msg .= ", {$updatedCount} existing items updated";
         }
         $msg .= '.';
 
