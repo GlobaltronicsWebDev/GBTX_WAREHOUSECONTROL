@@ -111,6 +111,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
     Route::put('/inventory/{item}', [InventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/{item}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+    Route::post('/inventory/{item}/reserve', [InventoryController::class, 'reserve'])->name('inventory.reserve');
 
     // Warehouse Operational Workflow Actions (Interactive Floor Operations)
     Route::post('/operations/dispatch', [DashboardController::class, 'dispatchOrder'])->name('operations.dispatch');

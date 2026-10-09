@@ -376,7 +376,6 @@ class InventoryController extends Controller
         return redirect()->route('admin.inventory.index', ['category' => $item->category])
             ->with('status', "Reserved {$validated['reservation_qty']} pcs of '{$item->model}' for {$validated['reservation_project']}.");
     }
-    }
 
     /**
      * Remove the specified inventory item from stock.
