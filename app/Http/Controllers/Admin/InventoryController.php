@@ -455,16 +455,23 @@ class InventoryController extends Controller
             ];
         } elseif ($isPhilips) {
             $headers = [
-                'TAG #',
+                'LOCATION',
                 'DATE RECEIVED',
-                'PO / SKU No.',
                 'MANUFACTURER',
                 'MODEL',
-                'ITEM DESCRIPTION',
-                'LOCATION',
-                'SCREEN SIZE',
-                'QUANTITY',
-                'STATUS',
+                'PO / SKU No.',
+                'PARTICULAR',
+                'SERIAL NO.',
+                'QTY',
+                'ACU. QTY',
+                'AVAILABLE QTY',
+                'RESERVATION QTY',
+                'RESERVATION PROJECT',
+                'HISTORY QTY',
+                'HISTORY PROJECT',
+                'ORIGINAL QTY',
+                'UNFOUND QTY',
+                'UNFOUND STATUS',
                 'REMARKS',
             ];
         } else {
@@ -520,17 +527,25 @@ class InventoryController extends Controller
                         $item->remarks ?? '',
                     ];
                 } elseif ($isPhilips) {
+                    $availQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : max(0, (int)$item->quantity - (int)($item->reservation_qty ?? 0));
                     $row = [
-                        $item->tag_number ?? '',
+                        $item->location ?? 'A JUAN - 2ND FLR',
                         $dateRec,
-                        $item->po_number ?? '',
-                        $item->manufacturer ?? '',
+                        $item->manufacturer ?? 'PHILIPS',
                         $item->model ?? '',
+                        $item->po_number ?? '',
                         $item->item_description ?? '',
-                        $item->location ?? '',
-                        $item->screen_size ?? '',
+                        $item->tag_number ?? '',
                         $item->quantity ?? 0,
-                        $item->status ?? '',
+                        $item->acu_quantity ?? $item->quantity,
+                        $availQty,
+                        $item->reservation_qty ?? 0,
+                        $item->reservation_project ?? '',
+                        $item->history_qty ?? 0,
+                        $item->history_project ?? '',
+                        $item->original_quantity ?? $item->quantity,
+                        $item->status_qty ?? 0,
+                        $item->status_particular ?? 'OK',
                         $item->remarks ?? '',
                     ];
                 } else {
@@ -573,8 +588,46 @@ class InventoryController extends Controller
             $headers = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'MANUFACTURER', 'MODEL / PIXEL PITCH', 'ITEM DESCRIPTION', 'LOCATION', 'ON-HAND', 'TOTAL ON-HAND', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM', 'ORIGINAL QTY', 'RESERVATION QTY', 'RESERVATION PROJECT', 'REMARKS'];
             $sampleRow = ['TAG-LED-001', date('Y-m-d'), 'PO-2026-081', 'UNILUMIN', 'Upad IV P2.6', 'UNILUMIN UPAD IV P2.6 INDOOR 500X500MM DIE CAST CABINET', 'Globaltronics', 150, 150, 0.25, 37.5, 150, 0, '', 'New delivery batch'];
         } elseif ($isPhilips) {
-            $headers = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'MANUFACTURER', 'MODEL', 'ITEM DESCRIPTION', 'LOCATION', 'SCREEN SIZE', 'QUANTITY', 'STATUS', 'REMARKS'];
-            $sampleRow = ['TAG-PHI-001', date('Y-m-d'), 'PO-2026-042', 'PHILIPS', '55BDL4050D', 'PHILIPS 55INCH COMMERCIAL DISPLAY SLIM BEZEL', 'Globaltronics', '55"', 12, 'in_stock', 'Ready for deployment'];
+            $headers = [
+                'LOCATION',
+                'DATE RECEIVED',
+                'MANUFACTURER',
+                'MODEL',
+                'PO / SKU No.',
+                'PARTICULAR',
+                'SERIAL NO.',
+                'QTY',
+                'ACU. QTY',
+                'AVAILABLE QTY',
+                'RESERVATION QTY',
+                'RESERVATION PROJECT',
+                'HISTORY QTY',
+                'HISTORY PROJECT',
+                'ORIGINAL QTY',
+                'UNFOUND QTY',
+                'UNFOUND STATUS',
+                'REMARKS',
+            ];
+            $sampleRow = [
+                'A JUAN - 2ND FLR',
+                date('Y-m-d'),
+                'PHILIPS',
+                '55BDL4050D',
+                'PO-2026-042',
+                '55" PHILIPS FLAT WIDE MONITOR',
+                'SN-PHI-2026-001; SN-PHI-2026-002',
+                10,
+                10,
+                8,
+                2,
+                'Project Alpha Allocation',
+                0,
+                '',
+                10,
+                0,
+                'OK',
+                'Stored at A Juan - 2nd Flr',
+            ];
         } else {
             $headers = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'CATEGORY', 'MANUFACTURER', 'MODEL', 'ITEM DESCRIPTION', 'LOCATION', 'QUANTITY', 'STATUS', 'REMARKS'];
             $sampleRow = ['TAG-SU-001', date('Y-m-d'), 'PO-2026-015', $category, 'NOVASTAR', 'VX1000', 'NOVASTAR ALL-IN-ONE VIDEO PROCESSOR CONTROLLER', 'Globaltronics', 5, 'in_stock', 'Event demo unit'];
@@ -717,7 +770,7 @@ class InventoryController extends Controller
                 $subVal = isset($h2[$colIdx]) ? preg_replace('/[^a-z0-9]/', '', strtolower((string)$h2[$colIdx])) : '';
                 $colKey = null;
 
-                if (in_array($colClean, ['tag', 'tagno', 'tagnumber', 'tagid']) || str_starts_with($colClean, 'tag')) {
+                if (in_array($colClean, ['tag', 'tagno', 'tagnumber', 'tagid', 'serialno', 'serial']) || str_starts_with($colClean, 'tag') || str_starts_with($colClean, 'serial')) {
                     $colKey = 'tag_number';
                 } elseif (in_array($colClean, ['datereceived', 'date', 'checkindate'])) {
                     $colKey = 'check_in_date';
@@ -727,8 +780,14 @@ class InventoryController extends Controller
                     $colKey = 'manufacturer';
                 } elseif (str_contains($colClean, 'model') || str_contains($colClean, 'pixelpitch')) {
                     $colKey = 'model';
-                } elseif (str_contains($colClean, 'description') || str_contains($colClean, 'item')) {
-                    $colKey = 'item_description';
+                } elseif (str_contains($colClean, 'description') || str_contains($colClean, 'item') || str_contains($colClean, 'particular')) {
+                    if (str_contains($subVal, 'serial')) {
+                        $colKey = 'tag_number';
+                    } elseif (str_contains($subVal, 'particular')) {
+                        $colKey = 'item_description';
+                    } else {
+                        $colKey = 'item_description';
+                    }
                 } elseif (str_contains($colClean, 'location') || str_contains($colClean, 'warehouse') || str_contains($colClean, 'facility')) {
                     $colKey = 'location';
                 } elseif (str_contains($currentParent, 'inventory')) {
@@ -742,6 +801,10 @@ class InventoryController extends Controller
                         $colKey = 'acu_quantity';
                     } elseif (str_contains($subVal, 'onhand') || str_contains($subVal, 'qty')) {
                         $colKey = 'quantity';
+                    } elseif (str_contains($subVal, 'serial')) {
+                        $colKey = 'tag_number';
+                    } elseif (str_contains($subVal, 'particular')) {
+                        $colKey = 'item_description';
                     }
                 } elseif (str_contains($currentParent, 'available') || str_contains($colClean, 'available')) {
                     if (str_contains($subVal, 'sqm') || str_contains($colClean, 'availablesqm')) {
@@ -749,13 +812,13 @@ class InventoryController extends Controller
                     } else {
                         $colKey = 'forecasted_quantity';
                     }
-                } elseif (str_contains($currentParent, 'reservation')) {
+                } elseif (str_contains($currentParent, 'reservation') || str_contains($colClean, 'reservation')) {
                     if (str_contains($subVal, 'project') || str_contains($subVal, 'detail')) {
                         $colKey = 'reservation_project';
                     } else {
                         $colKey = 'reservation_qty';
                     }
-                } elseif (str_contains($currentParent, 'history')) {
+                } elseif (str_contains($currentParent, 'history') || str_contains($colClean, 'history')) {
                     if (str_contains($subVal, 'project')) {
                         $colKey = 'history_project';
                     } else {
@@ -763,8 +826,8 @@ class InventoryController extends Controller
                     }
                 } elseif (str_contains($currentParent, 'original') || str_contains($colClean, 'original')) {
                     $colKey = 'original_quantity';
-                } elseif (str_contains($currentParent, 'status') || str_contains($colClean, 'status')) {
-                    if (str_contains($subVal, 'particular')) {
+                } elseif (str_contains($currentParent, 'status') || str_contains($colClean, 'status') || str_contains($currentParent, 'unfound') || str_contains($colClean, 'unfound')) {
+                    if (str_contains($subVal, 'particular') || str_contains($subVal, 'status')) {
                         $colKey = 'status_particular';
                     } elseif (str_contains($subVal, 'qty')) {
                         $colKey = 'status_qty';
@@ -787,6 +850,9 @@ class InventoryController extends Controller
                     elseif (str_contains($subVal, 'perpanelsqm')) $colKey = 'per_panel_sqm';
                     elseif ($subVal === 'qty') $colKey = 'quantity';
                     elseif ($subVal === 'sqm') $colKey = 'sqm';
+                    elseif (str_contains($subVal, 'serial')) $colKey = 'tag_number';
+                    elseif (str_contains($subVal, 'particular')) $colKey = 'item_description';
+                    elseif (str_contains($subVal, 'status')) $colKey = 'status_particular';
                 }
 
                 $columnMap[$colIdx] = $colKey;
@@ -1042,6 +1108,31 @@ class InventoryController extends Controller
                         $movements['locations'][] = [
                             'location' => $location ?: 'GLOBALTRONICS',
                             'qty' => $onHand ?? 0,
+                        ];
+                        $needsSave = true;
+                    }
+                    if (!empty($rowData['tag_number']) && $hasColumn('tag_number')) {
+                        $existingTag = (string)($lastItemModel->tag_number ?? '');
+                        $newTag = $cleanStr($rowData['tag_number']);
+                        if (!empty($newTag) && !str_contains($existingTag, $newTag)) {
+                            $lastItemModel->tag_number = $existingTag ? $existingTag . '; ' . $newTag : $newTag;
+                            $needsSave = true;
+                        }
+                    }
+                    if (($statusQty || !empty($statusPart)) && $hasColumn('status_qty')) {
+                        $lastItemModel->status_qty = ($lastItemModel->status_qty ?? 0) + ($statusQty ?? 0);
+                        if (!empty($statusPart)) {
+                            $existingStat = (string)($lastItemModel->status_particular ?? '');
+                            if ($existingStat === '' || $existingStat === 'OK') {
+                                $lastItemModel->status_particular = $statusPart;
+                            } elseif (!str_contains($existingStat, $statusPart)) {
+                                $lastItemModel->status_particular = $existingStat . '; ' . $statusPart;
+                            }
+                        }
+                        if (!isset($movements['unfound'])) $movements['unfound'] = [];
+                        $movements['unfound'][] = [
+                            'qty' => $statusQty ?? 0,
+                            'status' => $statusPart ?: 'UNFOUND',
                         ];
                         $needsSave = true;
                     }
