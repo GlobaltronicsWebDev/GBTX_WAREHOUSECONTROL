@@ -1789,16 +1789,20 @@
                                     </button>
                                 </td>
 
-                                <!-- ITEM DESCRIPTION -->
-                                <td class="py-2 px-3 text-slate-800 uppercase font-medium leading-snug border-r border-slate-200 min-w-[320px] align-top text-xs">
-                                    <button 
-                                        type="button" 
-                                        onclick="openDrawer({{ json_encode($item) }})" 
-                                        class="text-left font-medium text-slate-800 hover:text-blue-600 hover:underline cursor-pointer block w-full leading-snug uppercase transition-colors"
-                                        title="View SKU Details"
-                                    >
-                                        <div>{{ $item->item_description }}</div>
-                                    </button>
+                                <!-- ITEM DESCRIPTION (INLINE EDITABLE) -->
+                                <td class="py-1 px-2 text-slate-800 uppercase font-medium leading-snug border-r border-slate-200 min-w-[320px] align-top text-xs">
+                                    <div class="relative group/edit">
+                                        <textarea 
+                                            rows="2"
+                                            data-item-id="{{ $item->id }}" 
+                                            data-field="item_description" 
+                                            data-original-val="{{ $item->item_description }}"
+                                            onblur="handleInlineSave(this)" 
+                                            onkeydown="handleInlineKey(event, this)" 
+                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-y leading-tight"
+                                            title="Click to edit item description (auto-saves on blur or Ctrl+Enter)"
+                                        >{{ $item->item_description }}</textarea>
+                                    </div>
                                 </td>
 
                                 <!-- QTY -->
@@ -1869,7 +1873,7 @@
                                     TOTAL COUNT
                                 </td>
                                 <!-- QTY -->
-                                <td class="py-2 px-3 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td id="footerEolQty" class="py-2 px-3 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($eolTotalQty) }}
                                 </td>
                                 <!-- ACTIONS -->
@@ -1992,16 +1996,20 @@
                                     </div>
                                 </td>
 
-                                <!-- Item Description (Interactive Item Trigger) -->
-                                <td class="py-2 px-3 text-slate-800 uppercase font-medium leading-snug border-r border-slate-200 min-w-[260px] align-top text-xs">
-                                    <button 
-                                        type="button" 
-                                        onclick="openDrawer({{ json_encode($item) }})" 
-                                        class="text-left font-medium text-slate-800 hover:text-blue-600 hover:underline cursor-pointer block w-full leading-snug uppercase transition-colors"
-                                        title="Click to view full SKU specifications & history"
-                                    >
-                                        <div class="line-clamp-2">{{ $item->item_description }}</div>
-                                    </button>
+                                <!-- Item Description (INLINE EDITABLE) -->
+                                <td class="py-1 px-2 text-slate-800 uppercase font-medium leading-snug border-r border-slate-200 min-w-[260px] align-top text-xs">
+                                    <div class="relative group/edit">
+                                        <textarea 
+                                            rows="2"
+                                            data-item-id="{{ $item->id }}" 
+                                            data-field="item_description" 
+                                            data-original-val="{{ $item->item_description }}"
+                                            onblur="handleInlineSave(this)" 
+                                            onkeydown="handleInlineKey(event, this)" 
+                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-y leading-tight"
+                                            title="Click to edit item description (auto-saves on blur or Ctrl+Enter)"
+                                        >{{ $item->item_description }}</textarea>
+                                    </div>
                                 </td>
 
                                 <!-- SPECS: Manufacturer -->
@@ -3177,6 +3185,166 @@
 <script>
     let activeDrawerItemId = null;
     let currentDrawerItem = null;
+
+    // =========================================================
+    // INLINE SPREADSHEET EDITING & LIVE TOTALS SUMMING
+    // =========================================================
+    async function handleInlineSave(element) {
+        const itemId = element.dataset.itemId;
+        const field = element.dataset.field;
+        let value = element.value;
+        const originalVal = element.dataset.originalVal;
+
+        // If value has not changed, do nothing
+        if (value === originalVal) {
+            return;
+        }
+
+        // For numeric fields like acu_quantity, sanitize and calculate live sum
+        if (field === 'acu_quantity') {
+            value = value === '' ? null : parseInt(value, 10);
+            if (value !== null && (isNaN(value) || value < 0)) {
+                value = 0;
+                element.value = 0;
+            }
+            recalculateTableTotals();
+        }
+
+        // Visual saving feedback (subtle amber ring)
+        element.classList.add('ring-2', 'ring-amber-400', 'bg-amber-50/60');
+
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+                || '{{ csrf_token() }}';
+
+            const response = await fetch(`/admin/inventory/${itemId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    field: field,
+                    value: value
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Update original value tracker
+                element.dataset.originalVal = element.value;
+
+                // Visual success feedback (emerald flash)
+                element.classList.remove('ring-amber-400', 'bg-amber-50/60');
+                element.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-50/50');
+                setTimeout(() => {
+                    element.classList.remove('ring-2', 'ring-emerald-500', 'bg-emerald-50/50');
+                }, 1200);
+
+                // Synchronize footer totals with backend database sums
+                if (data.totals) {
+                    updateFootersWithServerTotals(data.totals);
+                }
+            } else {
+                throw new Error(data.message || 'Failed to save inline edit');
+            }
+        } catch (err) {
+            console.error('Inline update failed:', err);
+            // Visual error feedback (rose flash) and revert
+            element.classList.remove('ring-amber-400', 'bg-amber-50/60');
+            element.classList.add('ring-2', 'ring-rose-500', 'bg-rose-50');
+            setTimeout(() => {
+                element.classList.remove('ring-2', 'ring-rose-500', 'bg-rose-50');
+                element.value = originalVal;
+                if (field === 'acu_quantity') {
+                    recalculateTableTotals();
+                }
+            }, 2000);
+        }
+    }
+
+    function handleInlineKey(event, element) {
+        if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            element.blur();
+        }
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            element.value = element.dataset.originalVal || '';
+            element.blur();
+        }
+    }
+
+    function recalculateTableTotals() {
+        const fmt = (n) => new Intl.NumberFormat().format(n);
+
+        // 1. LED Service Units ACU. QTY Sum
+        const ledAcuInputs = document.querySelectorAll('#centralLedTable .editable-acu-qty-led');
+        if (ledAcuInputs.length > 0) {
+            let sum = 0;
+            ledAcuInputs.forEach(input => {
+                const val = parseInt(input.value, 10);
+                if (!isNaN(val)) sum += val;
+            });
+            const footer = document.getElementById('footerLedAcuQty');
+            if (footer) footer.textContent = fmt(sum);
+        }
+
+        // 2. Philips Service Units ACU. QTY Sum
+        const philAcuInputs = document.querySelectorAll('#centralLedTable .editable-acu-qty-phil');
+        if (philAcuInputs.length > 0) {
+            let sum = 0;
+            philAcuInputs.forEach(input => {
+                const val = parseInt(input.value, 10);
+                if (!isNaN(val)) sum += val;
+            });
+            const footer = document.getElementById('footerPhilAcuQty');
+            if (footer) footer.textContent = fmt(sum);
+        }
+
+        // 3. Centralized LED Inventory ACU. QTY Sum (TOTAL ON-HAND)
+        const cledAcuInputs = document.querySelectorAll('#centralLedTable .editable-acu-qty-cled');
+        if (cledAcuInputs.length > 0) {
+            let sum = 0;
+            cledAcuInputs.forEach(input => {
+                const val = parseInt(input.value, 10);
+                if (!isNaN(val)) sum += val;
+            });
+            const footer = document.getElementById('footerCLedAcuQty');
+            if (footer) footer.textContent = fmt(sum);
+        }
+    }
+
+    function updateFootersWithServerTotals(totals) {
+        if (!totals) return;
+        const fmt = (n) => new Intl.NumberFormat().format(n);
+
+        // LED Service Units
+        const fLedQty = document.getElementById('footerLedQty');
+        if (fLedQty && totals.total_qty !== undefined) fLedQty.textContent = fmt(totals.total_qty);
+        const fLedAcu = document.getElementById('footerLedAcuQty');
+        if (fLedAcu && totals.total_acu_qty !== undefined) fLedAcu.textContent = fmt(totals.total_acu_qty);
+        const fLedAvail = document.getElementById('footerLedAvailQty');
+        if (fLedAvail && totals.total_forecasted_qty !== undefined) fLedAvail.textContent = fmt(totals.total_forecasted_qty);
+
+        // Philips Service Units
+        const fPhilQty = document.getElementById('footerPhilQty');
+        if (fPhilQty && totals.total_qty !== undefined) fPhilQty.textContent = fmt(totals.total_qty);
+        const fPhilAcu = document.getElementById('footerPhilAcuQty');
+        if (fPhilAcu && totals.total_acu_qty !== undefined) fPhilAcu.textContent = fmt(totals.total_acu_qty);
+        const fPhilAvail = document.getElementById('footerPhilAvailQty');
+        if (fPhilAvail && totals.total_forecasted_qty !== undefined) fPhilAvail.textContent = fmt(totals.total_forecasted_qty);
+
+        // Centralized LED
+        const fCLedQty = document.getElementById('footerCLedQty');
+        if (fCLedQty && totals.total_qty !== undefined) fCLedQty.textContent = fmt(totals.total_qty);
+        const fCLedAcu = document.getElementById('footerCLedAcuQty');
+        if (fCLedAcu && totals.total_acu_qty !== undefined) fCLedAcu.textContent = fmt(totals.total_acu_qty);
+        const fCLedAvail = document.getElementById('footerCLedAvailQty');
+        if (fCLedAvail && totals.total_forecasted_qty !== undefined) fCLedAvail.textContent = fmt(totals.total_forecasted_qty);
+    }
 
     // Column View Mode Toggle (LuminaSpec Reference)
     function setColumnView(viewMode) {
