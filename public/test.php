@@ -3,32 +3,34 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-echo "<h3>Step 1: PHP is working: " . phpversion() . "</h3>";
+echo "<h2>Laravel Diagnostic Log Inspector</h2>";
+
+$logFile = __DIR__ . '/../storage/logs/laravel.log';
+if (file_exists($logFile)) {
+    echo "<h3>Recent Laravel Logs:</h3>";
+    $lines = file($logFile);
+    $lastLines = array_slice($lines, -60);
+    echo "<pre style='background:#1e1e1e;color:#00ff00;padding:15px;border-radius:8px;overflow-x:auto;'>" . htmlspecialchars(implode('', $lastLines)) . "</pre>";
+} else {
+    echo "<h3>No log file found at: " . htmlspecialchars($logFile) . "</h3>";
+}
 
 try {
     require __DIR__ . '/../vendor/autoload.php';
-    echo "<h3>Step 2: Autoload OK</h3>";
-} catch (\Throwable $e) {
-    echo "<h3>Step 2 FAILED: " . $e->getMessage() . "</h3>";
-    exit;
-}
-
-try {
     $app = require_once __DIR__ . '/../bootstrap/app.php';
-    echo "<h3>Step 3: Bootstrap App OK</h3>";
-} catch (\Throwable $e) {
-    echo "<h3>Step 3 FAILED: " . $e->getMessage() . "</h3>";
-    exit;
-}
-
-try {
+    
+    // Force debug mode
+    config(['app.debug' => true]);
+    
     $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
-    $response = $kernel->handle($request = \Illuminate\Http\Request::capture());
-    echo "<h3>Step 4: Kernel Handle Status: " . $response->getStatusCode() . "</h3>";
+    $request = \Illuminate\Http\Request::create('/', 'GET');
+    $response = $kernel->handle($request);
+    
+    echo "<h3>Direct Request Status: " . $response->getStatusCode() . "</h3>";
+    if ($response->getStatusCode() !== 200) {
+        echo "<div style='background:#fff0f0;border:2px solid red;padding:15px;'>" . $response->getContent() . "</div>";
+    }
 } catch (\Throwable $e) {
-    echo "<h3>Step 4 FAILED: " . $e->getMessage() . "</h3>";
+    echo "<h3 style='color:red;'>Caught Exception: " . $e->getMessage() . "</h3>";
     echo "<pre>" . $e->getTraceAsString() . "</pre>";
-    exit;
 }
-
-echo "<h3>All steps passed successfully!</h3>";
