@@ -605,6 +605,7 @@
                         <tr class="bg-slate-50 text-slate-700 font-bold uppercase text-[11px] sm:text-xs tracking-wider divide-x divide-slate-200 border-b border-slate-200">
                             <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[130px] whitespace-nowrap">TAG #</th>
                             <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[120px] whitespace-nowrap">DATE RECEIVED</th>
+                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[130px] whitespace-nowrap">PO #</th>
                             <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">MANUFACTURER</th>
                             <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[160px] whitespace-nowrap">MODEL / PIXEL PITCH</th>
                             <th rowspan="2" class="py-2.5 px-4 text-left text-slate-700 select-none min-w-[320px]">ITEM DESCRIPTION</th>
@@ -631,6 +632,11 @@
                                 <!-- DATE RECEIVED -->
                                 <td class="py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap">
                                     {{ $item->check_in_date ? $item->check_in_date->format('n/j/Y') : '—' }}
+                                </td>
+
+                                <!-- PO # -->
+                                <td class="py-3 px-3 font-mono-code text-center text-slate-800 border-r border-slate-200 whitespace-nowrap font-bold">
+                                    {{ $item->po_number ?? '—' }}
                                 </td>
 
                                 <!-- MANUFACTURER -->
@@ -697,7 +703,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="py-12 text-center text-slate-500">
+                                <td colspan="10" class="py-12 text-center text-slate-500">
                                     <div class="max-w-xs mx-auto space-y-2">
                                         <p class="font-bold text-slate-700">No LED inventory items found</p>
                                         <p class="text-xs text-slate-400">Add an LED module using the button above to populate this category.</p>
