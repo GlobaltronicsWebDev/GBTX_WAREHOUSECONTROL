@@ -3,32 +3,41 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-echo "<h2>Vendor Status Inspection</h2>";
+echo "<h2>Laravel Diagnostic Details</h2>";
 
-$base = realpath(__DIR__ . '/..') ?: (__DIR__ . '/..');
-$vendor = $base . '/vendor';
-$autoload = $vendor . '/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
 
-echo "<p><strong>Base:</strong> " . htmlspecialchars($base) . "</p>";
-echo "<p><strong>Vendor dir exists:</strong> " . (is_dir($vendor) ? 'YES' : 'NO') . "</p>";
-echo "<p><strong>autoload.php exists:</strong> " . (file_exists($autoload) ? 'YES' : 'NO') . "</p>";
-
-if (is_dir($vendor)) {
-    echo "<h3>Files inside vendor:</h3>";
-    $files = scandir($vendor);
-    echo "<pre style='background:#f4f4f4;padding:10px;'>" . print_r($files, true) . "</pre>";
+// Test DB connection
+try {
+    echo "<h3>Testing DB Connection:</h3>";
+    $pdo = \Illuminate\Support\Facades\DB::connection()->getPdo();
+    echo "<p style='color:green;'>✔ DB Connection OK! Database: " . \Illuminate\Support\Facades\DB::connection()->getDatabaseName() . "</p>";
+} catch (\Throwable $e) {
+    echo "<p style='color:red;'>✘ DB Connection FAILED: " . $e->getMessage() . "</p>";
 }
 
-if (file_exists($autoload)) {
-    try {
-        require $autoload;
-        echo "<h3 style='color:green;'>SUCCESS: Autoload loaded successfully!</h3>";
-        
-        $app = require_once $base . '/bootstrap/app.php';
-        echo "<h3 style='color:green;'>SUCCESS: App booted!</h3>";
-    } catch (\Throwable $e) {
-        echo "<h3 style='color:red;'>FAILED to require: " . $e->getMessage() . "</h3>";
-    }
+// Check recent logs
+$logFile = __DIR__ . '/../storage/logs/laravel.log';
+echo "<h3>Laravel Error Log:</h3>";
+if (file_exists($logFile)) {
+    $lines = file($logFile);
+    echo "<pre style='background:#1e1e1e;color:#00ff00;padding:15px;overflow-x:auto;'>" . htmlspecialchars(implode('', array_slice($lines, -60))) . "</pre>";
 } else {
-    echo "<p style='color:red;'>autoload.php does not exist yet. Composer install might still be running or was interrupted.</p>";
+    echo "<p>No log file found at {$logFile}</p>";
+}
+
+// Execute request with full debug
+try {
+    config(['app.debug' => true]);
+    $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+    $request = \Illuminate\Http\Request::create('/', 'GET');
+    $response = $kernel->handle($request);
+    echo "<h3>Request '/' Status: " . $response->getStatusCode() . "</h3>";
+    if ($response->getStatusCode() !== 200) {
+        echo "<div style='border:2px solid red;padding:10px;'>" . $response->getContent() . "</div>";
+    }
+} catch (\Throwable $e) {
+    echo "<p style='color:red;'>Caught Exception: " . $e->getMessage() . "</p>";
+    echo "<pre>" . $e->getTraceAsString() . "</pre>";
 }
