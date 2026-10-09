@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\InventoryItem;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -367,8 +368,56 @@ class InventoryController extends Controller
     /**
      * Update the specified inventory item.
      */
-    public function update(Request $request, InventoryItem $item): RedirectResponse
+    public function update(Request $request, InventoryItem $item): RedirectResponse|JsonResponse
     {
+        // Support inline quick-update of single fields (item_description, acu_quantity, quantity, etc.)
+        if ($request->has('field')) {
+            $field = $request->input('field');
+            $value = $request->input('value');
+
+            $allowedFields = [
+                'item_description' => ['required', 'string', 'max:5000'],
+                'acu_quantity' => ['nullable', 'integer', 'min:0'],
+                'quantity' => ['nullable', 'integer', 'min:0'],
+                'forecasted_quantity' => ['nullable', 'integer', 'min:0'],
+                'original_quantity' => ['nullable', 'integer', 'min:0'],
+                'reservation_qty' => ['nullable', 'integer', 'min:0'],
+                'history_qty' => ['nullable', 'integer', 'min:0'],
+                'status_qty' => ['nullable', 'integer', 'min:0'],
+                'remarks' => ['nullable', 'string', 'max:2000'],
+            ];
+
+            if (!array_key_exists($field, $allowedFields)) {
+                return response()->json(['success' => false, 'message' => "Field '{$field}' is not allowed for inline update."], 422);
+            }
+
+            $validated = $request->validate([
+                'value' => $allowedFields[$field],
+            ]);
+
+            $item->{$field} = $validated['value'];
+
+            // If quantity changed, record in movement history
+            if ($field === 'quantity' && (int)$value !== (int)$item->getOriginal('quantity')) {
+                $history = is_array($item->movement_history) ? $item->movement_history : [];
+                $history[] = [
+                    'date' => date('Y-m-d H:i'),
+                    'action' => 'ADJUSTMENT: Quantity updated from ' . $item->getOriginal('quantity') . ' to ' . $value . ' pcs',
+                ];
+                $item->movement_history = $history;
+            }
+
+            $item->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Field '{$field}' updated successfully.",
+                'item' => $item,
+                'field' => $field,
+                'value' => $item->{$field},
+            ]);
+        }
+
         $allowedLocations = [
             'MARIKINA',
             'GLOBALTRONICS',
@@ -433,6 +482,14 @@ class InventoryController extends Controller
         }
 
         $item->update($validated);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Inventory unit '{$item->model}' updated successfully.",
+                'item' => $item,
+            ]);
+        }
 
         return redirect()->route('admin.inventory.index', ['category' => $item->category])
             ->with('status', "Inventory unit '{$item->model}' updated successfully.");
