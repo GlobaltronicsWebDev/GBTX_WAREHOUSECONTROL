@@ -641,31 +641,31 @@
                 @elseif ($selectedCategory === 'CENTRALIZED LED INVENTORY')
                     <!-- CLEAN SPREADSHEET HEADER FOR CENTRALIZED LED WITH EXPANDED GROUPS -->
                     <thead>
-                        <tr class="bg-slate-50 text-slate-700 font-bold uppercase text-[11px] sm:text-xs tracking-wider divide-x divide-slate-200 border-b border-slate-200">
-                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[100px] whitespace-nowrap">TAG #</th>
-                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[110px] whitespace-nowrap">DATE RECEIVED</th>
-                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[130px] whitespace-nowrap">PO #</th>
-                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">MANUFACTURER</th>
-                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[160px] whitespace-nowrap">MODEL / PIXEL PITCH</th>
-                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-4 text-left text-slate-700 select-none min-w-[300px]">ITEM DESCRIPTION</th>
-                            <th rowspan="2" class="col-group col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">LOCATION</th>
-                            <th colspan="4" class="col-group col-group-inventory py-1 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none border-b border-yellow-400 whitespace-nowrap bg-yellow-300 text-slate-900 tracking-wider">INVENTORY</th>
-                            <th colspan="2" class="col-group col-group-inventory py-1 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none border-b border-amber-300 whitespace-nowrap bg-amber-200 text-slate-900 tracking-wider">AVAILABLE QTY</th>
-                            <th colspan="2" class="col-group col-group-reservation py-1 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none border-b border-orange-500 whitespace-nowrap bg-orange-500 text-white tracking-wider">RESERVATION</th>
-                            <th colspan="2" class="col-group col-group-history py-1 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none border-b border-red-600 whitespace-nowrap bg-red-600 text-white tracking-wider">HISTORY</th>
-                            <th rowspan="2" class="col-group col-group-inventory py-2.5 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none whitespace-nowrap bg-emerald-600 text-white tracking-wider">ORIGINAL QTY</th>
-                            <th colspan="2" class="col-group col-group-history py-1 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none border-b border-slate-900 whitespace-nowrap bg-slate-900 text-white tracking-wider">STATUS</th>
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[90px] whitespace-nowrap sticky right-0 bg-slate-50">ACTIONS</th>
+                        <tr class="divide-x divide-slate-300 border-b border-slate-300 text-[11px] sm:text-xs tracking-wider">
+                            <th rowspan="2" class="col-group col-group-specs py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[100px] whitespace-nowrap bg-yellow-300">TAG #</th>
+                            <th rowspan="2" class="col-group col-group-specs py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[110px] whitespace-nowrap bg-yellow-300">DATE RECEIVED</th>
+                            <th rowspan="2" class="col-group col-group-specs py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[130px] whitespace-nowrap bg-yellow-300">PO / SKU No.</th>
+                            <th rowspan="2" class="col-group col-group-specs py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[140px] whitespace-nowrap bg-yellow-300">MANUFACTURER</th>
+                            <th rowspan="2" class="col-group col-group-specs py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[160px] whitespace-nowrap bg-yellow-300">MODEL / PIXEL PITCH</th>
+                            <th rowspan="2" class="col-group col-group-specs py-3 px-4 text-center text-slate-900 font-extrabold uppercase select-none min-w-[300px] bg-yellow-300">ITEM DESCRIPTION</th>
+                            <th rowspan="2" class="col-group col-group-specs py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[140px] whitespace-nowrap bg-yellow-300">LOCATION</th>
+                            <th colspan="4" class="col-group col-group-inventory py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-yellow-300 text-slate-900 tracking-wider">INVENTORY</th>
+                            <th colspan="2" class="col-group col-group-inventory py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-yellow-300 text-slate-900 tracking-wider">AVAILABLE QTY</th>
+                            <th colspan="2" class="col-group col-group-reservation py-2 px-3 text-center font-extrabold uppercase select-none border-b border-orange-500 whitespace-nowrap bg-orange-500 text-white tracking-wider">RESERVATION</th>
+                            <th colspan="2" class="col-group col-group-history py-2 px-3 text-center font-extrabold uppercase select-none border-b border-red-600 whitespace-nowrap bg-red-600 text-white tracking-wider">HISTORY</th>
+                            <th rowspan="2" class="col-group col-group-inventory py-3 px-3 text-center font-extrabold uppercase select-none whitespace-nowrap bg-emerald-600 text-white tracking-wider">ORIGINAL QTY</th>
+                            <th colspan="2" class="col-group col-group-history py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-900 whitespace-nowrap bg-slate-900 text-white tracking-wider">STATUS</th>
+                            <th rowspan="2" class="py-3 px-3 text-center text-slate-700 select-none min-w-[90px] whitespace-nowrap sticky right-0 bg-slate-50 font-bold uppercase">ACTIONS</th>
                         </tr>
-                        <tr class="divide-x divide-slate-200 border-b border-slate-200">
+                        <tr class="divide-x divide-slate-300 border-b border-slate-300">
                             <!-- INVENTORY SUBHEADERS -->
-                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-800 font-bold uppercase text-[10px] tracking-wider select-none min-w-[75px] whitespace-nowrap bg-slate-200">ON-HAND</th>
-                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[90px] whitespace-nowrap bg-yellow-200">TOTAL ON-HAND</th>
-                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-800 font-bold uppercase text-[10px] tracking-wider select-none min-w-[105px] whitespace-nowrap bg-slate-200">PER PANEL SQM</th>
-                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[125px] whitespace-nowrap bg-yellow-200">TOTAL AVAILABLE SQM</th>
+                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[75px] whitespace-nowrap bg-slate-300/80">ON-HAND</th>
+                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[90px] whitespace-nowrap bg-slate-300/80">TOTAL ON-HAND</th>
+                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[105px] whitespace-nowrap bg-slate-300/80">PER PANEL SQM</th>
+                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[125px] whitespace-nowrap bg-slate-300/80">TOTAL AVAILABLE SQM</th>
                             <!-- AVAILABLE QTY SUBHEADERS -->
-                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[75px] whitespace-nowrap bg-amber-100">QTY</th>
-                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[85px] whitespace-nowrap bg-amber-100">SQM</th>
+                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[75px] whitespace-nowrap bg-slate-300/80">QTY</th>
+                            <th class="col-group col-group-inventory py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[85px] whitespace-nowrap bg-slate-300/80">SQM</th>
                             <!-- RESERVATION SUBHEADERS -->
                             <th class="col-group col-group-reservation py-1.5 px-2.5 text-center text-orange-950 font-bold uppercase text-[10px] tracking-wider select-none min-w-[75px] whitespace-nowrap bg-orange-100">QTY</th>
                             <th class="col-group col-group-reservation py-1.5 px-2.5 text-left text-orange-950 font-bold uppercase text-[10px] tracking-wider select-none min-w-[180px] bg-orange-100">REMARKS / PROJECT DETAILS</th>
@@ -2484,15 +2484,164 @@
         document.getElementById('deleteModal').classList.add('hidden');
     }
 
+    // Import Modal Handlers
+    function openImportModal(category) {
+        const catSelect = document.getElementById('importCategory');
+        if (catSelect && category && category !== 'all') {
+            for (let i = 0; i < catSelect.options.length; i++) {
+                if (catSelect.options[i].value === category) {
+                    catSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        updateSampleTemplateLink(catSelect ? catSelect.value : 'CENTRALIZED LED INVENTORY');
+        document.getElementById('importModal').classList.remove('hidden');
+    }
+
+    function closeImportModal() {
+        document.getElementById('importModal').classList.add('hidden');
+    }
+
+    function updateSampleTemplateLink(cat) {
+        const link = document.getElementById('sampleTemplateBtn');
+        if (link) {
+            link.href = '{{ route("admin.inventory.sample-csv") }}?category=' + encodeURIComponent(cat);
+        }
+    }
+
     // Close on Escape Key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeCreateModal();
             closeEditModal();
             closeDeleteModal();
+            closeImportModal();
             closeDrawer();
             closeModal('reserveModal');
         }
     });
 </script>
+
+<!-- ========================================================================= -->
+<!-- CSV IMPORT MODAL -->
+<!-- ========================================================================= -->
+<div id="importModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-950/70 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative animate-in fade-in zoom-in duration-200">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Import Inventory Items</h3>
+                    <p class="text-xs text-slate-500">Upload CSV file mapped to target category</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeImportModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form action="{{ route('admin.inventory.import') }}" method="POST" enctype="multipart/form-data" class="mt-5 space-y-4">
+            @csrf
+
+            <!-- Target Category -->
+            <div>
+                <label for="importCategory" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Target Inventory Category <span class="text-rose-500">*</span>
+                </label>
+                <select 
+                    id="importCategory" 
+                    name="category" 
+                    required 
+                    onchange="updateSampleTemplateLink(this.value)"
+                    class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                    <option value="CENTRALIZED LED INVENTORY">CENTRALIZED LED INVENTORY</option>
+                    <option value="EOL PHILIPS UNITS">EOL PHILIPS UNITS</option>
+                    <optgroup label="Service Units (Events, Demo)">
+                        <option value="LED Service Units">LED Service Units</option>
+                        <option value="Philips Service Units">Philips Service Units</option>
+                        <option value="Video Controllers / Processors">Video Controllers / Processors</option>
+                        <option value="Shuttle">Shuttle</option>
+                        <option value="Aver">Aver</option>
+                        <option value="Digital iPoster">Digital iPoster</option>
+                        <option value="Kiosks">Kiosks</option>
+                    </optgroup>
+                </select>
+                <div class="mt-1.5 flex items-center justify-between">
+                    <span class="text-[11px] text-slate-400">Values will be assigned to this category</span>
+                    <a 
+                        id="sampleTemplateBtn" 
+                        href="{{ route('admin.inventory.sample-csv', ['category' => 'CENTRALIZED LED INVENTORY']) }}" 
+                        class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 underline inline-flex items-center gap-1"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download Sample CSV Template
+                    </a>
+                </div>
+            </div>
+
+            <!-- File Upload -->
+            <div>
+                <label for="importFile" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Select CSV File <span class="text-rose-500">*</span>
+                </label>
+                <div class="border-2 border-dashed border-slate-300 hover:border-indigo-400 rounded-2xl p-5 text-center transition-colors bg-slate-50/50">
+                    <input 
+                        type="file" 
+                        id="importFile" 
+                        name="file" 
+                        accept=".csv,text/csv,text/plain" 
+                        required 
+                        class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                    >
+                    <p class="text-[11px] text-slate-400 mt-2">
+                        Supported: Standard UTF-8 CSV files up to 10MB.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                <span class="font-bold">Smart Import Rules:</span>
+                <ul class="list-disc list-inside mt-1 space-y-0.5 text-[11px] text-amber-800">
+                    <li>Matches existing items by <strong>TAG #</strong> to update them automatically.</li>
+                    <li>Items without a matching Tag # will be created as new units.</li>
+                    <li>Columns are automatically recognized (e.g., Tag #, Manufacturer, Model, Description, Location, Qty, SQM, etc.).</li>
+                </ul>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button 
+                    type="button" 
+                    onclick="closeImportModal()" 
+                    class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+                >
+                    Cancel
+                </button>
+                <button 
+                    type="submit" 
+                    class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 transition-all hover:scale-[1.01]"
+                >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>Upload & Import</span>
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
 @endsection
