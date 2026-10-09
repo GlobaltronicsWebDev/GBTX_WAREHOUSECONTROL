@@ -3,30 +3,30 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-echo "<h2>Vendor & File Path Inspector</h2>";
+echo "<h2>Laravel Exception Inspector</h2>";
 
-$parentDir = realpath(__DIR__ . '/..') ?: (__DIR__ . '/..');
-echo "<strong>Current Directory:</strong> " . __DIR__ . "<br>";
-echo "<strong>Parent Directory:</strong> " . $parentDir . "<br>";
-
-echo "<h3>Checking Parent Directory Contents:</h3>";
-if (is_dir($parentDir)) {
-    $files = scandir($parentDir);
-    echo "<pre style='background:#f4f4f4;padding:10px;'>" . print_r($files, true) . "</pre>";
-} else {
-    echo "<p style='color:red;'>Parent dir is not a directory!</p>";
+try {
+    require __DIR__ . '/../vendor/autoload.php';
+    $app = require_once __DIR__ . '/../bootstrap/app.php';
+    
+    // Enable debug to see full error
+    config(['app.debug' => true]);
+    
+    $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+    $request = \Illuminate\Http\Request::create('/', 'GET');
+    $response = $kernel->handle($request);
+    
+    echo "<h3>Response Status: " . $response->getStatusCode() . "</h3>";
+    echo "<div>" . $response->getContent() . "</div>";
+} catch (\Throwable $e) {
+    echo "<h3 style='color:red;'>Caught Exception: " . $e->getMessage() . "</h3>";
+    echo "<p><strong>File:</strong> " . $e->getFile() . " on line " . $e->getLine() . "</p>";
+    echo "<pre style='background:#f4f4f4;padding:10px;'>" . $e->getTraceAsString() . "</pre>";
 }
 
-$vendorDir = $parentDir . '/vendor';
-echo "<h3>Checking Vendor Directory:</h3>";
-echo "<strong>is_dir(\$vendorDir):</strong> " . (is_dir($vendorDir) ? 'YES' : 'NO') . "<br>";
-echo "<strong>is_readable(\$vendorDir):</strong> " . (is_readable($vendorDir) ? 'YES' : 'NO') . "<br>";
-
-$autoloadFile = $vendorDir . '/autoload.php';
-echo "<strong>file_exists(\$autoloadFile):</strong> " . (file_exists($autoloadFile) ? 'YES' : 'NO') . "<br>";
-echo "<strong>is_readable(\$autoloadFile):</strong> " . (is_readable($autoloadFile) ? 'YES' : 'NO') . "<br>";
-
-if (is_dir($vendorDir)) {
-    echo "<h4>Vendor directory contents:</h4>";
-    echo "<pre style='background:#f4f4f4;padding:10px;'>" . print_r(scandir($vendorDir), true) . "</pre>";
+$logFile = __DIR__ . '/../storage/logs/laravel.log';
+if (file_exists($logFile)) {
+    echo "<h3>Recent Logs:</h3>";
+    $lines = file($logFile);
+    echo "<pre style='background:#222;color:#0f0;padding:10px;'>" . htmlspecialchars(implode('', array_slice($lines, -40))) . "</pre>";
 }
