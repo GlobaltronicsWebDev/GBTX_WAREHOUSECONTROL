@@ -891,7 +891,7 @@
                                 </tr>
                             @endif
 
-                            <tr class="hover:bg-slate-50/80 transition-colors group">
+                            <tr onclick="openDrawer({{ json_encode($item) }})" class="hover:bg-blue-50/70 transition-colors cursor-pointer group">
                                 @if ($selectedCategory === 'all')
                                     <td class="py-3 px-3 font-mono-code text-[11px] font-semibold text-slate-700 border-r border-slate-200 text-center whitespace-nowrap">
                                         <span class="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">
@@ -945,7 +945,7 @@
                                     <div class="flex items-center justify-center gap-1.5">
                                         <button 
                                             type="button" 
-                                            onclick="openEditModal({{ json_encode($item) }})" 
+                                            onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
                                             class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-slate-100 border border-slate-200 transition-colors"
                                             title="Edit Item Details"
                                         >
@@ -956,7 +956,7 @@
 
                                         <button 
                                             type="button" 
-                                            onclick="openDeleteModal({{ json_encode($item) }})" 
+                                            onclick="event.stopPropagation(); openDeleteModal({{ json_encode($item) }})" 
                                             class="p-1.5 rounded-lg text-slate-600 hover:text-rose-600 hover:bg-slate-100 border border-slate-200 transition-colors"
                                             title="Delete Item Record"
                                         >
