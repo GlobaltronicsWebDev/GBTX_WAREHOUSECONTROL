@@ -583,54 +583,96 @@ class InventoryController extends Controller
         $filename = 'sample_template_' . strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', $category)) . '.csv';
 
         $isCentralLed = ($category === 'CENTRALIZED LED INVENTORY');
-        $isPhilips = ($category === 'EOL PHILIPS UNITS');
+        $isPhilipsEol = in_array($category, ['EOL PHILIPS UNITS', 'EOL Philips Units'], true);
+        $isPhilipsService = in_array($category, ['Philips Service Units', 'PHILIPS SERVICE UNITS'], true);
+        $isLedService = in_array($category, ['LED Service Units', 'LED SERVICE UNITS'], true);
 
         if ($isCentralLed) {
             $headers = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'MANUFACTURER', 'MODEL / PIXEL PITCH', 'ITEM DESCRIPTION', 'LOCATION', 'ON-HAND', 'TOTAL ON-HAND', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM', 'ORIGINAL QTY', 'RESERVATION QTY', 'RESERVATION PROJECT', 'REMARKS'];
             $sampleRow = ['TAG-LED-001', date('Y-m-d'), 'PO-2026-081', 'UNILUMIN', 'Upad IV P2.6', 'UNILUMIN UPAD IV P2.6 INDOOR 500X500MM DIE CAST CABINET', 'Globaltronics', 150, 150, 0.25, 37.5, 150, 0, '', 'New delivery batch'];
-        } elseif ($isPhilips) {
+        } elseif ($isPhilipsEol) {
+            $headers = ['MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'ITEM DESCRIPTION', 'QTY'];
+            $sampleRow = ['PHILIPS', date('Y-m-d'), 'BDL3230QL/75', '31.5" PHILIPS FLAT WIDE MONITOR', 103];
+        } elseif ($isPhilipsService) {
             $headers = [
                 'LOCATION',
-                'DATE RECEIVED',
                 'MANUFACTURER',
+                'CHECK IN DATE',
                 'MODEL',
                 'PO / SKU No.',
-                'PARTICULAR',
+                'ITEM DESCRIPTION',
                 'SERIAL NO.',
                 'QTY',
                 'ACU. QTY',
-                'AVAILABLE QTY',
+                'FORECASTED QTY',
+                'HISTORY QTY',
+                'HISTORY PROJECT',
+                'REMARKS',
+            ];
+            $sampleRow = [
+                'MARIKINA',
+                'PHILIPS',
+                date('Y-m-d'),
+                '10BDL4151T/00',
+                'PO-2026-001',
+                '10" PHILIPS TOUCH SCREEN MONITOR',
+                'AU0B1521000146, AU0B1518000139',
+                13,
+                13,
+                13,
+                0,
+                '',
+                'Philips Service demo unit',
+            ];
+        } elseif ($isLedService) {
+            $headers = [
+                'CDX',
+                'LOCATION',
+                'MANUFACTURER',
+                'CHECK IN DATE',
+                'MODEL',
+                'PO / SKU No.',
+                'ITEM DESCRIPTION',
+                'QTY',
+                'ACU. QTY',
+                'PER PANEL SQM',
+                'TOTAL AVAILABLE SQM',
+                'FORECASTED QTY',
+                'FORECASTED SQM',
                 'RESERVATION QTY',
                 'RESERVATION PROJECT',
                 'HISTORY QTY',
                 'HISTORY PROJECT',
                 'ORIGINAL QTY',
-                'UNFOUND QTY',
-                'UNFOUND STATUS',
+                'STATUS QTY',
+                'STATUS PARTICULAR',
                 'REMARKS',
             ];
             $sampleRow = [
-                'A JUAN - 2ND FLR',
+                'CDX-01',
+                'GLOBALTRONICS',
+                'UNILUMIN',
                 date('Y-m-d'),
-                'PHILIPS',
-                '55BDL4050D',
-                'PO-2026-042',
-                '55" PHILIPS FLAT WIDE MONITOR',
-                'SN-PHI-2026-001; SN-PHI-2026-002',
-                10,
-                10,
-                8,
-                2,
-                'Project Alpha Allocation',
+                'Upad IV P2.6',
+                'PO-2026-081',
+                'UNILUMIN UPAD IV P2.6 INDOOR 500X500MM DIE CAST CABINET',
+                150,
+                150,
+                0.25,
+                37.5,
+                150,
+                37.5,
                 0,
                 '',
-                10,
+                0,
+                '',
+                150,
                 0,
                 'OK',
-                'Stored at A Juan - 2nd Flr',
+                'Service demo panel',
             ];
         } else {
-            $headers = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'CATEGORY', 'MANUFACTURER', 'MODEL', 'ITEM DESCRIPTION', 'LOCATION', 'QUANTITY', 'STATUS', 'REMARKS'];
+            $headers = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'CATEGORY', 'MANUFACTURER', 'MODEL', 'ITEM DESCRIPTION', 'LOCATION', 'QTY', 'STATUS', 'REMARKS'];
             $sampleRow = ['TAG-SU-001', date('Y-m-d'), 'PO-2026-015', $category, 'NOVASTAR', 'VX1000', 'NOVASTAR ALL-IN-ONE VIDEO PROCESSOR CONTROLLER', 'Globaltronics', 5, 'in_stock', 'Event demo unit'];
         }
 
@@ -731,10 +773,10 @@ class InventoryController extends Controller
             foreach ($rows as $idx => $r) {
                 $joined = strtolower(implode(' ', $r));
                 $score = 0;
-                foreach (['tag', 'date', 'po', 'sku', 'manufacturer', 'model', 'description', 'location', 'inventory', 'on-hand'] as $kw) {
+                foreach (['tag', 'date', 'po', 'sku', 'manufacturer', 'model', 'description', 'location', 'inventory', 'on-hand', 'qty', 'particular'] as $kw) {
                     if (str_contains($joined, $kw)) $score++;
                 }
-                if ($score >= 3) {
+                if ($score >= 2) {
                     $headerRow1Idx = $idx;
                     break;
                 }
@@ -748,7 +790,7 @@ class InventoryController extends Controller
             if (isset($rows[$headerRow1Idx + 1])) {
                 $nextJoined = strtolower(implode(' ', $rows[$headerRow1Idx + 1]));
                 $subScore = 0;
-                foreach (['on-hand', 'total', 'sqm', 'panel', 'qty', 'particular', 'project'] as $kw) {
+                foreach (['on-hand', 'total', 'sqm', 'panel', 'qty', 'particular', 'project', 'serial', 'acu'] as $kw) {
                     if (str_contains($nextJoined, $kw)) $subScore++;
                 }
                 if ($subScore >= 2) {
@@ -771,89 +813,152 @@ class InventoryController extends Controller
                 $subVal = isset($h2[$colIdx]) ? preg_replace('/[^a-z0-9]/', '', strtolower((string)$h2[$colIdx])) : '';
                 $colKey = null;
 
-                if (in_array($colClean, ['tag', 'tagno', 'tagnumber', 'tagid', 'serialno', 'serial']) || str_starts_with($colClean, 'tag') || str_starts_with($colClean, 'serial')) {
+                // 1. Tag / Serial Number
+                if (in_array($colClean, ['tag', 'tagno', 'tagnumber', 'tagid', 'serial', 'serialno', 'serialnumber', 'sn', 'serials'])
+                    || str_starts_with($colClean, 'tag')
+                    || str_starts_with($colClean, 'serial')
+                    || str_contains($subVal, 'serial')
+                    || str_contains($subVal, 'tagno')
+                ) {
                     $colKey = 'tag_number';
-                } elseif (in_array($colClean, ['datereceived', 'date', 'checkindate'])) {
+
+                // 2. Date
+                } elseif (in_array($colClean, ['datereceived', 'date', 'checkindate', 'checkin', 'receiveddate', 'datecheckedin'])
+                    || str_contains($colClean, 'date')
+                ) {
                     $colKey = 'check_in_date';
+
+                // 3. PO / SKU
                 } elseif (str_contains($colClean, 'po') || str_contains($colClean, 'sku')) {
                     $colKey = 'po_number';
+
+                // 4. Manufacturer
                 } elseif (str_contains($colClean, 'manufacturer') || str_contains($colClean, 'brand') || str_contains($colClean, 'mfr')) {
                     $colKey = 'manufacturer';
-                } elseif (str_contains($colClean, 'model') || str_contains($colClean, 'pixelpitch')) {
+
+                // 5. Model
+                } elseif ((str_contains($colClean, 'model') || str_contains($colClean, 'pixelpitch') || str_contains($colClean, 'pitch')) && !str_contains($colClean, 'desc')) {
                     $colKey = 'model';
-                } elseif (str_contains($colClean, 'description') || str_contains($colClean, 'item') || str_contains($colClean, 'particular')) {
+
+                // 6. Item Description / Particular
+                } elseif (str_contains($colClean, 'description') || str_contains($colClean, 'item') || str_contains($colClean, 'particular') || str_contains($subVal, 'particular')) {
                     if (str_contains($subVal, 'serial')) {
                         $colKey = 'tag_number';
-                    } elseif (str_contains($subVal, 'particular')) {
-                        $colKey = 'item_description';
                     } else {
                         $colKey = 'item_description';
                     }
-                } elseif (str_contains($colClean, 'location') || str_contains($colClean, 'warehouse') || str_contains($colClean, 'facility')) {
+
+                // 7. Location
+                } elseif (str_contains($colClean, 'location') || str_contains($colClean, 'warehouse') || str_contains($colClean, 'facility') || str_contains($colClean, 'storage')) {
                     $colKey = 'location';
-                } elseif (str_contains($currentParent, 'inventory')) {
-                    if (str_contains($subVal, 'sqm')) {
-                        if (str_contains($subVal, 'perpanel') || str_contains($subVal, 'panel')) {
-                            $colKey = 'per_panel_sqm';
-                        } else {
-                            $colKey = 'sqm';
-                        }
-                    } elseif (str_contains($subVal, 'total') || str_contains($subVal, 'acu')) {
-                        $colKey = 'acu_quantity';
-                    } elseif (str_contains($subVal, 'onhand') || str_contains($subVal, 'qty')) {
-                        $colKey = 'quantity';
-                    } elseif (str_contains($subVal, 'serial')) {
-                        $colKey = 'tag_number';
-                    } elseif (str_contains($subVal, 'particular')) {
-                        $colKey = 'item_description';
-                    }
-                } elseif (str_contains($currentParent, 'available') || str_contains($colClean, 'available')) {
-                    if (str_contains($subVal, 'sqm') || str_contains($colClean, 'availablesqm')) {
+
+                // 8. SQM fields
+                } elseif (str_contains($colClean, 'perpanel') || str_contains($subVal, 'perpanel') || str_contains($colClean, 'panelsqm') || str_contains($subVal, 'panelsqm')) {
+                    $colKey = 'per_panel_sqm';
+                } elseif (str_contains($colClean, 'sqm') || str_contains($subVal, 'sqm')) {
+                    if (str_contains($colClean, 'available') || str_contains($subVal, 'available')) {
                         $colKey = 'available_sqm';
                     } else {
-                        $colKey = 'forecasted_quantity';
+                        $colKey = 'sqm';
                     }
-                } elseif (str_contains($currentParent, 'reservation') || str_contains($colClean, 'reservation')) {
-                    if (str_contains($subVal, 'project') || str_contains($subVal, 'detail')) {
+
+                // 9. Acu. Quantity / Accumulated / Total On-Hand
+                } elseif (str_contains($colClean, 'acu')
+                    || str_contains($subVal, 'acu')
+                    || str_contains($colClean, 'accumulat')
+                    || str_contains($subVal, 'accumulat')
+                    || str_contains($colClean, 'totalonhand')
+                    || str_contains($subVal, 'totalonhand')
+                    || (str_contains($currentParent, 'inventory') && (str_contains($subVal, 'total') || str_contains($subVal, 'acu')))
+                ) {
+                    $colKey = 'acu_quantity';
+
+                // 10. Forecasted / Available QTY
+                } elseif (str_contains($colClean, 'forecast')
+                    || str_contains($subVal, 'forecast')
+                    || str_contains($colClean, 'available')
+                    || str_contains($currentParent, 'available')
+                ) {
+                    $colKey = 'forecasted_quantity';
+
+                // 11. Reservation QTY / Project / Remarks
+                } elseif (str_contains($currentParent, 'reservation') || str_contains($colClean, 'reservation') || str_contains($colClean, 'reserved')) {
+                    if (str_contains($subVal, 'project') || str_contains($colClean, 'project') || str_contains($subVal, 'detail')) {
                         $colKey = 'reservation_project';
+                    } elseif (str_contains($subVal, 'remark') || str_contains($colClean, 'remark')) {
+                        $colKey = 'reservation_remarks';
                     } else {
                         $colKey = 'reservation_qty';
                     }
+
+                // 12. History QTY / Project
                 } elseif (str_contains($currentParent, 'history') || str_contains($colClean, 'history')) {
-                    if (str_contains($subVal, 'project')) {
+                    if (str_contains($subVal, 'project') || str_contains($colClean, 'project') || str_contains($subVal, 'detail')) {
                         $colKey = 'history_project';
                     } else {
                         $colKey = 'history_qty';
                     }
-                } elseif (str_contains($currentParent, 'original') || str_contains($colClean, 'original')) {
+
+                // 13. Original Quantity
+                } elseif (str_contains($currentParent, 'original') || str_contains($colClean, 'original') || str_contains($colClean, 'origqty')) {
                     $colKey = 'original_quantity';
+
+                // 14. Status / Unfound / Damage
                 } elseif (str_contains($currentParent, 'status') || str_contains($colClean, 'status') || str_contains($currentParent, 'unfound') || str_contains($colClean, 'unfound')) {
-                    if (str_contains($subVal, 'particular') || str_contains($subVal, 'status')) {
+                    if (str_contains($subVal, 'particular') || str_contains($colClean, 'particular') || str_contains($subVal, 'status') || str_contains($subVal, 'remark')) {
                         $colKey = 'status_particular';
-                    } elseif (str_contains($subVal, 'qty')) {
-                        $colKey = 'status_qty';
                     } else {
                         $colKey = 'status_qty';
                     }
-                } elseif (str_contains($colClean, 'screensize') || str_contains($colClean, 'size')) {
+
+                // 15. Screen Size
+                } elseif (str_contains($colClean, 'screensize') || (str_contains($colClean, 'size') && !str_contains($colClean, 'pixel'))) {
                     $colKey = 'screen_size';
+
+                // 16. Category
                 } elseif (str_contains($colClean, 'category')) {
                     $colKey = 'category';
-                } elseif (str_contains($colClean, 'remark') || str_contains($colClean, 'note')) {
+
+                // 17. Remarks
+                } elseif (str_contains($colClean, 'remark') || str_contains($colClean, 'note') || str_contains($colClean, 'comment')) {
                     $colKey = 'remarks';
+
+                // 18. MAIN QUANTITY (covers 'qty', 'quantity', 'onhand', 'stock', 'pcs', 'count', 'inventory', etc.)
+                } elseif (in_array($colClean, ['qty', 'quantity', 'qnty', 'quant', 'onhand', 'stock', 'pcs', 'pieces', 'count', 'units', 'inventory', 'bal', 'balance'])
+                    || str_contains($colClean, 'onhand')
+                    || str_contains($colClean, 'quantity')
+                    || str_contains($colClean, 'stockqty')
+                    || str_contains($colClean, 'invqty')
+                    || str_contains($colClean, 'inventoryqty')
+                    || (str_contains($colClean, 'qty') && !str_contains($colClean, 'forecast') && !str_contains($colClean, 'avail') && !str_contains($colClean, 'reserv') && !str_contains($colClean, 'hist') && !str_contains($colClean, 'orig') && !str_contains($colClean, 'stat') && !str_contains($colClean, 'unfound') && !str_contains($colClean, 'acu'))
+                    || str_contains($currentParent, 'inventory')
+                ) {
+                    $colKey = 'quantity';
                 }
 
-                // Fallbacks based directly on subVal if header was empty
+                // 19. Fallbacks based directly on subVal if colKey still unset
                 if (!$colKey && !empty($subVal)) {
-                    if ($subVal === 'onhand') $colKey = 'quantity';
-                    elseif (str_contains($subVal, 'totalonhand')) $colKey = 'acu_quantity';
-                    elseif (str_contains($subVal, 'totalsqm') || str_contains($subVal, 'totalavailablesqm')) $colKey = 'sqm';
-                    elseif (str_contains($subVal, 'perpanelsqm')) $colKey = 'per_panel_sqm';
-                    elseif ($subVal === 'qty') $colKey = 'quantity';
-                    elseif ($subVal === 'sqm') $colKey = 'sqm';
-                    elseif (str_contains($subVal, 'serial')) $colKey = 'tag_number';
-                    elseif (str_contains($subVal, 'particular')) $colKey = 'item_description';
-                    elseif (str_contains($subVal, 'status')) $colKey = 'status_particular';
+                    if ($subVal === 'onhand' || $subVal === 'qty' || str_contains($subVal, 'qty')) {
+                        if (str_contains($subVal, 'acu') || str_contains($subVal, 'total')) {
+                            $colKey = 'acu_quantity';
+                        } else {
+                            $colKey = 'quantity';
+                        }
+                    } elseif (str_contains($subVal, 'totalonhand') || str_contains($subVal, 'acu')) {
+                        $colKey = 'acu_quantity';
+                    } elseif (str_contains($subVal, 'totalsqm') || str_contains($subVal, 'totalavailablesqm')) {
+                        $colKey = 'available_sqm';
+                    } elseif (str_contains($subVal, 'perpanelsqm')) {
+                        $colKey = 'per_panel_sqm';
+                    } elseif (str_contains($subVal, 'sqm')) {
+                        $colKey = 'sqm';
+                    } elseif (str_contains($subVal, 'serial')) {
+                        $colKey = 'tag_number';
+                    } elseif (str_contains($subVal, 'particular')) {
+                        $colKey = 'item_description';
+                    } elseif (str_contains($subVal, 'status')) {
+                        $colKey = 'status_particular';
+                    }
                 }
 
                 $columnMap[$colIdx] = $colKey;
@@ -863,16 +968,24 @@ class InventoryController extends Controller
             $importedCount = 0;
             $updatedCount = 0;
             $lastItemModel = null;
+            $activeScreenSize = null;
 
             for ($i = $startDataIdx; $i < count($rows); $i++) {
                 $row = $rows[$i];
-                if (empty(array_filter($row))) {
+                if (empty(array_filter($row, fn($v) => trim((string)$v) !== ''))) {
                     continue; // Skip empty rows
                 }
 
                 // Check if summary row
                 $rowJoined = strtolower(implode(' ', $row));
                 if (str_contains($rowJoined, 'total count') || str_contains($rowJoined, 'total inventory')) {
+                    continue;
+                }
+
+                // Check for Screen Size Divider row (e.g. ['10"', '', '', '', ''])
+                $nonEmptyCells = array_values(array_filter(array_map('trim', $row), fn($v) => $v !== ''));
+                if (count($nonEmptyCells) === 1 && preg_match('/^(\d+(?:\.\d+)?)\s*["\']?$/', $nonEmptyCells[0], $sm)) {
+                    $activeScreenSize = $sm[1] . '"';
                     continue;
                 }
 
@@ -889,6 +1002,7 @@ class InventoryController extends Controller
                 $po = $cleanStr($rowData['po_number'] ?? '');
                 $mfg = $cleanStr($rowData['manufacturer'] ?? '');
                 $location = $cleanStr($rowData['location'] ?? '');
+                $tagNumber = $cleanStr($rowData['tag_number'] ?? '');
 
                 $onHand = $parseNum($rowData['quantity'] ?? null);
                 $totalOnHand = $parseNum($rowData['acu_quantity'] ?? null);
@@ -914,20 +1028,43 @@ class InventoryController extends Controller
                     }
                 }
 
+                // If onHand is missing but totalOnHand is present:
+                if ($onHand === null && $totalOnHand !== null) {
+                    $onHand = $totalOnHand;
+                }
+                // If totalOnHand is missing but onHand is present:
+                if ($totalOnHand === null && $onHand !== null) {
+                    $totalOnHand = $onHand;
+                }
+                // If onHand is missing but tag_number has serials:
+                if ($onHand === null && !empty($tagNumber)) {
+                    $serials = preg_split('/[\r\n,;|]+/', $tagNumber, -1, PREG_SPLIT_NO_EMPTY);
+                    if (count($serials) > 0) {
+                        $onHand = count($serials);
+                        if ($totalOnHand === null) {
+                            $totalOnHand = $onHand;
+                        }
+                    }
+                }
+
+                $isPhilipsCategory = str_contains(strtolower($category), 'philips');
+                $defaultMfg = $isPhilipsCategory ? 'PHILIPS' : 'UNILUMIN';
+                $defaultLoc = $isPhilipsCategory ? 'MARIKINA' : 'Globaltronics';
+
                 if (!empty($model) || !empty($desc)) {
                     $itemData = [
                         'category' => !empty($rowData['category']) ? $cleanStr($rowData['category']) : $category,
-                        'tag_number' => $cleanStr($rowData['tag_number'] ?? ''),
+                        'tag_number' => $tagNumber,
                         'po_number' => substr($po, 0, 100),
-                        'manufacturer' => substr($mfg ?: 'UNILUMIN', 0, 100),
+                        'manufacturer' => substr($mfg ?: $defaultMfg, 0, 100),
                         'model' => substr($model ?: substr($desc, 0, 50), 0, 100),
                         'item_description' => $desc ?: $model,
-                        'location' => substr($location ?: 'Globaltronics', 0, 100),
+                        'location' => substr($location ?: $defaultLoc, 0, 100),
                         'quantity' => $onHand ?? 0,
                     ];
 
                     if ($hasColumn('acu_quantity')) {
-                        $itemData['acu_quantity'] = $totalOnHand !== null ? $totalOnHand : $onHand;
+                        $itemData['acu_quantity'] = $totalOnHand !== null ? $totalOnHand : ($onHand ?? 0);
                     }
                     if ($hasColumn('sqm')) {
                         $itemData['sqm'] = $sqm;
@@ -936,7 +1073,7 @@ class InventoryController extends Controller
                         $itemData['forecasted_quantity'] = $availQty;
                     }
                     if ($hasColumn('original_quantity')) {
-                        $itemData['original_quantity'] = $origQty !== null ? $origQty : ($totalOnHand ?? $onHand);
+                        $itemData['original_quantity'] = $origQty !== null ? $origQty : ($totalOnHand ?? ($onHand ?? 0));
                     }
                     if ($hasColumn('reservation_qty')) {
                         $itemData['reservation_qty'] = $resQty ?? 0;
@@ -972,7 +1109,12 @@ class InventoryController extends Controller
                         $itemData['created_by'] = $creatorId;
                     }
 
-                    // Auto extract screen size if empty
+                    // Auto assign active screen size from divider row if empty
+                    if (empty($itemData['screen_size']) && $hasColumn('screen_size') && $activeScreenSize) {
+                        $itemData['screen_size'] = $activeScreenSize;
+                    }
+
+                    // Auto extract screen size from description if still empty
                     if (empty($itemData['screen_size']) && $hasColumn('screen_size') && preg_match('/(\d+(?:\.\d+)?)\s*"/i', $itemData['item_description'], $m)) {
                         $itemData['screen_size'] = $m[1] . '"';
                     }
@@ -994,10 +1136,13 @@ class InventoryController extends Controller
                     // Filter only existing database columns to prevent unknown column SQL errors
                     $safeData = array_intersect_key($itemData, array_flip($tableColumns));
 
-                    // Match existing item accurately to avoid overwriting distinct products
+                    // Match existing item accurately to avoid creating unnecessary duplicates or failing to update qty
                     $existing = null;
+                    $targetCategory = $itemData['category'];
+                    $categoryVariants = array_unique([$targetCategory, strtoupper($targetCategory), strtolower($targetCategory), 'Philips Service Units', 'PHILIPS SERVICE UNITS']);
+
                     if (!empty($itemData['tag_number'])) {
-                        $tQuery = InventoryItem::where('category', $itemData['category'])
+                        $tQuery = InventoryItem::whereIn('category', $categoryVariants)
                             ->where('tag_number', $itemData['tag_number']);
                         if (!empty($itemData['po_number'])) {
                             $tQuery->where('po_number', $itemData['po_number']);
@@ -1005,22 +1150,27 @@ class InventoryController extends Controller
                         $existing = $tQuery->first();
                     }
 
-                    if (!$existing) {
-                        $query = InventoryItem::where('category', $itemData['category'])
-                            ->where('model', $itemData['model'])
-                            ->where('location', $itemData['location']);
+                    if (!$existing && !empty($itemData['model'])) {
+                        // 1. Try matching category + model + location (if location was explicitly provided)
+                        $mQuery = InventoryItem::whereIn('category', $categoryVariants)
+                            ->where('model', $itemData['model']);
+
+                        if (!empty($location)) {
+                            $mQuery->where('location', $itemData['location']);
+                        }
+
                         if (!empty($itemData['po_number'])) {
-                            $query->where('po_number', $itemData['po_number']);
-                        } else {
-                            $query->where(function ($q) {
-                                $q->whereNull('po_number')->orWhere('po_number', '');
-                            });
+                            $mQuery->where('po_number', $itemData['po_number']);
                         }
-                        if (!empty($itemData['item_description'])) {
-                            $descPrefix = mb_substr($itemData['item_description'], 0, 45);
-                            $query->where('item_description', 'like', $descPrefix . '%');
+
+                        $existing = $mQuery->first();
+
+                        // 2. If no location match or location was omitted, match first existing item with this model in this category
+                        if (!$existing) {
+                            $existing = InventoryItem::whereIn('category', $categoryVariants)
+                                ->where('model', $itemData['model'])
+                                ->first();
                         }
-                        $existing = $query->first();
                     }
 
                     $initialRes = [];
@@ -1049,6 +1199,23 @@ class InventoryController extends Controller
                     }
 
                     if ($existing) {
+                        // When updating: preserve existing values if CSV cell was blank/omitted
+                        if ($onHand === null) {
+                            unset($safeData['quantity']);
+                        }
+                        if ($totalOnHand === null && isset($safeData['acu_quantity'])) {
+                            unset($safeData['acu_quantity']);
+                        }
+                        if (empty($tagNumber) && isset($safeData['tag_number'])) {
+                            unset($safeData['tag_number']); // Don't wipe existing serials if not in CSV
+                        }
+                        if (empty($location) && isset($safeData['location'])) {
+                            unset($safeData['location']); // Don't overwrite existing warehouse location with default
+                        }
+                        if (empty($po) && isset($safeData['po_number'])) {
+                            unset($safeData['po_number']);
+                        }
+
                         $existing->update($safeData);
                         $lastItemModel = $existing;
                         $updatedCount++;
