@@ -1576,47 +1576,15 @@
                     </tbody>
 
                 @elseif ($selectedCategory === 'EOL PHILIPS UNITS')
-                    <!-- CLEAN 2-TIER SPREADSHEET HEADER FOR EOL PHILIPS UNITS (WITH TOGGLEABLE RESERVATION, HISTORY, ORIGINAL QTY, UNFOUND & REMARKS) -->
+                    <!-- CLEAN SPREADSHEET HEADER FOR EOL PHILIPS UNITS (NO BLUE BACKGROUND) -->
                     <thead>
-                        <tr class="h-8 divide-x divide-slate-300 border-b border-slate-300 text-[11px] sm:text-xs tracking-wider">
-                            <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase select-none min-w-[130px] whitespace-nowrap bg-sky-200">LOCATION</th>
-                            <th rowspan="2" class="py-1.5 px-2 text-center text-slate-900 font-extrabold uppercase select-none min-w-[95px] whitespace-nowrap bg-sky-200">DATE RECEIVED</th>
-                            <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase select-none min-w-[120px] whitespace-nowrap bg-sky-200">MANUFACTURER</th>
-                            <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase select-none min-w-[130px] whitespace-nowrap bg-sky-200">MODEL</th>
-                            <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase select-none min-w-[120px] whitespace-nowrap bg-sky-200">PO / SKU No.</th>
-                            <th colspan="2" class="py-1 px-2.5 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-sky-200 text-slate-900 tracking-wider">ITEM DESCRIPTION</th>
-                            <th colspan="2" class="py-1 px-2.5 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-sky-200 text-slate-900 tracking-wider">INVENTORY</th>
-                            <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase select-none min-w-[90px] whitespace-nowrap bg-sky-200">AVAILABLE QTY</th>
-                            
-                            <!-- TOGGLEABLE EXTENDED COLUMNS: RESERVATION, HISTORY, ORIGINAL QTY, UNFOUND, REMARKS -->
-                            <th colspan="2" class="col-philips-ext py-1 px-2.5 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-sky-200 text-slate-900 tracking-wider">RESERVATION</th>
-                            <th colspan="2" class="col-philips-ext py-1 px-2.5 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-sky-200 text-slate-900 tracking-wider">HISTORY</th>
-                            <th rowspan="2" class="col-philips-ext py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase select-none min-w-[90px] whitespace-nowrap bg-sky-200">ORIGINAL QTY</th>
-                            <th colspan="2" class="col-philips-ext py-1 px-2.5 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-sky-200 text-slate-900 tracking-wider">UNFOUND</th>
-                            <th rowspan="2" class="col-philips-ext py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase select-none min-w-[160px] whitespace-nowrap bg-sky-200">REMARKS</th>
-                            
-                            <th rowspan="2" class="col-actions-sticky py-1.5 px-2.5 text-center text-slate-700 select-none min-w-[90px] whitespace-nowrap bg-slate-50 font-bold uppercase">ACTIONS</th>
-                        </tr>
-                        <tr class="h-8 divide-x divide-slate-300 border-b border-slate-300">
-                            <!-- ITEM DESCRIPTION SUBHEADERS -->
-                            <th class="py-1 px-2.5 text-left text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[240px] bg-slate-200/90">PARTICULAR</th>
-                            <th class="py-1 px-2 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[130px] whitespace-nowrap bg-slate-200/90">SERIAL NO.</th>
-                            
-                            <!-- INVENTORY SUBHEADERS -->
-                            <th class="py-1 px-2 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[60px] whitespace-nowrap bg-slate-200/90">QTY</th>
-                            <th class="py-1 px-2 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[70px] whitespace-nowrap bg-slate-200/90">ACU. QTY</th>
-
-                            <!-- RESERVATION SUBHEADERS -->
-                            <th class="col-philips-ext py-1 px-2 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[65px] whitespace-nowrap bg-slate-200/90">QTY</th>
-                            <th class="col-philips-ext py-1 px-2.5 text-left text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[200px] bg-slate-200/90">PROJECT DETAILS</th>
-
-                            <!-- HISTORY SUBHEADERS -->
-                            <th class="col-philips-ext py-1 px-2 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[65px] whitespace-nowrap bg-slate-200/90">QTY</th>
-                            <th class="col-philips-ext py-1 px-2.5 text-left text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[200px] bg-slate-200/90">PROJECT</th>
-
-                            <!-- UNFOUND SUBHEADERS -->
-                            <th class="col-philips-ext py-1 px-2 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[65px] whitespace-nowrap bg-slate-200/90">QTY</th>
-                            <th class="col-philips-ext py-1 px-2 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[90px] whitespace-nowrap bg-slate-200/90">STATUS</th>
+                        <tr class="h-8 bg-white text-slate-800 font-bold uppercase text-[11px] sm:text-xs tracking-wider divide-x divide-slate-200 border-b border-slate-200">
+                            <th class="py-1.5 px-3 text-center text-slate-800 select-none min-w-[140px] whitespace-nowrap bg-white font-extrabold">MANUFACTURER</th>
+                            <th class="py-1.5 px-3 text-center text-slate-800 select-none min-w-[130px] whitespace-nowrap bg-white font-extrabold">CHECK IN DATE</th>
+                            <th class="py-1.5 px-3 text-center text-slate-800 select-none min-w-[160px] whitespace-nowrap bg-white font-extrabold">MODEL</th>
+                            <th class="py-1.5 px-3 text-left text-slate-800 select-none min-w-[320px] bg-white font-extrabold">ITEM DESCRIPTION</th>
+                            <th class="py-1.5 px-3 text-center text-slate-800 select-none min-w-[90px] whitespace-nowrap bg-white font-extrabold">QTY</th>
+                            <th class="col-actions-sticky py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[90px] whitespace-nowrap bg-white font-extrabold uppercase">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-xs sm:text-sm font-medium">
@@ -1625,275 +1593,68 @@
                         @endphp
 
                         @forelse ($items as $item)
-                            <!-- Screen Size Header Group (e.g. 55", 65", 43", etc.) -->
+                            <!-- Screen Size Header Group (e.g. 10", 24", 31.5", 43", etc.) -->
                             @if ($item->screen_size && $item->screen_size !== $currentSize && !$search)
                                 @php
                                     $currentSize = $item->screen_size;
                                 @endphp
-                                <tr class="bg-sky-50/90 border-y border-slate-300">
-                                    <td colspan="19" class="py-1 px-4 text-center font-extrabold text-sky-950 font-mono-code text-xs tracking-wider select-none">
+                                <tr class="bg-slate-100 border-y border-slate-200">
+                                    <td colspan="6" class="py-1.5 px-4 text-center font-extrabold text-slate-800 font-mono-code text-xs tracking-wider select-none">
                                         PHILIPS {{ $currentSize }} MONITORS / COMMERCIAL DISPLAYS
                                     </td>
                                 </tr>
                             @endif
 
                             <tr class="hover:bg-slate-50/80 transition-colors group">
-                                
-                                <!-- LOCATION -->
-                                <td class="py-2 px-2.5 border-r border-slate-200 font-mono-code align-top">
-                                    @if (!empty($item->movement_history['locations']) && count($item->movement_history['locations']) > 1)
-                                        <div class="flex flex-wrap gap-1 items-start max-w-[220px]">
-                                            @foreach ($item->movement_history['locations'] as $loc)
-                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-800 border border-slate-200 whitespace-nowrap">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
-                                                    <span>{{ strtoupper($loc['location'] ?? 'A JUAN - 2ND FLR') }}:</span>
-                                                    <span class="font-bold font-mono">{{ $loc['qty'] ?? 0 }}</span>
-                                                </span>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
-                                            {{ $item->location ?: 'A JUAN - 2ND FLR' }}
-                                        </span>
-                                    @endif
-                                </td>
-
-                                <!-- DATE RECEIVED -->
-                                <td class="py-2 px-2 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap align-top text-xs">
-                                    {{ $item->check_in_date ? $item->check_in_date->format('n/j/Y') : '—' }}
-                                </td>
-
                                 <!-- MANUFACTURER -->
-                                <td class="py-2 px-2.5 font-semibold text-slate-800 uppercase font-mono-code border-r border-slate-200 text-center whitespace-nowrap align-top text-xs">
+                                <td class="py-2 px-3 text-center font-semibold text-slate-800 uppercase font-mono-code border-r border-slate-200 whitespace-nowrap align-top text-xs">
                                     {{ $item->manufacturer ?: 'PHILIPS' }}
                                 </td>
 
+                                <!-- CHECK IN DATE -->
+                                <td class="py-2 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap align-top text-xs">
+                                    {{ $item->check_in_date ? $item->check_in_date->format('n/j/Y') : '—' }}
+                                </td>
+
                                 <!-- MODEL -->
-                                <td class="py-2 px-2.5 font-mono-code font-semibold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap align-top text-xs">
+                                <td class="py-2 px-3 font-mono-code font-bold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap align-top text-xs">
                                     <button 
                                         type="button" 
                                         onclick="openDrawer({{ json_encode($item) }})" 
                                         class="font-mono-code font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
-                                        title="View SKU Details & Movement History"
+                                        title="View SKU Details"
                                     >
                                         {{ $item->model }}
                                     </button>
                                 </td>
 
-                                <!-- PO / SKU No. -->
-                                <td class="py-2 px-2.5 font-mono-code text-center text-slate-800 border-r border-slate-200 whitespace-nowrap font-bold align-top text-xs">
-                                    {{ $item->po_number ?? '—' }}
-                                </td>
-
-                                <!-- ITEM DESCRIPTION: PARTICULAR -->
-                                <td class="py-2 px-2.5 text-slate-800 uppercase font-medium leading-snug border-r border-slate-200 min-w-[240px] align-top text-xs">
+                                <!-- ITEM DESCRIPTION -->
+                                <td class="py-2 px-3 text-slate-800 uppercase font-medium leading-snug border-r border-slate-200 min-w-[320px] align-top text-xs">
                                     <button 
                                         type="button" 
                                         onclick="openDrawer({{ json_encode($item) }})" 
                                         class="text-left font-medium text-slate-800 hover:text-blue-600 hover:underline cursor-pointer block w-full leading-snug uppercase transition-colors"
-                                        title="View SKU Details & Movement History"
+                                        title="View SKU Details"
                                     >
-                                        <div class="line-clamp-2">{{ $item->item_description }}</div>
+                                        <div>{{ $item->item_description }}</div>
                                     </button>
                                 </td>
 
-                                <!-- ITEM DESCRIPTION: SERIAL NO. -->
-                                <td class="py-2 px-2.5 font-mono-code font-bold text-center text-slate-800 border-r border-slate-200 align-top">
-                                    @if ($item->tag_number)
-                                        @php
-                                            $serials = preg_split('/[\r\n,;|]+/', $item->tag_number, -1, PREG_SPLIT_NO_EMPTY);
-                                            $serialCount = count($serials);
-                                            $firstSerial = trim($serials[0] ?? '');
-                                        @endphp
-                                        @if ($serialCount === 1)
-                                            <div class="inline-flex items-center gap-1">
-                                                <button 
-                                                    type="button" 
-                                                    onclick="openDrawer({{ json_encode($item) }})" 
-                                                    class="text-xs font-mono-code font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 hover:text-blue-700 px-2 py-0.5 rounded border border-slate-300 transition-colors cursor-pointer"
-                                                    title="Click to view SKU details & serial number">
-                                                    {{ $firstSerial }}
-                                                </button>
-                                            </div>
-                                        @else
-                                            <div class="relative inline-block text-center">
-                                                <button 
-                                                    type="button" 
-                                                    onclick="toggleSerialPopover(this, event)" 
-                                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono-code font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-900 border border-blue-200 transition-colors cursor-pointer shadow-2xs whitespace-nowrap"
-                                                    title="Click to view {{ $serialCount }} serial numbers">
-                                                    <span>🔢 {{ $serialCount }} Serials</span>
-                                                    <svg class="w-3 h-3 text-blue-500 shrink-0 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                                    </svg>
-                                                </button>
-                                                <!-- Floating Popover (Never expands row height) -->
-                                                <div class="serial-popover hidden absolute left-1/2 -translate-x-1/2 mt-1.5 w-64 max-h-52 overflow-y-auto bg-white rounded-xl shadow-xl border border-slate-200 p-2.5 z-50 text-left">
-                                                    <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-100">
-                                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono-code">Serials ({{ $serialCount }})</span>
-                                                        <button type="button" onclick="navigator.clipboard.writeText(`{{ implode('\n', array_map('trim', $serials)) }}`); alert('Copied {{ $serialCount }} serial numbers!');" class="text-[10px] font-bold text-blue-600 hover:text-blue-800">Copy All</button>
-                                                    </div>
-                                                    <div class="space-y-1">
-                                                        @foreach ($serials as $sn)
-                                                            <div class="text-[11px] font-mono-code text-slate-800 bg-slate-50 hover:bg-slate-100 px-2 py-0.5 rounded border border-slate-200 font-semibold select-all">
-                                                                {{ trim($sn) }}
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-                                    @else
-                                        <span class="text-slate-400">—</span>
-                                    @endif
-                                </td>
-
-                                <!-- INVENTORY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
-                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
-                                        {{ $item->quantity }}
+                                <!-- QTY -->
+                                <td class="py-2 px-3 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <span class="inline-flex items-center justify-center min-w-[2.25rem] px-2 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
+                                        {{ number_format($item->quantity) }}
                                     </span>
-                                </td>
-
-                                <!-- INVENTORY: ACU. QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
-                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
-                                        {{ $item->acu_quantity ?? $item->quantity }}
-                                    </span>
-                                </td>
-
-                                <!-- AVAILABLE QTY -->
-                                @php
-                                    $philAvailQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : max(0, (int)$item->quantity - (int)($item->reservation_qty ?? 0));
-                                @endphp
-                                <td class="py-2 px-2.5 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
-                                    <span class="inline-flex items-center justify-center min-w-[2.25rem] px-2 py-0.5 rounded font-bold text-xs {{ $philAvailQty > 0 ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-slate-100 text-slate-400' }}">
-                                        {{ $philAvailQty }}
-                                    </span>
-                                </td>
-
-                                <!-- TOGGLEABLE: RESERVATION QTY -->
-                                <td class="col-philips-ext py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
-                                    @if (($item->reservation_qty ?? 0) > 0)
-                                        <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded font-bold text-xs bg-amber-50 text-amber-800 border border-amber-300">
-                                            {{ $item->reservation_qty }}
-                                        </span>
-                                    @else
-                                        <span class="text-slate-400">—</span>
-                                    @endif
-                                </td>
-
-                                <!-- TOGGLEABLE: RESERVATION PROJECT DETAILS (EXTENDED CARDS) -->
-                                <td class="col-philips-ext py-2 px-2.5 border-r border-slate-200 min-w-[220px] text-xs align-top">
-                                    @if (!empty($item->movement_history['reservations']) && count($item->movement_history['reservations']) > 0)
-                                        <div class="flex flex-col gap-1 max-h-24 overflow-y-auto pr-0.5">
-                                            @foreach ($item->movement_history['reservations'] as $res)
-                                                <div class="p-1.5 rounded-lg bg-amber-50/80 border border-amber-200/80 text-amber-950 text-xs shadow-2xs space-y-0.5">
-                                                    <div class="flex items-center gap-1.5">
-                                                        <span class="px-1.5 py-0.2 rounded bg-amber-200/80 text-amber-900 font-bold font-mono text-[10px]">{{ $res['qty'] ?? 0 }} pcs</span>
-                                                        <span class="font-bold text-[11px] leading-tight line-clamp-1">{{ $res['project'] ?? 'Project Reservation' }}</span>
-                                                    </div>
-                                                    @if (!empty($res['remarks']))
-                                                        <div class="text-[10px] text-amber-800/80 italic pl-1 line-clamp-1">{{ $res['remarks'] }}</div>
-                                                    @endif
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @elseif ($item->reservation_project)
-                                        <div class="line-clamp-2 text-slate-700 font-medium py-0.5" title="{{ $item->reservation_project }}">{{ $item->reservation_project }}</div>
-                                    @else
-                                        <span class="text-slate-400">—</span>
-                                    @endif
-                                </td>
-
-                                <!-- TOGGLEABLE: HISTORY QTY -->
-                                <td class="col-philips-ext py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
-                                    @if (($item->history_qty ?? 0) > 0)
-                                        <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded font-bold text-xs bg-blue-50 text-blue-800 border border-blue-300">
-                                            {{ $item->history_qty }}
-                                        </span>
-                                    @else
-                                        <span class="text-slate-400">—</span>
-                                    @endif
-                                </td>
-
-                                <!-- TOGGLEABLE: HISTORY PROJECT (EXTENDED CARDS) -->
-                                <td class="col-philips-ext py-2 px-2.5 border-r border-slate-200 min-w-[220px] text-xs align-top">
-                                    @if (!empty($item->movement_history['history']) && count($item->movement_history['history']) > 0)
-                                        <div class="flex flex-col gap-1 max-h-24 overflow-y-auto pr-0.5">
-                                            @foreach ($item->movement_history['history'] as $hist)
-                                                <div class="p-1.5 rounded-lg bg-blue-50/80 border border-blue-200/80 text-blue-950 text-xs shadow-2xs space-y-0.5">
-                                                    <div class="flex items-center gap-1.5">
-                                                        <span class="px-1.5 py-0.2 rounded bg-blue-200/80 text-blue-900 font-bold font-mono text-[10px]">{{ $hist['qty'] ?? 0 }} pcs</span>
-                                                        <span class="font-bold text-[11px] leading-tight line-clamp-1">{{ $hist['project'] ?? 'Project Delivery' }}</span>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @elseif ($item->history_project)
-                                        <div class="line-clamp-2 text-slate-700 font-medium py-0.5" title="{{ $item->history_project }}">{{ $item->history_project }}</div>
-                                    @else
-                                        <span class="text-slate-400">—</span>
-                                    @endif
-                                </td>
-
-                                <!-- TOGGLEABLE: ORIGINAL QTY -->
-                                <td class="col-philips-ext py-2 px-2.5 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top font-bold text-slate-700">
-                                    {{ $item->original_quantity ?? $item->quantity }}
-                                </td>
-
-                                <!-- TOGGLEABLE: UNFOUND QTY -->
-                                <td class="col-philips-ext py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
-                                    @if (($item->status_qty ?? 0) > 0)
-                                        <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded font-bold text-xs bg-rose-50 text-rose-800 border border-rose-300">
-                                            {{ $item->status_qty }}
-                                        </span>
-                                    @else
-                                        <span class="text-slate-400">0</span>
-                                    @endif
-                                </td>
-
-                                <!-- TOGGLEABLE: UNFOUND STATUS -->
-                                <td class="col-philips-ext py-2 px-2 text-center border-r border-slate-200 whitespace-nowrap align-top">
-                                    @php
-                                        $stPart = strtoupper(trim((string)($item->status_particular ?? 'OK')));
-                                    @endphp
-                                    @if ($stPart === 'OK' || empty($stPart))
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                            OK
-                                        </span>
-                                    @elseif (str_contains($stPart, 'UNFOUND'))
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                                            {{ $stPart }}
-                                        </span>
-                                    @elseif (str_contains($stPart, 'REPAIR'))
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                            {{ $stPart }}
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                                            {{ $stPart }}
-                                        </span>
-                                    @endif
-                                </td>
-
-                                <!-- TOGGLEABLE: REMARKS (FULLY OPENED & EXTENDED) -->
-                                <td class="col-philips-ext py-2 px-2.5 border-r border-slate-200 min-w-[180px] text-xs text-slate-600 align-top">
-                                    @if ($item->remarks)
-                                        <div class="line-clamp-2 font-medium text-slate-700" title="{{ $item->remarks }}">{{ $item->remarks }}</div>
-                                    @else
-                                        <span class="text-slate-400">—</span>
-                                    @endif
                                 </td>
 
                                 <!-- ACTIONS -->
-                                <td class="col-actions-sticky py-2 px-2.5 text-center whitespace-nowrap bg-white">
+                                <td class="col-actions-sticky py-2 px-2.5 text-center whitespace-nowrap bg-white align-top">
                                     <div class="flex items-center justify-center gap-1.5">
                                         <!-- View Drawer Details Button -->
                                         <button 
                                             type="button" 
                                             onclick="openDrawer({{ json_encode($item) }})" 
-                                            class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 transition-colors cursor-pointer"
+                                            class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
                                             title="View SKU Details Drawer"
                                         >
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1926,7 +1687,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="19" class="py-12 text-center text-slate-500">
+                                <td colspan="6" class="py-12 text-center text-slate-500">
                                     <div class="max-w-xs mx-auto space-y-2">
                                         <p class="font-bold text-slate-700">No Philips display items found</p>
                                         <p class="text-xs text-slate-400">Add a Philips monitor unit using the button above to populate this category.</p>
@@ -1935,6 +1696,28 @@
                             </tr>
                         @endforelse
                     </tbody>
+
+                    @if ($items->count() > 0)
+                        @php
+                            $eolTotalQty = $items->sum('quantity');
+                        @endphp
+                        <tfoot class="border-t-2 border-orange-700 font-bold bg-[#ea580c] text-white">
+                            <tr class="divide-x divide-orange-700/60 h-9">
+                                <!-- TOTAL COUNT (Spans MANUFACTURER to ITEM DESCRIPTION: 4 cols) -->
+                                <td colspan="4" class="py-2.5 px-4 text-center font-black tracking-wider uppercase text-xs sm:text-sm text-white bg-[#ea580c] select-none">
+                                    TOTAL COUNT
+                                </td>
+                                <!-- QTY -->
+                                <td class="py-2 px-3 text-center font-mono-code font-black text-xs sm:text-sm text-white bg-[#ea580c] whitespace-nowrap">
+                                    {{ number_format($eolTotalQty) }}
+                                </td>
+                                <!-- ACTIONS -->
+                                <td class="col-actions-sticky py-2 px-2.5 text-center text-xs text-orange-200 bg-[#ea580c] whitespace-nowrap">
+                                    —
+                                </td>
+                            </tr>
+                        </tfoot>
+                    @endif
 
                 @else
                     <!-- CLEAN SPREADSHEET HEADER FOR ALL WAREHOUSE INVENTORY & SERVICE UNITS -->
