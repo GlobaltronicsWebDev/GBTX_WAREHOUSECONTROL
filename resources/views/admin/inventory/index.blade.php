@@ -346,7 +346,7 @@
                         ALL WAREHOUSE INVENTORY
                     @endif
                 </h2>
-                <p class="text-xs text-slate-500">Click any row to open the full item drawer & movement logs</p>
+                <p class="text-xs text-slate-500">Click on the Model / Description item or the drawer icon to view full SKU specifications & movement logs</p>
             </div>
 
             @if ($selectedCategory === 'CENTRALIZED LED INVENTORY')
@@ -385,9 +385,9 @@
             </div>
             @else
             <!-- Column View Mode Selectors (LuminaSpec Reference) -->
-            <div class="flex items-center gap-2 overflow-x-auto pb-1">
-                <span class="text-xs text-slate-500 font-semibold mr-1 whitespace-nowrap">View Columns:</span>
-                <button type="button" onclick="setColumnView('all')" id="btnViewAll" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-white transition whitespace-nowrap shadow-sm" style="background-color: #0284c7 !important; color: #ffffff !important;">All</button>
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="columnViewButtonsGroup">
+                <span class="text-xs text-slate-500 font-semibold mr-1.5 whitespace-nowrap">View Columns:</span>
+                <button type="button" onclick="setColumnView('all')" id="btnViewAll" class="px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs bg-sky-600 text-white">All</button>
                 <button type="button" onclick="setColumnView('specs')" id="btnViewSpecs" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition whitespace-nowrap">Specs</button>
                 <button type="button" onclick="setColumnView('inventory')" id="btnViewInventory" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition whitespace-nowrap">Inventory & SQM</button>
                 <button type="button" onclick="setColumnView('reservation')" id="btnViewReservation" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition whitespace-nowrap">Reservations</button>
@@ -413,33 +413,43 @@
                     <!-- CLEAN 2-TIER SPREADSHEET HEADER FOR LED SERVICE UNITS -->
                     <thead>
                         <tr class="bg-slate-50 text-slate-700 font-bold uppercase text-[11px] sm:text-xs tracking-wider divide-x divide-slate-200 border-b border-slate-200">
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none w-16 whitespace-nowrap">CDX</th>
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">LOCATION</th>
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">MANUFACTURER</th>
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[120px] whitespace-nowrap">CHECK IN DATE</th>
+                            <th rowspan="2" class="col-group-specs py-2.5 px-3 text-center text-slate-700 select-none w-16 whitespace-nowrap">CDX</th>
+                            <th rowspan="2" class="col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">LOCATION</th>
+                            <th rowspan="2" class="col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">MANUFACTURER</th>
+                            <th rowspan="2" class="col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[120px] whitespace-nowrap">CHECK IN DATE</th>
                             <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">MODEL</th>
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">PO / SKU No.</th>
+                            <th rowspan="2" class="col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">PO / SKU No.</th>
                             <th rowspan="2" class="py-2.5 px-4 text-left text-slate-700 select-none min-w-[320px]">ITEM DESCRIPTION</th>
-                            <th colspan="4" class="py-1 px-3 text-center text-slate-700 select-none border-b border-slate-200 whitespace-nowrap">INVENTORY</th>
+                            <th colspan="4" class="col-group-inventory py-1 px-3 text-center text-slate-700 select-none border-b border-slate-200 whitespace-nowrap">INVENTORY</th>
+                            
+                            <!-- RESERVATION GROUP -->
+                            <th rowspan="2" class="col-group-reservation py-2.5 px-3 text-center text-slate-700 select-none min-w-[85px] whitespace-nowrap">RESERVED</th>
+                            <th rowspan="2" class="col-group-reservation py-2.5 px-4 min-w-[200px] text-left text-slate-700 select-none whitespace-nowrap">PROJECT ALLOCATION</th>
+
+                            <!-- STATUS & HISTORY GROUP -->
+                            <th rowspan="2" class="col-group-history py-2.5 px-3 min-w-[100px] text-center text-slate-700 select-none whitespace-nowrap">STATUS</th>
+                            <th rowspan="2" class="col-group-history py-2.5 px-4 min-w-[180px] text-left text-slate-700 select-none whitespace-nowrap">DISPATCH / MOVEMENT</th>
+                            <th rowspan="2" class="col-group-history py-2.5 px-4 min-w-[150px] text-left text-slate-700 select-none whitespace-nowrap">REMARKS</th>
+
                             <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[90px] whitespace-nowrap">ACTIONS</th>
                         </tr>
                         <tr class="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider divide-x divide-slate-200 border-b border-slate-200">
-                            <th class="py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[65px] whitespace-nowrap">QTY</th>
-                            <th class="py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[75px] whitespace-nowrap">ACU. QTY</th>
-                            <th class="py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[110px] whitespace-nowrap">PER PANEL SQM</th>
-                            <th class="py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[140px] whitespace-nowrap">TOTAL AVAILABLE SQM</th>
+                            <th class="col-group-inventory py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[65px] whitespace-nowrap">QTY</th>
+                            <th class="col-group-inventory py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[75px] whitespace-nowrap">ACU. QTY</th>
+                            <th class="col-group-inventory py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[110px] whitespace-nowrap">PER PANEL SQM</th>
+                            <th class="col-group-inventory py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[140px] whitespace-nowrap">TOTAL AVAILABLE SQM</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-xs sm:text-sm font-medium">
                         @forelse ($items as $idx => $item)
-                            <tr onclick="openDrawer({{ json_encode($item) }})" class="hover:bg-blue-50/70 transition-colors cursor-pointer group">
+                            <tr class="hover:bg-slate-50/80 transition-colors group">
                                 <!-- CDX -->
-                                <td class="py-3 px-2 font-mono-code font-bold text-center text-slate-800 border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-specs py-3 px-2 font-mono-code font-bold text-center text-slate-800 border-r border-slate-200 whitespace-nowrap">
                                     {{ $item->tag_number ?? ($idx + 1) }}
                                 </td>
 
                                 <!-- LOCATION -->
-                                <td class="py-3 px-3 text-center border-r border-slate-200 font-mono-code whitespace-nowrap">
+                                <td class="col-group-specs py-3 px-3 text-center border-r border-slate-200 font-mono-code whitespace-nowrap">
                                     @if (stripos($item->location, 'MARIKINA') !== false)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
                                             {{ $item->location }}
@@ -460,61 +470,143 @@
                                 </td>
 
                                 <!-- MANUFACTURER -->
-                                <td class="py-3 px-3 font-semibold text-slate-800 uppercase font-mono-code border-r border-slate-200 text-center whitespace-nowrap">
+                                <td class="col-group-specs py-3 px-3 font-semibold text-slate-800 uppercase font-mono-code border-r border-slate-200 text-center whitespace-nowrap">
                                     {{ $item->manufacturer }}
                                 </td>
 
                                 <!-- CHECK IN DATE -->
-                                <td class="py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-specs py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap">
                                     {{ $item->check_in_date ? $item->check_in_date->format('n/j/Y') : '—' }}
                                 </td>
 
                                 <!-- MODEL -->
                                 <td class="py-3 px-3 font-mono-code font-semibold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap">
-                                    {{ $item->model }}
+                                    <button 
+                                        type="button" 
+                                        onclick="openDrawer({{ json_encode($item) }})" 
+                                        class="font-mono-code font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                                        title="View SKU Details & Movement History"
+                                    >
+                                        {{ $item->model }}
+                                    </button>
                                 </td>
 
                                 <!-- PO / SKU No. -->
-                                <td class="py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-specs py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap">
                                     {{ $item->po_number ?? '—' }}
                                 </td>
 
                                 <!-- ITEM DESCRIPTION -->
                                 <td class="py-3 px-4 text-slate-800 uppercase font-medium leading-relaxed border-r border-slate-200 min-w-[320px]">
-                                    {{ $item->item_description }}
+                                    <button 
+                                        type="button" 
+                                        onclick="openDrawer({{ json_encode($item) }})" 
+                                        class="text-left font-medium text-slate-800 hover:text-blue-600 hover:underline cursor-pointer block w-full leading-relaxed uppercase transition-colors"
+                                        title="View SKU Details & Movement History"
+                                    >
+                                        {{ $item->item_description }}
+                                    </button>
                                 </td>
 
                                 <!-- QTY -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-inventory py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
                                     <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $item->quantity }}
                                     </span>
                                 </td>
 
                                 <!-- ACU. QTY -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-inventory py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
                                     <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $item->quantity }}
                                     </span>
                                 </td>
 
                                 <!-- PER PANEL SQM -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-inventory py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
                                     <span class="font-medium text-xs text-slate-600">
                                         {{ $item->sqm && $item->quantity > 0 ? number_format($item->sqm / $item->quantity, 3) : '—' }}
                                     </span>
                                 </td>
 
                                 <!-- TOTAL AVAILABLE SQM -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-inventory py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
                                     <span class="inline-flex items-center justify-center min-w-[2.5rem] px-1.5 py-0.5 rounded font-semibold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $item->sqm !== null ? number_format($item->sqm, 2) : '—' }}
                                     </span>
                                 </td>
 
+                                <!-- RESERVATIONS: Reserved Qty -->
+                                <td class="col-group-reservation py-3 px-3 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs {{ ($item->reservation_qty ?? 0) > 0 ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'text-slate-400' }}">
+                                        {{ ($item->reservation_qty ?? 0) > 0 ? $item->reservation_qty : '0' }}
+                                    </span>
+                                </td>
+
+                                <!-- RESERVATIONS: Project Allocation -->
+                                <td class="col-group-reservation py-3 px-4 border-r border-slate-200 min-w-[200px] text-xs text-slate-700">
+                                    @if ($item->reservation_project)
+                                        <span class="font-medium text-slate-800" title="{{ $item->reservation_project }}">{{ Str::limit($item->reservation_project, 30) }}</span>
+                                    @else
+                                        <span class="text-slate-400 italic">No allocation</span>
+                                    @endif
+                                </td>
+
+                                <!-- STATUS & HISTORY: Status -->
+                                <td class="col-group-history py-3 px-3 text-center border-r border-slate-200 whitespace-nowrap">
+                                    @php
+                                        $stat = strtolower((string)($item->status ?? 'in_stock'));
+                                        $isDeficit = ($item->forecasted_quantity !== null && $item->forecasted_quantity < 0) || $stat === 'deficit';
+                                    @endphp
+                                    @if ($isDeficit)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200">DEFICIT</span>
+                                    @elseif ($stat === 'under_repair' || $stat === 'maintenance')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">MAINTENANCE</span>
+                                    @elseif ($stat === 'reserved' || ($item->reservation_qty ?? 0) > 0)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-sky-50 text-sky-700 border border-sky-200">RESERVED</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">ACTIVE</span>
+                                    @endif
+                                </td>
+
+                                <!-- STATUS & HISTORY: Dispatch / Movement -->
+                                <td class="col-group-history py-3 px-4 border-r border-slate-200 min-w-[180px] text-xs text-slate-700">
+                                    @if ($item->history_project)
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-bold text-blue-700 font-mono text-[10px] bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 shrink-0">{{ $item->history_qty ?? 0 }} pcs</span>
+                                            <span class="truncate text-slate-800" title="{{ $item->history_project }}">{{ Str::limit($item->history_project, 22) }}</span>
+                                        </div>
+                                    @elseif ($item->check_in_date)
+                                        <span class="text-slate-500 font-mono text-[11px]">Received: {{ $item->check_in_date->format('n/j/Y') }}</span>
+                                    @else
+                                        <span class="text-slate-400 italic">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- STATUS & HISTORY: Remarks -->
+                                <td class="col-group-history py-3 px-4 border-r border-slate-200 min-w-[150px] text-xs text-slate-600">
+                                    @if ($item->remarks)
+                                        <span class="text-slate-700 italic" title="{{ $item->remarks }}">{{ Str::limit($item->remarks, 25) }}</span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
                                 <!-- ACTIONS -->
                                 <td class="py-3 px-3 text-center whitespace-nowrap">
                                     <div class="flex items-center justify-center gap-1.5">
+                                        <!-- View Drawer Details Button -->
+                                        <button 
+                                            type="button" 
+                                            onclick="openDrawer({{ json_encode($item) }})" 
+                                            class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 transition-colors"
+                                            title="View SKU Details Drawer"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
                                         <button 
                                             type="button" 
                                             onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
@@ -540,7 +632,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="12" class="py-12 text-center text-slate-500">
+                                <td colspan="17" class="py-12 text-center text-slate-500">
                                     <div class="max-w-xs mx-auto space-y-2">
                                         <p class="font-bold text-slate-700">No LED service units found</p>
                                         <p class="text-xs text-slate-400">Add an LED service unit using the button above to populate this list.</p>
@@ -554,60 +646,84 @@
                     <!-- CLEAN 2-TIER SPREADSHEET HEADER FOR PHILIPS SERVICE UNITS -->
                     <thead>
                         <tr class="bg-slate-50 text-slate-700 font-bold uppercase text-[11px] sm:text-xs tracking-wider divide-x divide-slate-200 border-b border-slate-200">
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">LOCATION</th>
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">MANUFACTURER</th>
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[120px] whitespace-nowrap">CHECK IN DATE</th>
+                            <th rowspan="2" class="col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">LOCATION</th>
+                            <th rowspan="2" class="col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">MANUFACTURER</th>
+                            <th rowspan="2" class="col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[120px] whitespace-nowrap">CHECK IN DATE</th>
                             <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">MODEL</th>
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">PO / SKU No.</th>
+                            <th rowspan="2" class="col-group-specs py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">PO / SKU No.</th>
                             <th colspan="2" class="py-1 px-3 text-center text-slate-700 select-none border-b border-slate-200 whitespace-nowrap">ITEM DESCRIPTION</th>
-                            <th colspan="2" class="py-1 px-3 text-center text-slate-700 select-none border-b border-slate-200 whitespace-nowrap">INVENTORY</th>
-                            <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[110px] whitespace-nowrap">AVAILABLE QTY</th>
+                            <th colspan="2" class="col-group-inventory py-1 px-3 text-center text-slate-700 select-none border-b border-slate-200 whitespace-nowrap">INVENTORY</th>
+                            <th rowspan="2" class="col-group-inventory py-2.5 px-3 text-center text-slate-700 select-none min-w-[110px] whitespace-nowrap">AVAILABLE QTY</th>
+                            
+                            <!-- RESERVATION GROUP -->
+                            <th rowspan="2" class="col-group-reservation py-2.5 px-3 text-center text-slate-700 select-none min-w-[85px] whitespace-nowrap">RESERVED</th>
+                            <th rowspan="2" class="col-group-reservation py-2.5 px-4 min-w-[200px] text-left text-slate-700 select-none whitespace-nowrap">PROJECT ALLOCATION</th>
+
+                            <!-- STATUS & HISTORY GROUP -->
+                            <th rowspan="2" class="col-group-history py-2.5 px-3 min-w-[100px] text-center text-slate-700 select-none whitespace-nowrap">STATUS</th>
+                            <th rowspan="2" class="col-group-history py-2.5 px-4 min-w-[180px] text-left text-slate-700 select-none whitespace-nowrap">DISPATCH / MOVEMENT</th>
+                            <th rowspan="2" class="col-group-history py-2.5 px-4 min-w-[150px] text-left text-slate-700 select-none whitespace-nowrap">REMARKS</th>
+
                             <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[90px] whitespace-nowrap">ACTIONS</th>
                         </tr>
                         <tr class="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider divide-x divide-slate-200 border-b border-slate-200">
                             <th class="py-1.5 px-4 text-left text-slate-600 select-none min-w-[260px]">PARTICULAR</th>
-                            <th class="py-1.5 px-3 text-center text-slate-600 select-none min-w-[130px] whitespace-nowrap">SERIAL NO.</th>
-                            <th class="py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[65px] whitespace-nowrap">QTY</th>
-                            <th class="py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[75px] whitespace-nowrap">ACU. QTY</th>
+                            <th class="col-group-specs py-1.5 px-3 text-center text-slate-600 select-none min-w-[130px] whitespace-nowrap">SERIAL NO.</th>
+                            <th class="col-group-inventory py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[65px] whitespace-nowrap">QTY</th>
+                            <th class="col-group-inventory py-1.5 px-2.5 text-center text-slate-600 select-none min-w-[75px] whitespace-nowrap">ACU. QTY</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-xs sm:text-sm font-medium">
                         @forelse ($items as $item)
-                            <tr onclick="openDrawer({{ json_encode($item) }})" class="hover:bg-blue-50/70 transition-colors cursor-pointer group">
+                            <tr class="hover:bg-slate-50/80 transition-colors group">
                                 <!-- LOCATION -->
-                                <td class="py-3 px-3 text-center border-r border-slate-200 font-mono-code whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                                <td class="col-group-specs py-3 px-3 text-center border-r border-slate-200 font-mono-code whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $item->location }}
                                     </span>
                                 </td>
 
                                 <!-- MANUFACTURER -->
-                                <td class="py-3 px-3 font-semibold text-slate-800 uppercase font-mono-code border-r border-slate-200 text-center whitespace-nowrap">
+                                <td class="col-group-specs py-3 px-3 font-semibold text-slate-800 uppercase font-mono-code border-r border-slate-200 text-center whitespace-nowrap">
                                     {{ $item->manufacturer }}
                                 </td>
 
                                 <!-- CHECK IN DATE -->
-                                <td class="py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-specs py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap">
                                     {{ $item->check_in_date ? $item->check_in_date->format('n/j/Y') : '—' }}
                                 </td>
 
                                 <!-- MODEL -->
                                 <td class="py-3 px-3 font-mono-code font-semibold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap">
-                                    {{ $item->model }}
+                                    <button 
+                                        type="button" 
+                                        onclick="openDrawer({{ json_encode($item) }})" 
+                                        class="font-mono-code font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                                        title="View SKU Details & Movement History"
+                                    >
+                                        {{ $item->model }}
+                                    </button>
                                 </td>
 
                                 <!-- PO / SKU No. -->
-                                <td class="py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-specs py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap">
                                     {{ $item->po_number ?? '—' }}
                                 </td>
 
                                 <!-- ITEM DESCRIPTION: PARTICULAR -->
                                 <td class="py-3 px-4 text-slate-800 uppercase font-medium leading-relaxed border-r border-slate-200 min-w-[260px]">
-                                    {{ $item->item_description }}
+                                    <button 
+                                        type="button" 
+                                        onclick="openDrawer({{ json_encode($item) }})" 
+                                        class="text-left font-medium text-slate-800 hover:text-blue-600 hover:underline cursor-pointer block w-full leading-relaxed uppercase transition-colors"
+                                        title="View SKU Details & Movement History"
+                                    >
+                                        {{ $item->item_description }}
+                                    </button>
                                 </td>
 
                                 <!-- ITEM DESCRIPTION: SERIAL NO. -->
-                                <td class="py-2.5 px-3 font-mono-code font-bold text-center text-slate-800 border-r border-slate-200">
+                                <td class="col-group-specs py-2.5 px-3 font-mono-code font-bold text-center text-slate-800 border-r border-slate-200">
                                     @if ($item->tag_number)
                                         @php
                                             $serials = preg_split('/[\r\n,;|]+/', $item->tag_number, -1, PREG_SPLIT_NO_EMPTY);
@@ -625,29 +741,97 @@
                                 </td>
 
                                 <!-- INVENTORY: QTY -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-inventory py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
                                     <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $item->quantity }}
                                     </span>
                                 </td>
 
                                 <!-- INVENTORY: ACU. QTY -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-inventory py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
                                     <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $item->acu_quantity ?? $item->quantity }}
                                     </span>
                                 </td>
 
                                 <!-- AVAILABLE QTY -->
-                                <td class="py-3 px-3 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-group-inventory py-3 px-3 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
                                     <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs {{ $item->forecasted_quantity ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-slate-400' }}">
                                         {{ $item->forecasted_quantity ?? '—' }}
                                     </span>
                                 </td>
 
+                                <!-- RESERVATIONS: Reserved Qty -->
+                                <td class="col-group-reservation py-3 px-3 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs {{ ($item->reservation_qty ?? 0) > 0 ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'text-slate-400' }}">
+                                        {{ ($item->reservation_qty ?? 0) > 0 ? $item->reservation_qty : '0' }}
+                                    </span>
+                                </td>
+
+                                <!-- RESERVATIONS: Project Allocation -->
+                                <td class="col-group-reservation py-3 px-4 border-r border-slate-200 min-w-[200px] text-xs text-slate-700">
+                                    @if ($item->reservation_project)
+                                        <span class="font-medium text-slate-800" title="{{ $item->reservation_project }}">{{ Str::limit($item->reservation_project, 30) }}</span>
+                                    @else
+                                        <span class="text-slate-400 italic">No allocation</span>
+                                    @endif
+                                </td>
+
+                                <!-- STATUS & HISTORY: Status -->
+                                <td class="col-group-history py-3 px-3 text-center border-r border-slate-200 whitespace-nowrap">
+                                    @php
+                                        $stat = strtolower((string)($item->status ?? 'in_stock'));
+                                        $isDeficit = ($item->forecasted_quantity !== null && $item->forecasted_quantity < 0) || $stat === 'deficit';
+                                    @endphp
+                                    @if ($isDeficit)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200">DEFICIT</span>
+                                    @elseif ($stat === 'under_repair' || $stat === 'maintenance')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">MAINTENANCE</span>
+                                    @elseif ($stat === 'reserved' || ($item->reservation_qty ?? 0) > 0)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-sky-50 text-sky-700 border border-sky-200">RESERVED</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">ACTIVE</span>
+                                    @endif
+                                </td>
+
+                                <!-- STATUS & HISTORY: Dispatch / Movement -->
+                                <td class="col-group-history py-3 px-4 border-r border-slate-200 min-w-[180px] text-xs text-slate-700">
+                                    @if ($item->history_project)
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-bold text-blue-700 font-mono text-[10px] bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 shrink-0">{{ $item->history_qty ?? 0 }} pcs</span>
+                                            <span class="truncate text-slate-800" title="{{ $item->history_project }}">{{ Str::limit($item->history_project, 22) }}</span>
+                                        </div>
+                                    @elseif ($item->check_in_date)
+                                        <span class="text-slate-500 font-mono text-[11px]">Received: {{ $item->check_in_date->format('n/j/Y') }}</span>
+                                    @else
+                                        <span class="text-slate-400 italic">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- STATUS & HISTORY: Remarks -->
+                                <td class="col-group-history py-3 px-4 border-r border-slate-200 min-w-[150px] text-xs text-slate-600">
+                                    @if ($item->remarks)
+                                        <span class="text-slate-700 italic" title="{{ $item->remarks }}">{{ Str::limit($item->remarks, 25) }}</span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
                                 <!-- ACTIONS -->
                                 <td class="py-3 px-3 text-center whitespace-nowrap">
                                     <div class="flex items-center justify-center gap-1.5">
+                                        <!-- View Drawer Details Button -->
+                                        <button 
+                                            type="button" 
+                                            onclick="openDrawer({{ json_encode($item) }})" 
+                                            class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 transition-colors"
+                                            title="View SKU Details Drawer"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
                                         <button 
                                             type="button" 
                                             onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
@@ -673,7 +857,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="py-12 text-center text-slate-500">
+                                <td colspan="16" class="py-12 text-center text-slate-500">
                                     <div class="max-w-xs mx-auto space-y-2">
                                         <p class="font-bold text-slate-700">No Philips service units found</p>
                                         <p class="text-xs text-slate-400">Add a Philips service unit using the button above to populate this list.</p>
@@ -731,7 +915,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-xs sm:text-sm font-medium">
                         @forelse ($items as $item)
-                            <tr onclick="openDrawer({{ json_encode($item) }})" class="hover:bg-blue-50/70 transition-colors cursor-pointer group">
+                            <tr class="hover:bg-slate-50/80 transition-colors group">
                                 
                                 <!-- TAG # -->
                                 <td class="py-3 px-3 font-mono-code font-bold text-center text-slate-800 border-r border-slate-200 whitespace-nowrap">
@@ -757,12 +941,26 @@
 
                                 <!-- MODEL / PIXEL PITCH -->
                                 <td class="py-3 px-3 font-mono-code font-semibold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap">
-                                    {{ $item->model }}
+                                    <button 
+                                        type="button" 
+                                        onclick="openDrawer({{ json_encode($item) }})" 
+                                        class="font-mono-code font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                                        title="View SKU Details & Movement History"
+                                    >
+                                        {{ $item->model }}
+                                    </button>
                                 </td>
 
                                 <!-- ITEM DESCRIPTION -->
                                 <td class="py-3 px-4 text-slate-800 uppercase font-medium leading-relaxed border-r border-slate-200 min-w-[300px]">
-                                    {{ $item->item_description }}
+                                    <button 
+                                        type="button" 
+                                        onclick="openDrawer({{ json_encode($item) }})" 
+                                        class="text-left font-medium text-slate-800 hover:text-blue-600 hover:underline cursor-pointer block w-full leading-relaxed uppercase transition-colors"
+                                        title="View SKU Details & Movement History"
+                                    >
+                                        {{ $item->item_description }}
+                                    </button>
                                 </td>
 
                                 <!-- LOCATION -->
@@ -956,6 +1154,18 @@
                                 <!-- ACTIONS -->
                                 <td class="py-3 px-3 text-center whitespace-nowrap sticky right-0 bg-white">
                                     <div class="flex items-center justify-center gap-1.5">
+                                        <!-- View Drawer Details Button -->
+                                        <button 
+                                            type="button" 
+                                            onclick="openDrawer({{ json_encode($item) }})" 
+                                            class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 transition-colors"
+                                            title="View SKU Details Drawer"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
                                         <button 
                                             type="button" 
                                             onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
@@ -1053,7 +1263,7 @@
                                 </tr>
                             @endif
 
-                            <tr onclick="openDrawer({{ json_encode($item) }})" class="hover:bg-blue-50/70 transition-colors cursor-pointer group">
+                            <tr class="hover:bg-slate-50/80 transition-colors group">
                                 
                                 <!-- LOCATION -->
                                 <td class="py-3 px-3 border-r border-slate-200 font-mono-code align-top">
@@ -1086,7 +1296,14 @@
 
                                 <!-- MODEL -->
                                 <td class="py-3 px-3 font-mono-code font-semibold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap align-top">
-                                    {{ $item->model }}
+                                    <button 
+                                        type="button" 
+                                        onclick="openDrawer({{ json_encode($item) }})" 
+                                        class="font-mono-code font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                                        title="View SKU Details & Movement History"
+                                    >
+                                        {{ $item->model }}
+                                    </button>
                                 </td>
 
                                 <!-- PO / SKU No. -->
@@ -1096,7 +1313,14 @@
 
                                 <!-- ITEM DESCRIPTION: PARTICULAR -->
                                 <td class="py-3 px-4 text-slate-800 uppercase font-medium leading-relaxed border-r border-slate-200 min-w-[260px] align-top">
-                                    <div class="whitespace-pre-line">{{ $item->item_description }}</div>
+                                    <button 
+                                        type="button" 
+                                        onclick="openDrawer({{ json_encode($item) }})" 
+                                        class="text-left font-medium text-slate-800 hover:text-blue-600 hover:underline cursor-pointer block w-full leading-relaxed uppercase transition-colors"
+                                        title="View SKU Details & Movement History"
+                                    >
+                                        <div class="whitespace-pre-line">{{ $item->item_description }}</div>
+                                    </button>
                                 </td>
 
                                 <!-- ITEM DESCRIPTION: SERIAL NO. -->
@@ -1258,6 +1482,18 @@
                                 <!-- ACTIONS -->
                                 <td class="py-3 px-3 text-center whitespace-nowrap sticky right-0 bg-white/95 backdrop-blur-xs group-hover:bg-blue-50/95 transition-colors align-top shadow-xs">
                                     <div class="flex items-center justify-center gap-1.5">
+                                        <!-- View Drawer Details Button -->
+                                        <button 
+                                            type="button" 
+                                            onclick="openDrawer({{ json_encode($item) }})" 
+                                            class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 transition-colors"
+                                            title="View SKU Details Drawer"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
                                         <button 
                                             type="button" 
                                             onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
@@ -1294,22 +1530,36 @@
                     </tbody>
 
                 @else
-                    <!-- CLEAN SPREADSHEET HEADER FOR EOL PHILIPS UNITS, SERVICE UNITS & ALL -->
+                    <!-- CLEAN SPREADSHEET HEADER FOR ALL WAREHOUSE INVENTORY & SERVICE UNITS -->
                     <thead>
                         <tr class="bg-slate-50 text-slate-700 font-bold uppercase text-[11px] sm:text-xs tracking-wider divide-x divide-slate-200 border-b border-slate-200">
                             @if ($selectedCategory === 'all')
-                                <th class="py-2.5 px-3 min-w-[160px] text-center text-slate-700 select-none whitespace-nowrap">CATEGORY</th>
+                                <th class="py-2.5 px-3 min-w-[150px] text-center text-slate-700 select-none whitespace-nowrap">CATEGORY</th>
                             @endif
-                            <th class="py-2.5 px-4 min-w-[140px] text-center text-slate-700 select-none whitespace-nowrap">MANUFACTURER</th>
-                            <th class="py-2.5 px-4 min-w-[120px] text-center text-slate-700 select-none whitespace-nowrap">CHECK IN DATE</th>
-                            <th class="py-2.5 px-4 min-w-[150px] text-center text-slate-700 select-none whitespace-nowrap">MODEL</th>
-                            <th class="py-2.5 px-4 text-left text-slate-700 select-none min-w-[320px]">ITEM DESCRIPTION</th>
-                            <th class="py-2.5 px-4 min-w-[140px] text-center text-slate-700 select-none whitespace-nowrap">LOCATION / BAY</th>
-                            <th class="py-2.5 px-4 min-w-[75px] text-center text-slate-700 select-none whitespace-nowrap">QTY</th>
-                            @if ($selectedCategory === 'all')
-                                <th class="py-2.5 px-3 min-w-[85px] text-center text-slate-700 select-none whitespace-nowrap">SQM</th>
-                            @endif
-                            <th class="py-2.5 px-4 min-w-[90px] text-center text-slate-700 select-none whitespace-nowrap">ACTIONS</th>
+                            <th class="py-2.5 px-4 min-w-[140px] text-center text-slate-700 select-none whitespace-nowrap">MODEL</th>
+                            <th class="py-2.5 px-4 text-left text-slate-700 select-none min-w-[280px]">ITEM DESCRIPTION</th>
+
+                            <!-- SPECS GROUP -->
+                            <th class="col-group-specs py-2.5 px-4 min-w-[130px] text-center text-slate-700 select-none whitespace-nowrap">MANUFACTURER</th>
+                            <th class="col-group-specs py-2.5 px-4 min-w-[110px] text-center text-slate-700 select-none whitespace-nowrap">CHECK IN DATE</th>
+                            <th class="col-group-specs py-2.5 px-4 min-w-[140px] text-center text-slate-700 select-none whitespace-nowrap">LOCATION / BAY</th>
+
+                            <!-- INVENTORY GROUP -->
+                            <th class="col-group-inventory py-2.5 px-4 min-w-[75px] text-center text-slate-700 select-none whitespace-nowrap">QTY</th>
+                            <th class="col-group-inventory py-2.5 px-3 min-w-[85px] text-center text-slate-700 select-none whitespace-nowrap">AVAIL QTY</th>
+                            <th class="col-group-inventory py-2.5 px-3 min-w-[85px] text-center text-slate-700 select-none whitespace-nowrap">SQM</th>
+
+                            <!-- RESERVATIONS GROUP -->
+                            <th class="col-group-reservation py-2.5 px-3 min-w-[85px] text-center text-slate-700 select-none whitespace-nowrap">RESERVED</th>
+                            <th class="col-group-reservation py-2.5 px-4 min-w-[220px] text-left text-slate-700 select-none whitespace-nowrap">PROJECT ALLOCATION</th>
+
+                            <!-- STATUS & HISTORY GROUP -->
+                            <th class="col-group-history py-2.5 px-3 min-w-[100px] text-center text-slate-700 select-none whitespace-nowrap">STATUS</th>
+                            <th class="col-group-history py-2.5 px-4 min-w-[200px] text-left text-slate-700 select-none whitespace-nowrap">DISPATCH / MOVEMENT</th>
+                            <th class="col-group-history py-2.5 px-4 min-w-[160px] text-left text-slate-700 select-none whitespace-nowrap">REMARKS</th>
+
+                            <!-- ACTIONS -->
+                            <th class="py-2.5 px-4 min-w-[110px] text-center text-slate-700 select-none whitespace-nowrap">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-xs sm:text-sm font-medium">
@@ -1324,13 +1574,13 @@
                                     $currentSize = $item->screen_size;
                                 @endphp
                                 <tr class="bg-slate-50 border-y border-slate-200">
-                                    <td colspan="{{ $selectedCategory === 'all' ? 9 : 7 }}" class="py-1 px-4 text-center font-bold text-slate-700 font-mono-code text-xs tracking-wider select-none">
+                                    <td colspan="16" class="py-1 px-4 text-center font-bold text-slate-700 font-mono-code text-xs tracking-wider select-none">
                                         {{ $currentSize }}
                                     </td>
                                 </tr>
                             @endif
 
-                            <tr onclick="openDrawer({{ json_encode($item) }})" class="hover:bg-blue-50/70 transition-colors cursor-pointer group">
+                            <tr class="hover:bg-slate-50/80 transition-colors group">
                                 @if ($selectedCategory === 'all')
                                     <td class="py-3 px-3 font-mono-code text-[11px] font-semibold text-slate-700 border-r border-slate-200 text-center whitespace-nowrap">
                                         <span class="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">
@@ -1339,52 +1589,145 @@
                                     </td>
                                 @endif
 
-                                <!-- Manufacturer -->
-                                <td class="py-3 px-4 font-semibold text-slate-800 border-r border-slate-200 uppercase font-mono-code text-center whitespace-nowrap">
+                                <!-- Model (Interactive Item Trigger) -->
+                                <td class="py-3 px-4 font-mono-code font-bold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap">
+                                    <button 
+                                        type="button" 
+                                        onclick="openDrawer({{ json_encode($item) }})" 
+                                        class="font-mono-code font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                                        title="Click to view full SKU specifications & history"
+                                    >
+                                        {{ $item->model }}
+                                    </button>
+                                </td>
+
+                                <!-- Item Description (Interactive Item Trigger) -->
+                                <td class="py-3 px-4 text-slate-800 uppercase font-medium leading-relaxed border-r border-slate-200 min-w-[280px]">
+                                    <button 
+                                        type="button" 
+                                        onclick="openDrawer({{ json_encode($item) }})" 
+                                        class="text-left font-medium text-slate-800 hover:text-blue-600 hover:underline cursor-pointer block w-full leading-relaxed uppercase transition-colors"
+                                        title="Click to view full SKU specifications & history"
+                                    >
+                                        {{ $item->item_description }}
+                                    </button>
+                                </td>
+
+                                <!-- SPECS: Manufacturer -->
+                                <td class="col-group-specs py-3 px-4 font-semibold text-slate-800 border-r border-slate-200 uppercase font-mono-code text-center whitespace-nowrap">
                                     {{ $item->manufacturer }}
                                 </td>
 
-                                <!-- Check-in Date -->
-                                <td class="py-3 px-4 font-mono-code text-slate-600 border-r border-slate-200 text-center whitespace-nowrap">
+                                <!-- SPECS: Check-in Date -->
+                                <td class="col-group-specs py-3 px-4 font-mono-code text-slate-600 border-r border-slate-200 text-center whitespace-nowrap">
                                     {{ $item->check_in_date ? $item->check_in_date->format('n/j/Y') : '—' }}
                                 </td>
 
-                                <!-- Model -->
-                                <td class="py-3 px-4 font-mono-code font-semibold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap">
-                                    {{ $item->model }}
-                                </td>
-
-                                <!-- Item Description -->
-                                <td class="py-3 px-4 text-slate-800 uppercase font-medium leading-relaxed border-r border-slate-200 min-w-[320px]">
-                                    {{ $item->item_description }}
-                                </td>
-
-                                <!-- Location / Bay -->
-                                <td class="py-3 px-4 text-center border-r border-slate-200 font-mono-code whitespace-nowrap">
+                                <!-- SPECS: Location / Bay -->
+                                <td class="col-group-specs py-3 px-4 text-center border-r border-slate-200 font-mono-code whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $item->location }}
                                     </span>
                                 </td>
 
-                                <!-- Quantity -->
-                                <td class="py-3 px-4 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <!-- INVENTORY: Quantity -->
+                                <td class="col-group-inventory py-3 px-4 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
                                     <span class="inline-flex items-center justify-center min-w-[2.25rem] px-2 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $item->quantity }}
                                     </span>
                                 </td>
 
-                                @if ($selectedCategory === 'all')
-                                    <td class="py-3 px-3 text-center font-mono-code border-r border-slate-200 text-xs whitespace-nowrap">
-                                        {{ $item->sqm ? number_format($item->sqm, 2).' m²' : '—' }}
-                                    </td>
-                                @endif
+                                <!-- INVENTORY: Available Qty -->
+                                <td class="col-group-inventory py-3 px-3 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    @php
+                                        $avail = $item->forecasted_quantity !== null ? $item->forecasted_quantity : ($item->quantity - ($item->reservation_qty ?? 0));
+                                    @endphp
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs {{ $avail < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' }}">
+                                        {{ $avail }}
+                                    </span>
+                                </td>
 
-                                <!-- Action Controls (Edit & Delete) -->
+                                <!-- INVENTORY: SQM -->
+                                <td class="col-group-inventory py-3 px-3 text-center font-mono-code border-r border-slate-200 text-xs whitespace-nowrap">
+                                    {{ $item->sqm ? number_format($item->sqm, 2).' m²' : '—' }}
+                                </td>
+
+                                <!-- RESERVATIONS: Reserved Qty -->
+                                <td class="col-group-reservation py-3 px-3 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs {{ ($item->reservation_qty ?? 0) > 0 ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'text-slate-400' }}">
+                                        {{ ($item->reservation_qty ?? 0) > 0 ? $item->reservation_qty : '0' }}
+                                    </span>
+                                </td>
+
+                                <!-- RESERVATIONS: Project Allocation -->
+                                <td class="col-group-reservation py-3 px-4 border-r border-slate-200 min-w-[220px] text-xs text-slate-700">
+                                    @if ($item->reservation_project)
+                                        <span class="font-medium text-slate-800" title="{{ $item->reservation_project }}">{{ Str::limit($item->reservation_project, 35) }}</span>
+                                    @else
+                                        <span class="text-slate-400 italic">No allocation</span>
+                                    @endif
+                                </td>
+
+                                <!-- STATUS & HISTORY: Status -->
+                                <td class="col-group-history py-3 px-3 text-center border-r border-slate-200 whitespace-nowrap">
+                                    @php
+                                        $stat = strtolower((string)($item->status ?? 'in_stock'));
+                                        $isDeficit = ($item->forecasted_quantity !== null && $item->forecasted_quantity < 0) || $stat === 'deficit';
+                                    @endphp
+                                    @if ($isDeficit)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200">DEFICIT</span>
+                                    @elseif ($stat === 'under_repair' || $stat === 'maintenance')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">MAINTENANCE</span>
+                                    @elseif ($stat === 'reserved' || ($item->reservation_qty ?? 0) > 0)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-sky-50 text-sky-700 border border-sky-200">RESERVED</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">ACTIVE</span>
+                                    @endif
+                                </td>
+
+                                <!-- STATUS & HISTORY: Dispatch / Movement -->
+                                <td class="col-group-history py-3 px-4 border-r border-slate-200 min-w-[200px] text-xs text-slate-700">
+                                    @if ($item->history_project)
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-bold text-blue-700 font-mono text-[10px] bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 shrink-0">{{ $item->history_qty ?? 0 }} pcs</span>
+                                            <span class="truncate text-slate-800" title="{{ $item->history_project }}">{{ Str::limit($item->history_project, 25) }}</span>
+                                        </div>
+                                    @elseif ($item->check_in_date)
+                                        <span class="text-slate-500 font-mono text-[11px]">Received: {{ $item->check_in_date->format('n/j/Y') }}</span>
+                                    @else
+                                        <span class="text-slate-400 italic">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- STATUS & HISTORY: Remarks -->
+                                <td class="col-group-history py-3 px-4 border-r border-slate-200 min-w-[160px] text-xs text-slate-600">
+                                    @if ($item->remarks)
+                                        <span class="text-slate-700 italic" title="{{ $item->remarks }}">{{ Str::limit($item->remarks, 30) }}</span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- Actions (Drawer, Edit, Delete) -->
                                 <td class="py-3 px-4 text-center whitespace-nowrap">
                                     <div class="flex items-center justify-center gap-1.5">
+                                        <!-- Open Details Drawer -->
                                         <button 
                                             type="button" 
-                                            onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
+                                            onclick="openDrawer({{ json_encode($item) }})" 
+                                            class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 transition-colors"
+                                            title="View Full Item Details Drawer"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Edit Modal -->
+                                        <button 
+                                            type="button" 
+                                            onclick="openEditModal({{ json_encode($item) }})" 
                                             class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-slate-100 border border-slate-200 transition-colors"
                                             title="Edit Item Details"
                                         >
@@ -1393,9 +1736,10 @@
                                             </svg>
                                         </button>
 
+                                        <!-- Delete Modal -->
                                         <button 
                                             type="button" 
-                                            onclick="event.stopPropagation(); openDeleteModal({{ json_encode($item) }})" 
+                                            onclick="openDeleteModal({{ json_encode($item) }})" 
                                             class="p-1.5 rounded-lg text-slate-600 hover:text-rose-600 hover:bg-slate-100 border border-slate-200 transition-colors"
                                             title="Delete Item Record"
                                         >
@@ -1405,11 +1749,10 @@
                                         </button>
                                     </div>
                                 </td>
-
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ $selectedCategory === 'all' ? 9 : 7 }}" class="py-12 text-center text-slate-500">
+                                <td colspan="16" class="py-12 text-center text-slate-500">
                                     <div class="max-w-xs mx-auto space-y-2">
                                         <p class="font-bold text-slate-700">No inventory items found</p>
                                         <p class="text-xs text-slate-400">Add an item using the button above to populate the inventory spreadsheet.</p>
@@ -2147,19 +2490,25 @@
         right: 0 !important;
         width: 100% !important;
         max-width: 32rem !important;
-        background-color: #0b0f17 !important;
-        background: #0b0f17 !important;
-        color: #f1f5f9 !important;
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
         z-index: 999999 !important;
-        box-shadow: -20px 0 50px rgba(0, 0, 0, 0.95) !important;
-        border-left: 1px solid #1e293b !important;
+        box-shadow: -10px 0 30px rgba(15, 23, 42, 0.15) !important;
+        border-left: 1px solid #e2e8f0 !important;
+        transform: translateX(100%) !important;
+        pointer-events: none !important;
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         opacity: 1 !important;
+    }
+    #itemDrawer.drawer-open {
+        transform: translateX(0) !important;
+        pointer-events: auto !important;
     }
     #itemDrawerBackdrop {
         position: fixed !important;
         inset: 0 !important;
-        background-color: rgba(0, 0, 0, 0.75) !important;
+        background-color: rgba(15, 23, 42, 0.6) !important;
         backdrop-filter: blur(4px) !important;
         -webkit-backdrop-filter: blur(4px) !important;
         z-index: 999990 !important;
@@ -2173,25 +2522,25 @@
 <!-- ============================================================= -->
 <!-- BACKDROP FOR SLIDE-OVER DRAWER                                -->
 <!-- ============================================================= -->
-<div id="itemDrawerBackdrop" class="fixed inset-0 hidden opacity-0" onclick="closeDrawer()" style="background-color: rgba(0, 0, 0, 0.75) !important; z-index: 999990 !important; backdrop-filter: blur(4px) !important;"></div>
+<div id="itemDrawerBackdrop" class="fixed inset-0 hidden opacity-0" onclick="closeDrawer()" style="background-color: rgba(15, 23, 42, 0.6) !important; z-index: 999990 !important; backdrop-filter: blur(4px) !important;"></div>
 
 <!-- ============================================================= -->
-<!-- SIDE DRAWER DETAILS & HISTORY (LuminaSpec Reference Design)   -->
+<!-- SIDE DRAWER DETAILS & HISTORY (White Theme & High Contrast)    -->
 <!-- ============================================================= -->
-<div id="itemDrawer" class="fixed inset-y-0 right-0 w-full max-w-lg shadow-2xl transform translate-x-full flex flex-col" style="background-color: #0b0f17 !important; color: #f1f5f9 !important; z-index: 999999 !important; border-left: 1px solid #1e293b !important;">
+<div id="itemDrawer" class="fixed inset-y-0 right-0 w-full max-w-lg shadow-2xl flex flex-col bg-white text-slate-900 border-l border-slate-200">
     
     <!-- Drawer Header -->
-    <div class="p-6 border-b flex justify-between items-center" style="background-color: #0d131f !important; border-color: #1e293b !important;">
+    <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
         <div>
-            <span id="drawerTag" class="text-[10px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wider" style="background-color: rgba(14, 165, 233, 0.2) !important; color: #38bdf8 !important; border: 1px solid rgba(14, 165, 233, 0.3) !important;">
+            <span id="drawerTag" class="text-[10px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-200">
                 SKU DETAILS
             </span>
-            <h2 id="drawerSku" class="text-xl font-bold text-white mt-1 font-mono tracking-wide">
+            <h2 id="drawerSku" class="text-xl font-bold text-slate-900 mt-1 font-mono tracking-wide">
                 AUN2F3362A
             </h2>
             <h2 id="drawerTitle" class="hidden">AUN2F3362A</h2>
         </div>
-        <button type="button" onclick="closeDrawer()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition-colors">
+        <button type="button" onclick="closeDrawer()" class="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-200/60 transition-colors" title="Close Drawer">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -2199,68 +2548,68 @@
     </div>
 
     <!-- Drawer Body -->
-    <div class="flex-1 overflow-y-auto p-6 space-y-6" style="background-color: #0b0f17 !important;">
+    <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
         
         <!-- Item Specifications -->
-        <div class="p-4 rounded-xl space-y-3" style="background-color: #151c28 !important; border: 1px solid #1e293b !important;">
+        <div class="p-4 rounded-xl space-y-3 bg-slate-50 border border-slate-200">
             <div class="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                    <p class="text-slate-400 text-[11px] font-medium uppercase tracking-wider">Manufacturer</p>
-                    <p id="drawerBrand" class="font-bold text-slate-100 uppercase mt-0.5 text-sm">UNILUMIN</p>
+                    <p class="text-slate-500 text-[11px] font-semibold uppercase tracking-wider">Manufacturer</p>
+                    <p id="drawerBrand" class="font-bold text-slate-900 uppercase mt-0.5 text-sm">UNILUMIN</p>
                     <span id="drawerMfg" class="hidden">UNILUMIN</span>
                 </div>
                 <div>
-                    <p class="text-slate-400 text-[11px] font-medium uppercase tracking-wider">Model / Pitch</p>
-                    <p id="drawerModel" class="font-bold text-slate-100 font-mono mt-0.5 text-sm">UMINI P1.2 COB</p>
+                    <p class="text-slate-500 text-[11px] font-semibold uppercase tracking-wider">Model / Pitch</p>
+                    <p id="drawerModel" class="font-bold text-slate-900 font-mono mt-0.5 text-sm">UMINI P1.2 COB</p>
                 </div>
-                <div class="col-span-2 pt-2.5" style="border-top: 1px solid rgba(255,255,255,0.08) !important;">
-                    <p class="text-slate-400 text-[11px] font-medium uppercase tracking-wider">Description</p>
-                    <p id="drawerDesc" class="font-medium text-slate-200 text-xs mt-0.5 leading-relaxed uppercase">LED DISPLAY (600 X 337.5MM) - INDOOR</p>
+                <div class="col-span-2 pt-2.5 border-t border-slate-200">
+                    <p class="text-slate-500 text-[11px] font-semibold uppercase tracking-wider">Description</p>
+                    <p id="drawerDesc" class="font-medium text-slate-800 text-xs mt-0.5 leading-relaxed uppercase">LED DISPLAY (600 X 337.5MM) - INDOOR</p>
                 </div>
-                <div class="col-span-2 pt-2.5 flex justify-between items-center" style="border-top: 1px solid rgba(255,255,255,0.08) !important;">
+                <div class="col-span-2 pt-2.5 flex justify-between items-center border-t border-slate-200">
                     <div>
-                        <p class="text-slate-400 text-[11px] font-medium uppercase tracking-wider">Location Warehouse</p>
-                        <p id="drawerLocation" class="font-bold text-amber-400 text-xs mt-0.5 uppercase">MARIKINA</p>
+                        <p class="text-slate-500 text-[11px] font-semibold uppercase tracking-wider">Location Warehouse</p>
+                        <p id="drawerLocation" class="font-bold text-amber-700 text-xs mt-0.5 uppercase">MARIKINA</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-slate-400 text-[11px] font-medium uppercase tracking-wider">Date Received</p>
-                        <p id="drawerDate" class="font-mono font-medium text-slate-200 text-xs mt-0.5">10/15/2025</p>
+                        <p class="text-slate-500 text-[11px] font-semibold uppercase tracking-wider">Date Received</p>
+                        <p id="drawerDate" class="font-mono font-medium text-slate-700 text-xs mt-0.5">10/15/2025</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Status & Remarks Box -->
-        <div class="p-4 rounded-xl space-y-2" style="background-color: #111724 !important; border: 1px solid #1e293b !important;">
+        <div class="p-4 rounded-xl space-y-2 bg-slate-50 border border-slate-200">
             <div class="flex justify-between items-center">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Item Status & Remarks</span>
-                <span id="drawerStatusBadge" class="px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Item Status & Remarks</span>
+                <span id="drawerStatusBadge" class="px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-300">
                     ACTIVE
                 </span>
             </div>
-            <p id="drawerRemarks" class="text-xs text-slate-300 italic leading-relaxed">
+            <p id="drawerRemarks" class="text-xs text-slate-600 italic leading-relaxed">
                 No special remarks noted.
             </p>
         </div>
 
         <!-- Inventory Metrics Breakdown -->
         <div>
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
                 Inventory Quantities
             </h3>
             <div class="grid grid-cols-3 gap-3">
-                <div class="p-3 rounded-xl text-center" style="background-color: #111724 !important; border: 1px solid #1e293b !important;">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Original Qty</span>
-                    <p id="drawerOriginalQty" class="text-base font-extrabold text-slate-200 mt-1">500 pcs</p>
+                <div class="p-3 rounded-xl text-center bg-slate-50 border border-slate-200">
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Original Qty</span>
+                    <p id="drawerOriginalQty" class="text-base font-extrabold text-slate-800 mt-1 font-mono">500 pcs</p>
                 </div>
-                <div class="p-3 rounded-xl text-center" style="background-color: #111724 !important; border: 1px solid #1e293b !important;">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">On-Hand Qty</span>
-                    <p id="drawerOnHand" class="text-base font-extrabold text-white mt-1">500 pcs</p>
+                <div class="p-3 rounded-xl text-center bg-slate-50 border border-slate-200">
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">On-Hand Qty</span>
+                    <p id="drawerOnHand" class="text-base font-extrabold text-slate-900 mt-1 font-mono">500 pcs</p>
                     <span id="drawerOnHandQty" class="hidden">500 pcs</span>
                 </div>
-                <div id="drawerAvailBox" class="p-3 rounded-xl text-center" style="background-color: rgba(6, 78, 59, 0.3) !important; border: 1px solid rgba(16, 185, 129, 0.3) !important;">
-                    <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">Available</span>
-                    <p id="drawerAvailQty" class="text-base font-extrabold text-emerald-400 mt-1">500 pcs</p>
+                <div id="drawerAvailBox" class="p-3 rounded-xl text-center bg-emerald-50 border border-emerald-200">
+                    <span class="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">Available</span>
+                    <p id="drawerAvailQty" class="text-base font-extrabold text-emerald-700 mt-1 font-mono">500 pcs</p>
                     <span id="drawerAvailableQty" class="hidden">500 pcs</span>
                 </div>
             </div>
@@ -2269,8 +2618,8 @@
         <!-- Detailed Project Reservations -->
         <div>
             <div class="flex justify-between items-center mb-2.5">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Project Reservations</h3>
-                <button type="button" onclick="openReserveForCurrent()" class="text-xs text-amber-400 hover:text-amber-300 font-bold hover:underline transition-colors">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Project Reservations</h3>
+                <button type="button" onclick="openReserveForCurrent()" class="text-xs text-amber-600 hover:text-amber-700 font-bold hover:underline transition-colors">
                     + New Reservation
                 </button>
             </div>
@@ -2282,12 +2631,12 @@
 
         <!-- Transaction & Movement History -->
         <div>
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">Movement History</h3>
-            <div id="drawerHistory" class="space-y-2 border-l-2 ml-2 pl-4" style="border-color: #1e293b !important;">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">Movement History</h3>
+            <div id="drawerHistory" class="space-y-2 border-l-2 ml-2 pl-4 border-slate-200">
                 <div class="relative pb-3 text-xs">
-                    <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-slate-900"></div>
+                    <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-white"></div>
                     <div class="text-[10px] text-slate-500 font-mono">2025-10-15 09:30</div>
-                    <div class="font-semibold text-slate-300 mt-0.5">RECEIVED: Initial stock received</div>
+                    <div class="font-semibold text-slate-700 mt-0.5">RECEIVED: Initial stock received</div>
                 </div>
             </div>
             <div id="drawerMovementList" class="hidden"></div>
@@ -2296,14 +2645,14 @@
     </div>
 
     <!-- Drawer Footer Actions -->
-    <div class="p-4 border-t flex gap-2.5" style="background-color: #0d131f !important; border-color: #1e293b !important;">
-        <button type="button" onclick="editCurrentRow()" class="flex-1 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-1.5" style="background-color: #1e293b !important; border: 1px solid #334155 !important;">
-            <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="p-4 border-t border-slate-200 flex gap-2.5 bg-slate-50">
+        <button type="button" onclick="editCurrentRow()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-xs transition flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             Edit Details
         </button>
-        <button type="button" onclick="closeDrawer()" class="px-5 text-slate-300 hover:text-white text-xs font-semibold py-2.5 rounded-xl transition" style="background-color: #151c28 !important; border: 1px solid #1e293b !important;">
+        <button type="button" onclick="closeDrawer()" class="px-5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold py-2.5 rounded-xl transition">
             Close
         </button>
     </div>
@@ -2311,18 +2660,18 @@
 </div>
 
 <!-- ============================================================= -->
-<!-- EXTENDED RESERVATION MODAL (LuminaSpec Reference Design)      -->
+<!-- EXTENDED RESERVATION MODAL (Clean Light Aesthetic)           -->
 <!-- ============================================================= -->
-<div id="reserveModal" class="fixed inset-0 hidden flex items-center justify-center p-4 overflow-y-auto" style="z-index: 9999999 !important; background-color: rgba(0, 0, 0, 0.8) !important; backdrop-filter: blur(4px) !important;">
-    <div class="rounded-2xl max-w-lg w-full p-6 shadow-2xl relative my-8" style="background-color: #0f172a !important; border: 1px solid #1e293b !important; color: #f1f5f9 !important;">
-        <div class="flex justify-between items-center border-b pb-4 mb-4" style="border-color: #1e293b !important;">
-            <h3 class="font-bold text-amber-400 text-lg flex items-center gap-2">
-                <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+<div id="reserveModal" class="fixed inset-0 hidden flex items-center justify-center p-4 overflow-y-auto" style="z-index: 9999999 !important; background-color: rgba(15, 23, 42, 0.6) !important; backdrop-filter: blur(4px) !important;">
+    <div class="rounded-2xl max-w-lg w-full p-6 shadow-2xl relative my-8 bg-white border border-slate-200 text-slate-900">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-4 mb-4">
+            <h3 class="font-bold text-amber-600 text-lg flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
                 </svg>
                 Create Reservation & Allocation
             </h3>
-            <button type="button" onclick="closeModal('reserveModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+            <button type="button" onclick="closeModal('reserveModal')" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -2332,8 +2681,8 @@
         <form id="reserveForm" method="POST" action="" onsubmit="handleReserveStock(event)" class="space-y-4">
             @csrf
             <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Select LED Display SKU *</label>
-                <select id="reserveSkuSelect" required onchange="onReserveSkuChange(this.value)" class="w-full rounded-xl p-2.5 text-xs text-white focus:outline-none" style="background-color: #0b111e !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Select LED Display SKU *</label>
+                <select id="reserveSkuSelect" required onchange="onReserveSkuChange(this.value)" class="w-full rounded-xl p-2.5 text-xs text-slate-900 bg-slate-50 border border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
                     @foreach ($items as $itm)
                         <option value="{{ $itm->id }}" data-avail="{{ $itm->forecasted_quantity !== null ? $itm->forecasted_quantity : $itm->quantity }}">
                             {{ $itm->po_number ?? ($itm->tag_number ?? 'SKU-'.$itm->id) }} — {{ $itm->manufacturer }} {{ $itm->model }} ({{ $itm->location }})
@@ -2344,28 +2693,28 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Project / Client Name *</label>
-                    <input type="text" name="reservation_project" id="reserveProject" required placeholder="e.g. Globe Telco Event" class="w-full rounded-xl p-2.5 text-xs text-white focus:outline-none" style="background-color: #0b111e !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Project / Client Name *</label>
+                    <input type="text" name="reservation_project" id="reserveProject" required placeholder="e.g. Globe Telco Event" class="w-full rounded-xl p-2.5 text-xs text-slate-900 bg-slate-50 border border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Reserved Quantity (PCS) *</label>
-                    <input type="number" name="reservation_qty" id="reserveQty" required min="1" value="10" class="w-full rounded-xl p-2.5 text-xs text-white focus:outline-none" style="background-color: #0b111e !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Reserved Quantity (PCS) *</label>
+                    <input type="number" name="reservation_qty" id="reserveQty" required min="1" value="10" class="w-full rounded-xl p-2.5 text-xs text-slate-900 bg-slate-50 border border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Project Details / Location</label>
-                <input type="text" id="reserveProjectDetails" placeholder="e.g. SMX Convention Hall B Main Stage" class="w-full rounded-xl p-2.5 text-xs text-white focus:outline-none" style="background-color: #0b111e !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Project Details / Location</label>
+                <input type="text" id="reserveProjectDetails" placeholder="e.g. SMX Convention Hall B Main Stage" class="w-full rounded-xl p-2.5 text-xs text-slate-900 bg-slate-50 border border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
             </div>
 
             <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Particulars / Special Specs</label>
-                <textarea name="reservation_remarks" id="reserveParticulars" rows="2" placeholder="e.g. Requires 5x3 setup with hanging bars and power link cables..." class="w-full rounded-xl p-2 text-xs text-white focus:outline-none" style="background-color: #0b111e !important; color: #ffffff !important; border: 1px solid #334155 !important;"></textarea>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Particulars / Special Specs</label>
+                <textarea name="reservation_remarks" id="reserveParticulars" rows="2" placeholder="e.g. Requires 5x3 setup with hanging bars and power link cables..." class="w-full rounded-xl p-2 text-xs text-slate-900 bg-slate-50 border border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
             </div>
 
-            <div class="flex justify-end gap-3 pt-4 border-t" style="border-color: #1e293b !important;">
-                <button type="button" onclick="closeModal('reserveModal')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">Cancel</button>
-                <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition shadow-md shadow-amber-600/30">Confirm Allocation</button>
+            <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                <button type="button" onclick="closeModal('reserveModal')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900">Cancel</button>
+                <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition shadow-md shadow-amber-600/20">Confirm Allocation</button>
             </div>
         </form>
     </div>
@@ -2377,8 +2726,9 @@
 
     // Column View Mode Toggle (LuminaSpec Reference)
     function setColumnView(viewMode) {
+        if (!viewMode) viewMode = 'all';
         const groups = ['specs', 'inventory', 'reservation', 'history'];
-        const buttons = {
+        const buttonIds = {
             all: 'btnViewAll',
             specs: 'btnViewSpecs',
             inventory: 'btnViewInventory',
@@ -2386,17 +2736,15 @@
             history: 'btnViewHistory'
         };
 
-        Object.keys(buttons).forEach(key => {
-            const btn = document.getElementById(buttons[key]);
+        Object.keys(buttonIds).forEach(key => {
+            const btn = document.getElementById(buttonIds[key]);
             if (!btn) return;
+            btn.style.removeProperty('background-color');
+            btn.style.removeProperty('color');
             if (key === viewMode) {
-                btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold text-white transition whitespace-nowrap shadow-sm";
-                btn.style.backgroundColor = "#0284c7";
-                btn.style.color = "#ffffff";
+                btn.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs bg-sky-600 text-white";
             } else {
                 btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition whitespace-nowrap";
-                btn.style.backgroundColor = "";
-                btn.style.color = "";
             }
         });
 
@@ -2410,6 +2758,10 @@
                 }
             });
         });
+
+        try {
+            localStorage.setItem('inv_active_column_view', viewMode);
+        } catch (e) {}
     }
 
     // Open Slide Drawer (LuminaSpec Reference Design)
@@ -2475,14 +2827,14 @@
 
         const availBox = document.getElementById('drawerAvailBox');
         if (availBox) {
+            availBox.style.removeProperty('background-color');
+            availBox.style.removeProperty('border-color');
             if (isDeficit) {
-                availBox.style.backgroundColor = "rgba(136, 19, 55, 0.4) !important";
-                availBox.style.borderColor = "rgba(244, 63, 94, 0.4) !important";
-                if (availQtyEl) availQtyEl.className = "text-base font-extrabold text-rose-400 mt-1";
+                availBox.className = "p-3 rounded-xl text-center bg-rose-50 border border-rose-200";
+                if (availQtyEl) availQtyEl.className = "text-base font-extrabold text-rose-700 mt-1 font-mono";
             } else {
-                availBox.style.backgroundColor = "rgba(6, 78, 59, 0.3) !important";
-                availBox.style.borderColor = "rgba(16, 185, 129, 0.3) !important";
-                if (availQtyEl) availQtyEl.className = "text-base font-extrabold text-emerald-400 mt-1";
+                availBox.className = "p-3 rounded-xl text-center bg-emerald-50 border border-emerald-200";
+                if (availQtyEl) availQtyEl.className = "text-base font-extrabold text-emerald-700 mt-1 font-mono";
             }
         }
 
@@ -2490,16 +2842,16 @@
         const statusBadge = document.getElementById('drawerStatusBadge');
         if (statusBadge) {
             if (isDeficit) {
-                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse";
+                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-300 animate-pulse";
                 statusBadge.textContent = "DEFICIT";
             } else if (item.status === 'under_repair' || item.status === 'MAINTENANCE') {
-                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-300";
                 statusBadge.textContent = "MAINTENANCE";
             } else if (reservedQty > 0 || item.status === 'reserved') {
-                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-sky-500/20 text-sky-400 border border-sky-500/30";
+                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-300";
                 statusBadge.textContent = "RESERVED";
             } else {
-                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-300";
                 statusBadge.textContent = "ACTIVE";
             }
         }
@@ -2531,12 +2883,12 @@
 
             if (resItems.length > 0) {
                 resContainer.innerHTML = resItems.map(r => `
-                    <div class="p-3.5 rounded-xl text-xs space-y-1.5" style="background-color: #111724 !important; border: 1px solid #1e293b !important;">
+                    <div class="p-3.5 rounded-xl text-xs space-y-1.5 bg-amber-50/70 border border-amber-200">
                         <div class="flex justify-between items-start gap-2">
-                            <span class="font-bold text-slate-100 text-sm whitespace-pre-line">${r.project || 'Project Allocation'}</span>
-                            <span class="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 shrink-0 font-mono">${r.qty || 0} pcs reserved</span>
+                            <span class="font-bold text-slate-900 text-sm whitespace-pre-line">${r.project || 'Project Allocation'}</span>
+                            <span class="text-amber-800 font-bold bg-amber-100 px-2 py-0.5 rounded border border-amber-300 shrink-0 font-mono">${r.qty || 0} pcs reserved</span>
                         </div>
-                        ${r.remarks ? `<div class="text-slate-300 text-xs italic"><span class="text-slate-500">Details:</span> ${r.remarks}</div>` : ''}
+                        ${r.remarks ? `<div class="text-slate-600 text-xs italic"><span class="text-slate-500">Details:</span> ${r.remarks}</div>` : ''}
                     </div>
                 `).join('');
             } else {
@@ -2567,19 +2919,19 @@
             if (histItems.length > 0) {
                 historyContainer.innerHTML = histItems.map(h => `
                     <div class="relative pb-3 text-xs">
-                        <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-slate-900"></div>
+                        <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-white"></div>
                         <div class="flex items-center justify-between gap-2">
-                            <span class="text-cyan-300 font-bold font-mono text-[11px] bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">${h.qty || 0} pcs dispatched</span>
+                            <span class="text-blue-700 font-bold font-mono text-[11px] bg-blue-50 px-2 py-0.5 rounded border border-blue-200">${h.qty || 0} pcs dispatched</span>
                         </div>
-                        <div class="font-semibold text-slate-200 mt-1 whitespace-pre-line">${h.project || 'Project Delivery'}</div>
+                        <div class="font-semibold text-slate-800 mt-1 whitespace-pre-line">${h.project || 'Project Delivery'}</div>
                     </div>
                 `).join('');
             } else {
                 historyContainer.innerHTML = `
                     <div class="relative pb-3 text-xs">
-                        <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-slate-900"></div>
+                        <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-white"></div>
                         <div class="text-[10px] text-slate-500 font-mono">${date !== '—' ? date : 'Initial stock'}</div>
-                        <div class="font-semibold text-slate-300 mt-0.5">Received stock of ${origQty} pcs</div>
+                        <div class="font-semibold text-slate-700 mt-0.5">Received stock of ${origQty} pcs</div>
                     </div>
                 `;
             }
@@ -2596,7 +2948,9 @@
         }
         if (drawer) {
             drawer.classList.remove('translate-x-full');
+            drawer.classList.add('drawer-open');
             drawer.style.transform = 'translateX(0)';
+            drawer.style.pointerEvents = 'auto';
         }
     }
 
@@ -2606,7 +2960,9 @@
         const drawer = document.getElementById('itemDrawer');
         if (drawer) {
             drawer.classList.add('translate-x-full');
+            drawer.classList.remove('drawer-open');
             drawer.style.transform = 'translateX(100%)';
+            drawer.style.pointerEvents = 'none';
         }
         if (backdrop) {
             backdrop.style.opacity = '0';
@@ -3034,6 +3390,8 @@
         setCentralizedLedToggleUI(savedExt === '1');
         const savedPhilExt = localStorage.getItem('philips_ext_visible');
         setPhilipsToggleUI(savedPhilExt === '1');
+        const savedColView = localStorage.getItem('inv_active_column_view') || 'all';
+        setColumnView(savedColView);
     });
 
     // Close on Escape Key
