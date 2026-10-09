@@ -765,8 +765,10 @@ class InventoryController extends Controller
                 } elseif (str_contains($currentParent, 'status') || str_contains($colClean, 'status')) {
                     if (str_contains($subVal, 'particular')) {
                         $colKey = 'status_particular';
+                    } elseif (str_contains($subVal, 'qty')) {
+                        $colKey = 'status_qty';
                     } else {
-                        $colKey = 'status';
+                        $colKey = 'status_qty';
                     }
                 } elseif (str_contains($colClean, 'screensize') || str_contains($colClean, 'size')) {
                     $colKey = 'screen_size';
@@ -830,12 +832,18 @@ class InventoryController extends Controller
                 $histQty = $parseNum($rowData['history_qty'] ?? null);
                 $histProject = $cleanStr($rowData['history_project'] ?? '');
 
-                // Sub-batch check (e.g., PO specified on subsequent row under the same model)
-                if (empty($model) && empty($desc) && !empty($po) && ($onHand !== null || $totalOnHand !== null) && $lastItemModel) {
-                    $model = $lastItemModel->model;
-                    $desc = $lastItemModel->item_description;
-                    if (empty($mfg)) $mfg = $lastItemModel->manufacturer;
-                    if (empty($location)) $location = $lastItemModel->location;
+                $statusQty = $parseNum($rowData['status_qty'] ?? null);
+                $statusPart = $cleanStr($rowData['status_particular'] ?? '');
+
+                // Secondary location / batch check: inherit model, description, manufacturer, PO if this row has location or stock
+                if (empty($model) && empty($desc) && $lastItemModel !== null) {
+                    if (!empty($location) || ($onHand !== null && $onHand > 0) || !empty($po)) {
+                        $model = $lastItemModel->model;
+                        $desc = $lastItemModel->item_description;
+                        if (empty($mfg)) $mfg = $lastItemModel->manufacturer;
+                        if (empty($location)) $location = $lastItemModel->location;
+                        if (empty($po)) $po = $lastItemModel->po_number;
+                    }
                 }
 
                 if (!empty($model) || !empty($desc)) {
@@ -877,6 +885,12 @@ class InventoryController extends Controller
                     if ($hasColumn('history_project')) {
                         $itemData['history_project'] = $isTextCol ? $histProject : mb_substr($histProject, 0, 240);
                     }
+                    if ($hasColumn('status_qty')) {
+                        $itemData['status_qty'] = $statusQty ?? 0;
+                    }
+                    if ($hasColumn('status_particular')) {
+                        $itemData['status_particular'] = $statusPart ?: 'OK';
+                    }
                     if ($hasColumn('screen_size')) {
                         $itemData['screen_size'] = substr($cleanStr($rowData['screen_size'] ?? ''), 0, 50);
                     }
@@ -912,18 +926,31 @@ class InventoryController extends Controller
                     // Filter only existing database columns to prevent unknown column SQL errors
                     $safeData = array_intersect_key($itemData, array_flip($tableColumns));
 
-                    // Match existing item by Tag # if present, or by [Category, PO, Model, Location]
+                    // Match existing item accurately to avoid overwriting distinct products
                     $existing = null;
                     if (!empty($itemData['tag_number'])) {
-                        $existing = InventoryItem::where('category', $itemData['category'])
-                            ->where('tag_number', $itemData['tag_number'])
-                            ->first();
-                    } else {
+                        $tQuery = InventoryItem::where('category', $itemData['category'])
+                            ->where('tag_number', $itemData['tag_number']);
+                        if (!empty($itemData['po_number'])) {
+                            $tQuery->where('po_number', $itemData['po_number']);
+                        }
+                        $existing = $tQuery->first();
+                    }
+
+                    if (!$existing) {
                         $query = InventoryItem::where('category', $itemData['category'])
                             ->where('model', $itemData['model'])
                             ->where('location', $itemData['location']);
                         if (!empty($itemData['po_number'])) {
                             $query->where('po_number', $itemData['po_number']);
+                        } else {
+                            $query->where(function ($q) {
+                                $q->whereNull('po_number')->orWhere('po_number', '');
+                            });
+                        }
+                        if (!empty($itemData['item_description'])) {
+                            $descPrefix = mb_substr($itemData['item_description'], 0, 45);
+                            $query->where('item_description', 'like', $descPrefix . '%');
                         }
                         $existing = $query->first();
                     }
@@ -943,7 +970,13 @@ class InventoryController extends Controller
                         $lastItemModel->reservation_qty = ($lastItemModel->reservation_qty ?? 0) + ($resQty ?? 0);
                         if (!empty($resProject) && $hasColumn('reservation_project')) {
                             $existingProj = (string)($lastItemModel->reservation_project ?? '');
-                            $combined = $existingProj !== '' ? ($existingProj . '; ' . $resProject) : $resProject;
+                            if ($existingProj === '') {
+                                $combined = $resProject;
+                            } elseif (!str_contains($existingProj, $resProject)) {
+                                $combined = $existingProj . '; ' . $resProject;
+                            } else {
+                                $combined = $existingProj;
+                            }
                             $lastItemModel->reservation_project = $isTextCol ? $combined : mb_substr($combined, 0, 240);
                         }
                         $needsSave = true;
@@ -952,7 +985,13 @@ class InventoryController extends Controller
                         $lastItemModel->history_qty = ($lastItemModel->history_qty ?? 0) + ($histQty ?? 0);
                         if (!empty($histProject) && $hasColumn('history_project')) {
                             $existingHist = (string)($lastItemModel->history_project ?? '');
-                            $combinedHist = $existingHist !== '' ? ($existingHist . '; ' . $histProject) : $histProject;
+                            if ($existingHist === '') {
+                                $combinedHist = $histProject;
+                            } elseif (!str_contains($existingHist, $histProject)) {
+                                $combinedHist = $existingHist . '; ' . $histProject;
+                            } else {
+                                $combinedHist = $existingHist;
+                            }
                             $lastItemModel->history_project = $isTextCol ? $combinedHist : mb_substr($combinedHist, 0, 240);
                         }
                         $needsSave = true;

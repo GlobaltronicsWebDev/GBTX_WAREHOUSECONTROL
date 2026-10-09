@@ -349,7 +349,24 @@
                 <p class="text-xs text-slate-500">Click any row to open the full item drawer & movement logs</p>
             </div>
 
-            @if ($selectedCategory !== 'CENTRALIZED LED INVENTORY')
+            @if ($selectedCategory === 'CENTRALIZED LED INVENTORY')
+            <!-- Centralized LED Toggle for Reservations, History & Status -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+                <button 
+                    type="button" 
+                    onclick="toggleCentralizedLedColumns()" 
+                    id="btnToggleLedDetails" 
+                    class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
+                >
+                    <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span id="lblToggleLedDetails">Open Extended (Reservation, History, Status)</span>
+                    <span id="badgeToggleLedDetails" class="px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-slate-100 text-slate-600">HIDDEN</span>
+                </button>
+            </div>
+            @else
             <!-- Column View Mode Selectors (LuminaSpec Reference) -->
             <div class="flex items-center gap-2 overflow-x-auto pb-1">
                 <span class="text-xs text-slate-500 font-semibold mr-1 whitespace-nowrap">View Columns:</span>
@@ -362,9 +379,15 @@
             @endif
         </div>
 
+        <style>
+            .hide-central-ext .col-central-ext {
+                display: none !important;
+            }
+        </style>
+
         <!-- Spreadsheet Grid Table -->
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[1300px] text-left border-collapse">
+            <table id="centralLedTable" class="w-full min-w-[1300px] text-left border-collapse hide-central-ext">
                 
                 @if ($selectedCategory === 'LED Service Units' || $selectedCategory === 'LED SERVICES UNITS')
                     <!-- CLEAN 2-TIER SPREADSHEET HEADER FOR LED SERVICE UNITS -->
@@ -641,7 +664,7 @@
                     </tbody>
 
                 @elseif ($selectedCategory === 'CENTRALIZED LED INVENTORY')
-                    <!-- CLEAN SPREADSHEET HEADER FOR CENTRALIZED LED (STREAMLINED VIEW) -->
+                    <!-- CLEAN SPREADSHEET HEADER FOR CENTRALIZED LED (WITH TOGGLEABLE RESERVATIONS, HISTORY & STATUS) -->
                     <thead>
                         <tr class="divide-x divide-slate-300 border-b border-slate-300 text-[11px] sm:text-xs tracking-wider">
                             <th rowspan="2" class="py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[100px] whitespace-nowrap bg-yellow-300">TAG #</th>
@@ -653,6 +676,14 @@
                             <th rowspan="2" class="py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[140px] whitespace-nowrap bg-yellow-300">LOCATION</th>
                             <th colspan="4" class="py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-yellow-300 text-slate-900 tracking-wider">INVENTORY</th>
                             <th colspan="2" class="py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-yellow-300 text-slate-900 tracking-wider">AVAILABLE QTY</th>
+                            
+                            <!-- TOGGLEABLE EXTENDED COLUMNS: RESERVATION, HISTORY, ORIGINAL QTY, STATUS, REMARKS -->
+                            <th colspan="2" class="col-central-ext py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-yellow-300 text-slate-900 tracking-wider">RESERVATION</th>
+                            <th colspan="2" class="col-central-ext py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-yellow-300 text-slate-900 tracking-wider">HISTORY</th>
+                            <th rowspan="2" class="col-central-ext py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[95px] whitespace-nowrap bg-yellow-300">ORIGINAL QTY</th>
+                            <th colspan="2" class="col-central-ext py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-yellow-300 text-slate-900 tracking-wider">STATUS</th>
+                            <th rowspan="2" class="col-central-ext py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[150px] whitespace-nowrap bg-yellow-300">REMARKS</th>
+                            
                             <th rowspan="2" class="py-3 px-3 text-center text-slate-700 select-none min-w-[90px] whitespace-nowrap sticky right-0 bg-slate-50 font-bold uppercase">ACTIONS</th>
                         </tr>
                         <tr class="divide-x divide-slate-300 border-b border-slate-300">
@@ -664,6 +695,18 @@
                             <!-- AVAILABLE QTY SUBHEADERS -->
                             <th class="py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[75px] whitespace-nowrap bg-slate-300/80">QTY</th>
                             <th class="py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[85px] whitespace-nowrap bg-slate-300/80">SQM</th>
+                            
+                            <!-- RESERVATION SUBHEADERS -->
+                            <th class="col-central-ext py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[75px] whitespace-nowrap bg-slate-300/80">QTY</th>
+                            <th class="col-central-ext py-1.5 px-3 text-left text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[220px] bg-slate-300/80">PROJECT DETAILS</th>
+
+                            <!-- HISTORY SUBHEADERS -->
+                            <th class="col-central-ext py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[75px] whitespace-nowrap bg-slate-300/80">QTY</th>
+                            <th class="col-central-ext py-1.5 px-3 text-left text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[220px] bg-slate-300/80">PROJECT</th>
+
+                            <!-- STATUS SUBHEADERS -->
+                            <th class="col-central-ext py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[65px] whitespace-nowrap bg-slate-300/80">QTY</th>
+                            <th class="col-central-ext py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[90px] whitespace-nowrap bg-slate-300/80">PARTICULAR</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-xs sm:text-sm font-medium">
@@ -766,6 +809,83 @@
                                         <span class="font-bold text-xs {{ $availSqm < 0 ? 'text-rose-600' : ($availSqm == 0 ? 'text-slate-400' : 'text-slate-900') }}">
                                             {{ number_format($availSqm, 2) }}
                                         </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: RESERVATION QTY -->
+                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    @if ($item->reservation_qty)
+                                        <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-amber-50 text-amber-800 border border-amber-200">
+                                            {{ number_format($item->reservation_qty) }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: RESERVATION PROJECT DETAILS -->
+                                <td class="col-central-ext py-3 px-3 border-r border-slate-200 min-w-[220px] max-w-[320px] text-xs text-slate-800">
+                                    @if ($item->reservation_project)
+                                        <span class="line-clamp-2 hover:line-clamp-none font-medium" title="{{ $item->reservation_project }}">{{ $item->reservation_project }}</span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: HISTORY QTY -->
+                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    @if ($item->history_qty)
+                                        <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-blue-50 text-blue-800 border border-blue-200">
+                                            {{ number_format($item->history_qty) }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: HISTORY PROJECT -->
+                                <td class="col-central-ext py-3 px-3 border-r border-slate-200 min-w-[220px] max-w-[320px] text-xs text-slate-800">
+                                    @if ($item->history_project)
+                                        <span class="line-clamp-2 hover:line-clamp-none font-medium" title="{{ $item->history_project }}">{{ $item->history_project }}</span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: ORIGINAL QTY -->
+                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    <span class="font-bold text-xs text-slate-700">
+                                        {{ $item->original_quantity !== null ? number_format($item->original_quantity) : number_format($item->quantity) }}
+                                    </span>
+                                </td>
+
+                                <!-- TOGGLEABLE: STATUS QTY -->
+                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    <span class="text-xs font-semibold text-slate-700">
+                                        {{ $item->status_qty !== null ? number_format($item->status_qty) : '0' }}
+                                    </span>
+                                </td>
+
+                                <!-- TOGGLEABLE: STATUS PARTICULAR -->
+                                <td class="col-central-ext py-3 px-2 text-center border-r border-slate-200 whitespace-nowrap">
+                                    @php
+                                        $part = strtoupper(trim((string)($item->status_particular ?? 'OK')));
+                                    @endphp
+                                    @if ($part === 'OK' || empty($part))
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">OK</span>
+                                    @elseif (str_contains($part, 'RECOUNT'))
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">FOR RECOUNT</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">{{ $part }}</span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: REMARKS -->
+                                <td class="col-central-ext py-3 px-3 border-r border-slate-200 min-w-[140px] max-w-[240px] text-xs text-slate-600">
+                                    @if ($item->remarks)
+                                        <span class="line-clamp-2 hover:line-clamp-none" title="{{ $item->remarks }}">{{ $item->remarks }}</span>
                                     @else
                                         <span class="text-slate-400">—</span>
                                     @endif
@@ -2438,6 +2558,45 @@
             link.href = '{{ route("admin.inventory.sample-csv") }}?category=' + encodeURIComponent(cat);
         }
     }
+
+    // Centralized LED Extended Columns Toggle
+    function toggleCentralizedLedColumns() {
+        const table = document.getElementById('centralLedTable');
+        if (!table) return;
+        const isCurrentlyHidden = table.classList.contains('hide-central-ext');
+        setCentralizedLedToggleUI(isCurrentlyHidden);
+        localStorage.setItem('central_led_ext_visible', isCurrentlyHidden ? '1' : '0');
+    }
+
+    function setCentralizedLedToggleUI(show) {
+        const table = document.getElementById('centralLedTable');
+        if (table) {
+            if (show) {
+                table.classList.remove('hide-central-ext');
+            } else {
+                table.classList.add('hide-central-ext');
+            }
+        }
+        const btn = document.getElementById('btnToggleLedDetails');
+        const lbl = document.getElementById('lblToggleLedDetails');
+        const badge = document.getElementById('badgeToggleLedDetails');
+        if (btn) {
+            if (show) {
+                btn.className = "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900";
+                if (lbl) lbl.textContent = "Hide Extended (Reservation, History, Status)";
+                if (badge) { badge.textContent = "OPEN"; badge.className = "px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-amber-200 text-amber-900"; }
+            } else {
+                btn.className = "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-700";
+                if (lbl) lbl.textContent = "Open Extended (Reservation, History, Status)";
+                if (badge) { badge.textContent = "HIDDEN"; badge.className = "px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-slate-100 text-slate-600"; }
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedExt = localStorage.getItem('central_led_ext_visible');
+        setCentralizedLedToggleUI(savedExt === '1');
+    });
 
     // Close on Escape Key
     document.addEventListener('keydown', function(e) {
