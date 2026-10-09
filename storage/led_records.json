@@ -11,7 +11,8 @@
         "quantity": 500,
         "sqm": 101.25,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 500
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -25,7 +26,8 @@
         "quantity": 172,
         "sqm": 37.67,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 186
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -53,7 +55,8 @@
         "quantity": 352,
         "sqm": 108.13,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 352
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -67,7 +70,8 @@
         "quantity": 23,
         "sqm": 4.15,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 81
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -109,7 +113,8 @@
         "quantity": 240,
         "sqm": 12.29,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 240
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -123,7 +128,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "GLOBALTRONICS",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -137,7 +143,8 @@
         "quantity": 28,
         "sqm": 6.45,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 28
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -151,7 +158,8 @@
         "quantity": 312,
         "sqm": 97.08,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 316
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -179,7 +187,8 @@
         "quantity": 56,
         "sqm": 14,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 56
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -193,7 +202,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -207,7 +217,8 @@
         "quantity": 44,
         "sqm": 11,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 44
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -221,7 +232,8 @@
         "quantity": 215,
         "sqm": 114.5,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 229
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -249,7 +261,8 @@
         "quantity": 71,
         "sqm": 17.75,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 71
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -263,7 +276,8 @@
         "quantity": 121,
         "sqm": 60.5,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 121
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -277,7 +291,8 @@
         "quantity": 86,
         "sqm": 21.5,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 86
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -291,7 +306,8 @@
         "quantity": 18,
         "sqm": 9,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 18
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -305,7 +321,8 @@
         "quantity": 107,
         "sqm": 101.38,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 110
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -333,7 +350,8 @@
         "quantity": 276,
         "sqm": 84.79,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 276
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -341,13 +359,14 @@
         "po_number": "HK252292A",
         "manufacturer": "ABSEN",
         "check_in_date": "2025-10-14",
-        "model": "T5C3M-RC15 \/ P2.5",
+        "model": "T5C3M-RC15 / P2.5",
         "screen_size": null,
         "item_description": "FLEXIBLE LED MODULE (320 X 160MM)",
         "quantity": 2888,
         "sqm": 147.87,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 2888
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -361,7 +380,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "GLOBALTRONICS",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -375,7 +395,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -389,7 +410,8 @@
         "quantity": 535,
         "sqm": 27.39,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 535
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -403,7 +425,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -417,7 +440,8 @@
         "quantity": 2,
         "sqm": 0.5,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 2
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -431,7 +455,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -441,11 +466,12 @@
         "check_in_date": "2023-05-25",
         "model": "GX2.6",
         "screen_size": null,
-        "item_description": "GX2.6 \/ P2.6 LED DISPLAY (500mm x 1000mm)",
+        "item_description": "GX2.6 / P2.6 LED DISPLAY (500mm x 1000mm)",
         "quantity": 48,
         "sqm": 27.5,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 55
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -455,7 +481,7 @@
         "check_in_date": "2023-05-25",
         "model": "GX2.6",
         "screen_size": null,
-        "item_description": "GX2.6 \/ P2.6 LED DISPLAY (500mm x 1000mm)",
+        "item_description": "GX2.6 / P2.6 LED DISPLAY (500mm x 1000mm)",
         "quantity": 7,
         "sqm": 3.5,
         "location": "GLOBALTRONICS",
@@ -469,11 +495,12 @@
         "check_in_date": "2023-05-25",
         "model": "GX2.6",
         "screen_size": null,
-        "item_description": "GX2.6 \/ P2.6 LED DISPLAY (500mm x 500mm)",
+        "item_description": "GX2.6 / P2.6 LED DISPLAY (500mm x 500mm)",
         "quantity": 11,
         "sqm": 6,
         "location": "AJUAN - 1ST FLR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 24
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -483,7 +510,7 @@
         "check_in_date": "2023-05-25",
         "model": "GX2.6",
         "screen_size": null,
-        "item_description": "GX2.6 \/ P2.6 LED DISPLAY (500mm x 500mm)",
+        "item_description": "GX2.6 / P2.6 LED DISPLAY (500mm x 500mm)",
         "quantity": 13,
         "sqm": 3.25,
         "location": "GLOBALTRONICS",
@@ -501,7 +528,8 @@
         "quantity": 62,
         "sqm": 31.5,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 63
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -529,7 +557,8 @@
         "quantity": 57,
         "sqm": 16,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 64
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -557,7 +586,8 @@
         "quantity": 400,
         "sqm": 200,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 400
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -571,7 +601,8 @@
         "quantity": 48,
         "sqm": 24,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 48
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -585,7 +616,8 @@
         "quantity": 52,
         "sqm": 26,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 52
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -599,7 +631,8 @@
         "quantity": 80,
         "sqm": 20,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 80
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -613,7 +646,8 @@
         "quantity": 120,
         "sqm": 30,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 120
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -627,7 +661,8 @@
         "quantity": 240,
         "sqm": 30,
         "location": "GLOBALTRONICS",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 240
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -641,7 +676,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -655,7 +691,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -669,7 +706,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -683,7 +721,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -697,7 +736,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -711,7 +751,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -725,7 +766,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -739,7 +781,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -753,7 +796,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -767,7 +811,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -781,7 +826,8 @@
         "quantity": 228,
         "sqm": 57,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 228
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -795,7 +841,8 @@
         "quantity": 7,
         "sqm": 1.75,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 7
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -809,7 +856,8 @@
         "quantity": 20,
         "sqm": 5,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 20
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -823,7 +871,8 @@
         "quantity": 16,
         "sqm": 4,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 16
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -837,7 +886,8 @@
         "quantity": 48,
         "sqm": 12,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 48
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -851,7 +901,8 @@
         "quantity": 132,
         "sqm": 33,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 132
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -865,7 +916,8 @@
         "quantity": 73,
         "sqm": 17.52,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 73
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -879,7 +931,8 @@
         "quantity": 21,
         "sqm": 5.04,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 21
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -889,11 +942,12 @@
         "check_in_date": "2022-01-11",
         "model": "PTS 2.9",
         "screen_size": null,
-        "item_description": "LED DISPLAY (500 X 500MM) - INDOOR \/ OUTDOOR",
+        "item_description": "LED DISPLAY (500 X 500MM) - INDOOR / OUTDOOR",
         "quantity": 7,
         "sqm": 1.75,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 7
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -907,7 +961,8 @@
         "quantity": 123,
         "sqm": 30.75,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 123
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -921,7 +976,8 @@
         "quantity": 480,
         "sqm": 120,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 480
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -935,7 +991,8 @@
         "quantity": 345,
         "sqm": 172.5,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 345
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -949,7 +1006,8 @@
         "quantity": 68,
         "sqm": 17,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 68
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -963,7 +1021,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "GLOBALTRONICS",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -977,7 +1036,8 @@
         "quantity": 12,
         "sqm": 3,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 12
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -991,7 +1051,8 @@
         "quantity": 13,
         "sqm": 6.5,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 13
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1005,7 +1066,8 @@
         "quantity": 98,
         "sqm": 49,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 98
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1019,7 +1081,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1033,7 +1096,8 @@
         "quantity": 365,
         "sqm": 95.25,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 381
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1061,7 +1125,8 @@
         "quantity": 90,
         "sqm": 45,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 90
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1075,7 +1140,8 @@
         "quantity": 9,
         "sqm": 9,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 9
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1089,7 +1155,8 @@
         "quantity": 3,
         "sqm": 1.5,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 3
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1103,7 +1170,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1117,7 +1185,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1131,7 +1200,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1145,7 +1215,8 @@
         "quantity": 17,
         "sqm": 8.5,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 17
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1159,7 +1230,8 @@
         "quantity": 11,
         "sqm": 2.75,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 11
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1173,7 +1245,8 @@
         "quantity": 151,
         "sqm": 185.55,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 151
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1187,7 +1260,8 @@
         "quantity": 16,
         "sqm": 13.11,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 16
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1201,7 +1275,8 @@
         "quantity": 33,
         "sqm": 8.25,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 33
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1215,7 +1290,8 @@
         "quantity": 1,
         "sqm": 1.5,
         "location": "GLOBALTRONICS",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 1
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1229,7 +1305,8 @@
         "quantity": 9,
         "sqm": 9,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 9
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1243,7 +1320,8 @@
         "quantity": 1,
         "sqm": 0.25,
         "location": "GLOBALTRONICS",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 1
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1257,7 +1335,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "CLARK OFFICE",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1271,7 +1350,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "CLARK OFFICE",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1285,7 +1365,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "CLARK OFFICE",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1299,7 +1380,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "CLARK OFFICE",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1313,7 +1395,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "CLARK OFFICE",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1327,7 +1410,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "CLARK OFFICE",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1341,7 +1425,8 @@
         "quantity": 22,
         "sqm": 24,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 24
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1369,7 +1454,8 @@
         "quantity": 1,
         "sqm": 0.25,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 1
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1377,13 +1463,14 @@
         "po_number": "LTVGT221025-D",
         "manufacturer": "LEDTOP",
         "check_in_date": "2023-01-11",
-        "model": "EC5 \/ P5",
+        "model": "EC5 / P5",
         "screen_size": null,
         "item_description": "LED DISPLAY (960 X 960MM x 138.5) - OUTDOOR",
         "quantity": 170,
         "sqm": 156.67,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 170
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1391,13 +1478,14 @@
         "po_number": "LKGT20190805-D",
         "manufacturer": "LIGHT KING",
         "check_in_date": "2019-10-01",
-        "model": "KB5 \/ P5.9",
+        "model": "KB5 / P5.9",
         "screen_size": null,
         "item_description": "LED DISPLAY (500 X 500 X 22MM) - OUTDOOR",
         "quantity": 14,
         "sqm": 3.5,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 14
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1405,13 +1493,14 @@
         "po_number": "LKGT20191022-D",
         "manufacturer": "LIGHT KING",
         "check_in_date": "2019-12-06",
-        "model": "EC6 \/ P5.9",
+        "model": "EC6 / P5.9",
         "screen_size": null,
         "item_description": "LED DISPLAY (960 X 960 X 140MM) - OUTDOOR",
         "quantity": 9,
         "sqm": 8.29,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 9
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1419,13 +1508,14 @@
         "po_number": "1710042-D",
         "manufacturer": "LIGHT KING",
         "check_in_date": "2018-01-18",
-        "model": "RS6 \/ P6",
+        "model": "RS6 / P6",
         "screen_size": null,
         "item_description": "LED DISPLAY (576 X 576 X 45MM) -INDOOR",
         "quantity": 140,
         "sqm": 46.45,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 140
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1433,13 +1523,14 @@
         "po_number": "LKGT210917-D",
         "manufacturer": "LIGHT KING",
         "check_in_date": "2021-11-29",
-        "model": "EC5 \/ P6 (PRO)",
+        "model": "EC5 / P6 (PRO)",
         "screen_size": null,
         "item_description": "LED DISPLAY (960 X 960 X 138.5MM) - OUTDOOR",
         "quantity": 3,
         "sqm": 2.76,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 3
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1447,13 +1538,14 @@
         "po_number": "LKVGT211227",
         "manufacturer": "LIGHT KING",
         "check_in_date": "2022-02-24",
-        "model": "EC5 \/ P6 (PRO)",
+        "model": "EC5 / P6 (PRO)",
         "screen_size": null,
         "item_description": "LED DISPLAY (960 X 960 X 120MM) - OUTDOOR",
         "quantity": 10,
         "sqm": 9.22,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 10
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1467,7 +1559,8 @@
         "quantity": 40,
         "sqm": 45.16,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 49
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1509,7 +1602,8 @@
         "quantity": 11,
         "sqm": 5.07,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 11
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1523,7 +1617,8 @@
         "quantity": 117,
         "sqm": 107.83,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 117
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1537,7 +1632,8 @@
         "quantity": 20,
         "sqm": 20,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 20
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1551,7 +1647,8 @@
         "quantity": 120,
         "sqm": 120,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 120
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1565,7 +1662,8 @@
         "quantity": 200,
         "sqm": 200,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 200
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1579,7 +1677,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1593,7 +1692,8 @@
         "quantity": 55,
         "sqm": 50.69,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 55
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1607,7 +1707,8 @@
         "quantity": 23,
         "sqm": 21.2,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 23
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1621,7 +1722,8 @@
         "quantity": 3,
         "sqm": 3.69,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 4
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1649,7 +1751,8 @@
         "quantity": 543,
         "sqm": 380.62,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 413
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1663,7 +1766,8 @@
         "quantity": 256,
         "sqm": 315.8,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 257
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1691,7 +1795,8 @@
         "quantity": 193,
         "sqm": 275.25,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 224
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1717,9 +1822,10 @@
         "screen_size": null,
         "item_description": "LED DISPLAY (960 X 960MM) - OUTDOOR",
         "quantity": 13,
-        "sqm": 11.96,
+        "sqm": 0,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 14
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1747,7 +1853,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1761,7 +1868,8 @@
         "quantity": 10,
         "sqm": 9.22,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 10
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1775,7 +1883,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1783,13 +1892,14 @@
         "po_number": "TDC1802040",
         "manufacturer": "TRT",
         "check_in_date": "2019-01-04",
-        "model": "P8.33\/16.67",
+        "model": "P8.33/16.67",
         "screen_size": null,
         "item_description": "LED DISPLAY (500 X 1000MM) - OUTDOOR",
         "quantity": 150,
         "sqm": 75,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 150
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1797,13 +1907,14 @@
         "po_number": "TDM1710405",
         "manufacturer": "TRT",
         "check_in_date": "2018-02-15",
-        "model": "P8.33\/16.67",
+        "model": "P8.33/16.67",
         "screen_size": null,
         "item_description": "LED DISPLAY (500 X 1000MM) - OUTDOOR",
         "quantity": 50,
         "sqm": 25,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 50
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1817,7 +1928,8 @@
         "quantity": 5,
         "sqm": 4.61,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 5
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1825,13 +1937,14 @@
         "po_number": "LKGT20191018-D",
         "manufacturer": "LIGHT KING",
         "check_in_date": "2019-12-06",
-        "model": "EC5(PRO) P10 \/ E10",
+        "model": "EC5(PRO) P10 / E10",
         "screen_size": null,
         "item_description": "LED DISPLAY (960 X 960 X 138.5MM) - OUTDOOR",
         "quantity": 100,
         "sqm": 92.16,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 100
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1845,7 +1958,8 @@
         "quantity": 28,
         "sqm": 25.8,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 28
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1859,7 +1973,8 @@
         "quantity": 36,
         "sqm": 33.18,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 36
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1873,7 +1988,8 @@
         "quantity": 258,
         "sqm": 237.77,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 258
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1887,7 +2003,8 @@
         "quantity": 952,
         "sqm": 877.36,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 952
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1901,7 +2018,8 @@
         "quantity": 0,
         "sqm": 0,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 0
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1915,7 +2033,8 @@
         "quantity": 14,
         "sqm": 6.45,
         "location": "MARIKINA",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 14
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1929,7 +2048,8 @@
         "quantity": 8,
         "sqm": 7.37,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 8
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1943,7 +2063,8 @@
         "quantity": 18,
         "sqm": 10.62,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 18
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1957,7 +2078,8 @@
         "quantity": 27,
         "sqm": 24.88,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 27
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1965,13 +2087,14 @@
         "po_number": "LKGT20200224",
         "manufacturer": "LIGHT KING",
         "check_in_date": "2020-07-14",
-        "model": "P15\/15",
+        "model": "P15/15",
         "screen_size": null,
         "item_description": "LED DISPLAY (500 X 1000MM) - OUTDOOR",
         "quantity": 172,
         "sqm": 86,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 172
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1985,7 +2108,8 @@
         "quantity": 5,
         "sqm": 4.61,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 5
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -1999,7 +2123,8 @@
         "quantity": 2,
         "sqm": 2.1,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 2
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -2013,7 +2138,8 @@
         "quantity": 9,
         "sqm": 8.29,
         "location": "A JUAN MAIN 3RD FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 9
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -2021,13 +2147,14 @@
         "po_number": "E210030",
         "manufacturer": "UNILUMIN",
         "check_in_date": "2022-04-13",
-        "model": "USTORMIII16 \/ P16",
+        "model": "USTORMIII16 / P16",
         "screen_size": null,
         "item_description": "LED DISPLAY (800 X 900MM) - OUTDOOR",
         "quantity": 1,
         "sqm": 0.72,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 1
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -2041,7 +2168,8 @@
         "quantity": 74,
         "sqm": 37,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 74
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -2049,13 +2177,14 @@
         "po_number": "TDC1712469",
         "manufacturer": "TRT",
         "check_in_date": "2018-04-07",
-        "model": "P16\/16",
+        "model": "P16/16",
         "screen_size": null,
         "item_description": "LED DISPLAY (500 x 1000MM) - OUTDOOR",
         "quantity": 4,
         "sqm": 2,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 4
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -2063,13 +2192,14 @@
         "po_number": "TDC1803067",
         "manufacturer": "TRT",
         "check_in_date": "2018-11-08",
-        "model": "P16\/16",
+        "model": "P16/16",
         "screen_size": null,
         "item_description": "LED DISPLAY (500 x 1000MM) - OUTDOOR",
         "quantity": 135,
         "sqm": 67.5,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 135
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -2077,13 +2207,14 @@
         "po_number": "ZX200089",
         "manufacturer": "LEYARD",
         "check_in_date": "2020-12-10",
-        "model": "P16\/16",
+        "model": "P16/16",
         "screen_size": null,
         "item_description": "LED DISPLAY (500 x 1000MM) - OUTDOOR",
         "quantity": 209,
         "sqm": 104.5,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 209
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -2097,7 +2228,8 @@
         "quantity": 1,
         "sqm": 1,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 1
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -2111,7 +2243,8 @@
         "quantity": 1,
         "sqm": 4,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 1
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -2125,7 +2258,8 @@
         "quantity": 4,
         "sqm": 16,
         "location": "GLOBALTRONICS",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 4
     },
     {
         "category": "CENTRALIZED LED INVENTORY",
@@ -2139,6 +2273,7 @@
         "quantity": 108,
         "sqm": 432,
         "location": "A JUAN MAIN 1ST FLOOR",
-        "status": "in_stock"
+        "status": "in_stock",
+        "acu_quantity": 108
     }
 ]

@@ -610,12 +610,14 @@
                             <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[160px] whitespace-nowrap">MODEL / PIXEL PITCH</th>
                             <th rowspan="2" class="py-2.5 px-4 text-left text-slate-700 select-none min-w-[320px]">ITEM DESCRIPTION</th>
                             <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[140px] whitespace-nowrap">LOCATION</th>
-                            <th colspan="2" class="py-1 px-3 text-center text-slate-700 select-none border-b border-slate-200 whitespace-nowrap">AVAILABLE QTY</th>
+                            <th colspan="4" class="py-1 px-3 text-center font-extrabold uppercase text-[11px] sm:text-xs select-none border-b border-yellow-400 whitespace-nowrap bg-yellow-300 text-slate-900 tracking-wider">INVENTORY</th>
                             <th rowspan="2" class="py-2.5 px-3 text-center text-slate-700 select-none min-w-[90px] whitespace-nowrap">ACTIONS</th>
                         </tr>
-                        <tr class="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider divide-x divide-slate-200 border-b border-slate-200">
-                            <th class="py-1.5 px-3 text-center text-slate-600 select-none min-w-[75px] whitespace-nowrap">QTY</th>
-                            <th class="py-1.5 px-3 text-center text-slate-600 select-none min-w-[85px] whitespace-nowrap">SQM</th>
+                        <tr class="divide-x divide-slate-200 border-b border-slate-200">
+                            <th class="py-1.5 px-2.5 text-center text-slate-800 font-bold uppercase text-[10px] tracking-wider select-none min-w-[75px] whitespace-nowrap bg-slate-200">ON-HAND</th>
+                            <th class="py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[90px] whitespace-nowrap bg-yellow-200">TOTAL ON-HAND</th>
+                            <th class="py-1.5 px-2.5 text-center text-slate-800 font-bold uppercase text-[10px] tracking-wider select-none min-w-[105px] whitespace-nowrap bg-slate-200">PER PANEL SQM</th>
+                            <th class="py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[125px] whitespace-nowrap bg-yellow-200">TOTAL AVAILABLE SQM</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-xs sm:text-sm font-medium">
@@ -661,16 +663,37 @@
                                     </span>
                                 </td>
 
-                                <!-- QTY -->
-                                <td class="py-3 px-3 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
-                                    <span class="inline-flex items-center justify-center min-w-[2.25rem] px-2 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
-                                        {{ $item->quantity }}
+                                <!-- ON-HAND -->
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
+                                        {{ number_format($item->quantity) }}
                                     </span>
                                 </td>
 
-                                <!-- SQM -->
-                                <td class="py-3 px-3 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
-                                    <span class="inline-flex items-center justify-center min-w-[2.75rem] px-2 py-0.5 rounded font-semibold text-xs bg-slate-100 text-slate-800 border border-slate-200">
+                                <!-- TOTAL ON-HAND -->
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    @if ($item->acu_quantity !== null)
+                                        <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-yellow-50 text-amber-900 border border-yellow-200">
+                                            {{ number_format($item->acu_quantity) }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- PER PANEL SQM -->
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    <span class="font-medium text-xs text-slate-600">
+                                        @php
+                                            $divisor = $item->acu_quantity ?: $item->quantity;
+                                        @endphp
+                                        {{ $item->sqm && $divisor > 0 ? number_format($item->sqm / $divisor, 2) : '—' }}
+                                    </span>
+                                </td>
+
+                                <!-- TOTAL AVAILABLE SQM -->
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                    <span class="font-bold text-xs text-slate-900">
                                         {{ $item->sqm !== null ? number_format($item->sqm, 2) : '—' }}
                                     </span>
                                 </td>
@@ -703,7 +726,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="py-12 text-center text-slate-500">
+                                <td colspan="12" class="py-12 text-center text-slate-500">
                                     <div class="max-w-xs mx-auto space-y-2">
                                         <p class="font-bold text-slate-700">No LED inventory items found</p>
                                         <p class="text-xs text-slate-400">Add an LED module using the button above to populate this category.</p>

@@ -19,16 +19,27 @@ Artisan::command('inventory:sync-po', function () {
 
     foreach ($records as $rec) {
         $po = !empty($rec['po_number']) ? trim($rec['po_number']) : null;
+        $acuQty = isset($rec['acu_quantity']) ? $rec['acu_quantity'] : null;
+        $sqm = isset($rec['sqm']) ? $rec['sqm'] : null;
+
         if (!empty($rec['tag_number'])) {
+            $data = ['po_number' => $po];
+            if ($acuQty !== null) {
+                $data['acu_quantity'] = $acuQty;
+            }
+            if ($sqm !== null) {
+                $data['sqm'] = $sqm;
+            }
+
             $count = \App\Models\InventoryItem::where('category', 'CENTRALIZED LED INVENTORY')
                 ->where('tag_number', $rec['tag_number'])
-                ->update(['po_number' => $po]);
+                ->update($data);
             if ($count > 0) {
                 $updated++;
             }
         }
     }
 
-    $this->info("Successfully synced PO # for {$updated} Centralized LED inventory items!");
-})->purpose('Sync PO numbers from led_records.json into inventory_items');
+    $this->info("Successfully synced PO #, On-Hand and SQM quantities for {$updated} Centralized LED inventory items!");
+})->purpose('Sync PO numbers and quantities from led_records.json into inventory_items');
 
