@@ -639,11 +639,18 @@ class InventoryController extends Controller
             // Detect if reservation_project column is TEXT or VARCHAR
             $isTextCol = false;
             try {
-                $colType = DB::selectOne("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'inventory_items' AND COLUMN_NAME = 'reservation_project'");
-                if ($colType && in_array(strtolower($colType->DATA_TYPE), ['text', 'mediumtext', 'longtext'])) {
+                $colType = Schema::getColumnType('inventory_items', 'reservation_project');
+                if (in_array(strtolower((string)$colType), ['text', 'mediumtext', 'longtext'])) {
                     $isTextCol = true;
                 }
-            } catch (\Throwable $ignored) {
+            } catch (\Throwable $e) {
+                try {
+                    $colType = DB::selectOne("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'inventory_items' AND COLUMN_NAME = 'reservation_project'");
+                    if ($colType && in_array(strtolower($colType->DATA_TYPE), ['text', 'mediumtext', 'longtext'])) {
+                        $isTextCol = true;
+                    }
+                } catch (\Throwable $ignored) {
+                }
             }
 
             // Helper for numbers (handles commas like "2,888", units like "500 pcs", "-242 pcs", "101.25 sqm", "-12.39 sqm", etc.)
@@ -859,7 +866,7 @@ class InventoryController extends Controller
                         $itemData['reservation_qty'] = $resQty ?? 0;
                     }
                     if ($hasColumn('reservation_project')) {
-                        $itemData['reservation_project'] = $resProject;
+                        $itemData['reservation_project'] = $isTextCol ? $resProject : mb_substr($resProject, 0, 240);
                     }
                     if ($hasColumn('reservation_remarks')) {
                         $itemData['reservation_remarks'] = $cleanStr($rowData['reservation_remarks'] ?? '');
@@ -868,7 +875,7 @@ class InventoryController extends Controller
                         $itemData['history_qty'] = $histQty ?? 0;
                     }
                     if ($hasColumn('history_project')) {
-                        $itemData['history_project'] = $histProject;
+                        $itemData['history_project'] = $isTextCol ? $histProject : mb_substr($histProject, 0, 240);
                     }
                     if ($hasColumn('screen_size')) {
                         $itemData['screen_size'] = substr($cleanStr($rowData['screen_size'] ?? ''), 0, 50);
@@ -935,14 +942,18 @@ class InventoryController extends Controller
                     if ($hasColumn('reservation_qty') && ($resQty || !empty($resProject))) {
                         $lastItemModel->reservation_qty = ($lastItemModel->reservation_qty ?? 0) + ($resQty ?? 0);
                         if (!empty($resProject) && $hasColumn('reservation_project')) {
-                            $lastItemModel->reservation_project = trim(($lastItemModel->reservation_project ? $lastItemModel->reservation_project . '; ' : '') . $resProject);
+                            $existingProj = (string)($lastItemModel->reservation_project ?? '');
+                            $combined = $existingProj !== '' ? ($existingProj . '; ' . $resProject) : $resProject;
+                            $lastItemModel->reservation_project = $isTextCol ? $combined : mb_substr($combined, 0, 240);
                         }
                         $needsSave = true;
                     }
                     if ($hasColumn('history_qty') && ($histQty || !empty($histProject))) {
                         $lastItemModel->history_qty = ($lastItemModel->history_qty ?? 0) + ($histQty ?? 0);
-                        if (!empty($histProject) && $hasColumn('history_project') && empty($lastItemModel->history_project)) {
-                            $lastItemModel->history_project = $histProject;
+                        if (!empty($histProject) && $hasColumn('history_project')) {
+                            $existingHist = (string)($lastItemModel->history_project ?? '');
+                            $combinedHist = $existingHist !== '' ? ($existingHist . '; ' . $histProject) : $histProject;
+                            $lastItemModel->history_project = $isTextCol ? $combinedHist : mb_substr($combinedHist, 0, 240);
                         }
                         $needsSave = true;
                     }
