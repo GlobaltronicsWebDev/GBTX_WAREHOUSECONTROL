@@ -366,6 +366,23 @@
                     <span id="badgeToggleLedDetails" class="px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-slate-100 text-slate-600">HIDDEN</span>
                 </button>
             </div>
+            @elseif ($selectedCategory === 'EOL PHILIPS UNITS')
+            <!-- EOL Philips Units Toggle for Reservations, History, Unfound & Remarks -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+                <button 
+                    type="button" 
+                    onclick="togglePhilipsColumns()" 
+                    id="btnTogglePhilipsDetails" 
+                    class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
+                >
+                    <svg class="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span id="lblTogglePhilipsDetails">Open Extended (Reservation, History, Unfound, Status)</span>
+                    <span id="badgeTogglePhilipsDetails" class="px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-slate-100 text-slate-600">HIDDEN</span>
+                </button>
+            </div>
             @else
             <!-- Column View Mode Selectors (LuminaSpec Reference) -->
             <div class="flex items-center gap-2 overflow-x-auto pb-1">
@@ -383,11 +400,14 @@
             .hide-central-ext .col-central-ext {
                 display: none !important;
             }
+            .hide-philips-ext .col-philips-ext {
+                display: none !important;
+            }
         </style>
 
         <!-- Spreadsheet Grid Table -->
         <div class="overflow-x-auto">
-            <table id="centralLedTable" class="w-full min-w-[1300px] text-left border-collapse hide-central-ext">
+            <table id="centralLedTable" class="w-full min-w-[1300px] text-left border-collapse hide-central-ext hide-philips-ext">
                 
                 @if ($selectedCategory === 'LED Service Units' || $selectedCategory === 'LED SERVICES UNITS')
                     <!-- CLEAN 2-TIER SPREADSHEET HEADER FOR LED SERVICE UNITS -->
