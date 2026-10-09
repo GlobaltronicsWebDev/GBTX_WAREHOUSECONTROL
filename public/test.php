@@ -120,27 +120,49 @@ echo "<p>\$_SERVER['DB_CONNECTION']: <strong>" . var_export($_SERVER['DB_CONNECT
 echo "<p>\$_ENV['DB_CONNECTION']: <strong>" . var_export($_ENV['DB_CONNECTION'] ?? null, true) . "</strong></p>";
 
 // 4. Test Laravel's configuration
-echo "<h3>4. Laravel Database Configuration</h3>";
-try {
-    require $basePath . '/vendor/autoload.php';
-    $app = require_once $basePath . '/bootstrap/app.php';
-    $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
-    $kernel->bootstrap();
+echo "<h3>4. Laravel Autoload & Database Configuration</h3>";
+$vendorDir = $basePath . '/vendor';
+$autoloadFile = $vendorDir . '/autoload.php';
 
-    echo "<p>Laravel default connection: <strong>" . config('database.default') . "</strong></p>";
-    echo "<p>Laravel env('DB_CONNECTION'): <strong>" . env('DB_CONNECTION') . "</strong></p>";
-    
-    $defaultConn = config('database.default');
-    $connConfig = config("database.connections.{$defaultConn}");
-    if ($connConfig) {
-        unset($connConfig['password']);
-        echo "<pre style='background:#f4f4f4;padding:10px;'>Active Connection Config: " . htmlspecialchars(json_encode($connConfig, JSON_PRETTY_PRINT)) . "</pre>";
+echo "<p>Vendor directory exists: <strong>" . (is_dir($vendorDir) ? "YES" : "NO") . "</strong></p>";
+if (is_dir($vendorDir)) {
+    $vendorFiles = scandir($vendorDir);
+    echo "<p>Files inside vendor: " . htmlspecialchars(implode(', ', array_slice($vendorFiles, 0, 20))) . "</p>";
+}
+
+// Search for autoload.php in other paths
+$otherPaths = [
+    '/home/u553953718/public_html/vendor/autoload.php',
+    '/home/u553953718/vendor/autoload.php',
+    dirname($basePath) . '/vendor/autoload.php',
+];
+foreach ($otherPaths as $altPath) {
+    if (file_exists($altPath)) {
+        echo "<p style='color:orange;'>Found alternative autoload at: <strong>{$altPath}</strong></p>";
+        if (!file_exists($autoloadFile)) {
+            echo "<p style='color:green;'>Copying/linking from {$altPath} to {$autoloadFile}...</p>";
+            @copy($altPath, $autoloadFile);
+        }
     }
+}
 
-    $db = \Illuminate\Support\Facades\DB::connection();
-    $db->getPdo();
-    echo "<p style='color:green;'>✔ Laravel DB::connection() Connected Successfully!</p>";
-} catch (\Throwable $e) {
-    echo "<p style='color:red;'>✘ Laravel Connection Error: " . htmlspecialchars($e->getMessage()) . "</p>";
+if (!file_exists($autoloadFile)) {
+    echo "<p style='color:red;'>✘ vendor/autoload.php is missing. Vendor directory contains: " . (is_dir($vendorDir) ? count(scandir($vendorDir)) . " items" : "DIR DOES NOT EXIST") . "</p>";
+} else {
+    try {
+        require $autoloadFile;
+        $app = require_once $basePath . '/bootstrap/app.php';
+        $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+        $kernel->bootstrap();
+
+        echo "<p>Laravel default connection: <strong>" . config('database.default') . "</strong></p>";
+        echo "<p>Laravel env('DB_CONNECTION'): <strong>" . env('DB_CONNECTION') . "</strong></p>";
+        
+        $db = \Illuminate\Support\Facades\DB::connection();
+        $db->getPdo();
+        echo "<p style='color:green;'>✔ Laravel DB::connection() Connected Successfully!</p>";
+    } catch (\Throwable $e) {
+        echo "<p style='color:red;'>✘ Laravel Connection Error: " . htmlspecialchars($e->getMessage()) . "</p>";
+    }
 }
 
