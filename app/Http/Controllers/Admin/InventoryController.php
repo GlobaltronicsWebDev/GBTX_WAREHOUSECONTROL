@@ -103,7 +103,7 @@ class InventoryController extends Controller
         $filterBaseQuery->getQuery()->orders = null;
 
         $categoryTotalQty = (int) (clone $filterBaseQuery)->sum('quantity');
-        $categoryTotalAcuQty = (int) (clone $filterBaseQuery)->sum(DB::raw('COALESCE(acu_quantity, quantity)'));
+        $categoryTotalAcuQty = (int) (clone $filterBaseQuery)->sum(DB::raw('CASE WHEN acu_quantity IS NOT NULL AND acu_quantity > 0 THEN acu_quantity ELSE quantity END'));
         $categoryTotalForecastedQty = (int) (clone $filterBaseQuery)->sum(DB::raw('COALESCE(forecasted_quantity, CASE WHEN quantity - COALESCE(reservation_qty, 0) > 0 THEN quantity - COALESCE(reservation_qty, 0) ELSE 0 END)'));
         $categoryTotalHistoryQty = (int) (clone $filterBaseQuery)->sum('history_qty');
         $categoryTotalReservedQty = (int) (clone $filterBaseQuery)->sum('reservation_qty');

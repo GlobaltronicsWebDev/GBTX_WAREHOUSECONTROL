@@ -537,7 +537,6 @@
                             <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[130px] whitespace-nowrap bg-white font-extrabold">PO / SKU No.</th>
                             <th rowspan="2" class="py-1.5 px-3 text-left text-slate-800 select-none min-w-[280px] bg-white font-extrabold">ITEM DESCRIPTION</th>
                             <th colspan="4" class="py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">INVENTORY</th>
-                            <th colspan="2" class="py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">FORECASTED QTY</th>
                             <th colspan="2" class="py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">RESERVATION</th>
                             <th colspan="2" class="py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">HISTORY</th>
                             <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[95px] whitespace-nowrap bg-white font-extrabold">ORIGINAL QTY</th>
@@ -551,10 +550,6 @@
                             <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[70px] whitespace-nowrap bg-white font-bold">ACU. QTY</th>
                             <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[100px] whitespace-nowrap bg-white font-bold">PER PANEL SQM</th>
                             <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[130px] whitespace-nowrap bg-white font-bold">TOTAL AVAILABLE SQM</th>
-
-                            <!-- FORECASTED QTY SUBHEADERS -->
-                            <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[65px] whitespace-nowrap bg-white font-bold">QTY</th>
-                            <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[80px] whitespace-nowrap bg-white font-bold">SQM</th>
 
                             <!-- RESERVATION SUBHEADERS -->
                             <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[65px] whitespace-nowrap bg-white font-bold">QTY</th>
@@ -661,7 +656,7 @@
                                 <!-- INVENTORY: ACU. QTY -->
                                 <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
-                                        {{ $item->acu_quantity ?? $item->quantity }}
+                                        {{ ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity }}
                                     </span>
                                 </td>
 
@@ -677,32 +672,6 @@
                                     <span class="inline-flex items-center justify-center min-w-[2.5rem] px-1.5 py-0.5 rounded font-semibold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $item->sqm !== null ? number_format($item->sqm, 2) : '—' }}
                                     </span>
-                                </td>
-
-                                <!-- FORECASTED QTY: QTY -->
-                                @php
-                                    $availQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : ($item->quantity - ($item->reservation_qty ?? 0));
-                                @endphp
-                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
-                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs {{ $availQty < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-800 border border-slate-200' }}">
-                                        {{ $availQty }}
-                                    </span>
-                                </td>
-
-                                <!-- FORECASTED QTY: SQM -->
-                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
-                                    @php
-                                        $divisor = ($item->acu_quantity ?: $item->quantity) ?: 1;
-                                        $perPanelSqm = ($item->sqm && $divisor > 0) ? ($item->sqm / $divisor) : 0;
-                                        $availSqm = $item->sqm !== null ? ($perPanelSqm * $availQty) : null;
-                                    @endphp
-                                    @if ($availSqm !== null)
-                                        <span class="font-bold text-xs text-slate-700">
-                                            {{ number_format($availSqm, 2) }}
-                                        </span>
-                                    @else
-                                        <span class="text-slate-400">—</span>
-                                    @endif
                                 </td>
 
                                 <!-- RESERVATION: QTY -->
@@ -855,7 +824,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="22" class="py-12 text-center text-slate-500">
+                                <td colspan="20" class="py-12 text-center text-slate-500">
                                     <div class="max-w-xs mx-auto space-y-2">
                                         <p class="font-bold text-slate-700">No LED service units found</p>
                                         <p class="text-xs text-slate-400">Add an LED service unit using the button above to populate this list.</p>
@@ -868,21 +837,12 @@
                     @if ($items->total() > 0 || $items->count() > 0)
                         @php
                             $ledTotalQty = $categoryTotalQty ?? $items->sum('quantity');
-                            $ledTotalAcuQty = $categoryTotalAcuQty ?? $items->sum(function($i) { return (int)($i->acu_quantity ?: $i->quantity); });
+                            $ledTotalAcuQty = $categoryTotalAcuQty ?? $items->sum(function($i) { return (int)(($i->acu_quantity && $i->acu_quantity > 0) ? $i->acu_quantity : $i->quantity); });
                             $ledTotalOrigQty = $categoryTotalOriginalQty ?? $items->sum(function($i) { return (int)($i->original_quantity !== null ? $i->original_quantity : $i->quantity); });
                             $ledTotalReservedQty = $categoryTotalReservedQty ?? $items->sum(function($i) { return (int)($i->reservation_qty ?: 0); });
                             $ledTotalHistoryQty = $categoryTotalHistoryQty ?? $items->sum(function($i) { return (int)($i->history_qty ?: 0); });
                             $ledTotalStatusQty = $categoryTotalStatusQty ?? $items->sum(function($i) { return (int)($i->status_qty ?: 0); });
-                            $ledTotalAvailQty = $categoryTotalForecastedQty ?? $items->sum(function($i) {
-                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reservation_qty ?? 0));
-                                return max(0, (int)$avail);
-                            });
-                            $ledTotalAvailSqm = $categoryTotalSqm ?? $items->sum(function($i) {
-                                $divisor = ($i->acu_quantity ?: $i->quantity) ?: 1;
-                                $perPanel = ($i->sqm && $divisor > 0) ? ($i->sqm / $divisor) : 0;
-                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reservation_qty ?? 0));
-                                return $i->sqm !== null ? ($perPanel * max(0, (int)$avail)) : 0;
-                            });
+                            $ledTotalAvailSqm = $categoryTotalSqm ?? $items->sum('sqm');
                         @endphp
                         <tfoot class="border-t-2 border-slate-300 font-bold bg-slate-100 text-slate-900 select-none">
                             <tr class="divide-x divide-slate-200 h-9">
@@ -907,16 +867,6 @@
                                 </td>
 
                                 <!-- INVENTORY: TOTAL AVAILABLE SQM -->
-                                <td class="py-2 px-2 text-center font-mono-code font-bold text-xs text-slate-900 bg-slate-100 whitespace-nowrap">
-                                    {{ $ledTotalAvailSqm > 0 ? number_format($ledTotalAvailSqm, 2) . ' m²' : '—' }}
-                                </td>
-
-                                <!-- FORECASTED QTY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
-                                    {{ number_format($ledTotalAvailQty) }}
-                                </td>
-
-                                <!-- FORECASTED QTY: SQM -->
                                 <td class="py-2 px-2 text-center font-mono-code font-bold text-xs text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ $ledTotalAvailSqm > 0 ? number_format($ledTotalAvailSqm, 2) . ' m²' : '—' }}
                                 </td>
