@@ -1703,7 +1703,449 @@
     </div>
 </div>
 
+<!-- ============================================================= -->
+<!-- SLIDE-OVER DRAWER: DETAILED INVENTORY ITEM INSPECTOR           -->
+<!-- ============================================================= -->
+<div id="itemDrawerBackdrop" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden transition-opacity duration-300 opacity-0" onclick="closeItemDrawer()"></div>
+
+<div id="itemDrawerWindow" class="fixed inset-y-0 right-0 z-50 w-full max-w-md sm:max-w-lg bg-[#0c1427] text-white shadow-2xl transition-transform duration-300 transform translate-x-full overflow-y-auto flex flex-col border-l border-slate-800">
+    
+    <!-- Drawer Header -->
+    <div class="p-6 pb-4 border-b border-slate-800/80 sticky top-0 bg-[#0c1427]/95 backdrop-blur z-10 flex items-start justify-between">
+        <div>
+            <span id="drawerTag" class="inline-block px-2.5 py-0.5 rounded text-[11px] font-black bg-cyan-950 text-cyan-400 border border-cyan-800 uppercase tracking-wider">
+                NO TAG
+            </span>
+            <h2 id="drawerTitle" class="text-2xl font-black text-white tracking-wide mt-2">
+                AUN2F3362A
+            </h2>
+        </div>
+        <button type="button" onclick="closeItemDrawer()" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Drawer Body -->
+    <div class="p-6 space-y-5 flex-1">
+        
+        <!-- Specs Card -->
+        <div class="bg-[#131d36] rounded-2xl p-4 border border-slate-800 space-y-3.5 shadow-sm">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <span class="text-[11px] font-medium text-slate-400 block mb-0.5">Manufacturer</span>
+                    <span id="drawerMfg" class="font-bold text-white uppercase text-sm block">UNILUMIN</span>
+                </div>
+                <div>
+                    <span class="text-[11px] font-medium text-slate-400 block mb-0.5">Model / Pitch</span>
+                    <span id="drawerModel" class="font-bold text-white text-sm block font-mono">UMINI P1.2 COB</span>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800/60">
+                <span class="text-[11px] font-medium text-slate-400 block mb-0.5">Description</span>
+                <span id="drawerDesc" class="font-medium text-slate-200 text-xs block leading-relaxed uppercase">
+                    LED DISPLAY (600 X 337.5MM) - INDOOR
+                </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 pt-2 border-t border-slate-800/60">
+                <div>
+                    <span class="text-[11px] font-medium text-slate-400 block mb-0.5">Location Warehouse</span>
+                    <span id="drawerLocation" class="font-bold text-amber-400 text-xs block uppercase">MARIKINA</span>
+                </div>
+                <div>
+                    <span class="text-[11px] font-medium text-slate-400 block mb-0.5">Date Received</span>
+                    <span id="drawerDate" class="font-mono text-slate-300 text-xs block">2025-10-15</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Status & Remarks Card -->
+        <div class="bg-[#131d36] rounded-2xl p-4 border border-slate-800 space-y-2 shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono-code">ITEM STATUS & REMARKS</span>
+                <span id="drawerStatusBadge" class="px-2.5 py-0.5 rounded text-[11px] font-extrabold bg-emerald-950 text-emerald-400 border border-emerald-800 uppercase tracking-wider">
+                    ACTIVE
+                </span>
+            </div>
+            <p id="drawerRemarks" class="text-xs italic text-slate-300 leading-relaxed">
+                New shipment in good condition
+            </p>
+        </div>
+
+        <!-- Inventory Quantities -->
+        <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 font-mono-code">
+                INVENTORY QUANTITIES
+            </h3>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-[#131d36] border border-slate-800 p-3 rounded-2xl text-center shadow-sm">
+                    <span class="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">ORIGINAL QTY</span>
+                    <span id="drawerOriginalQty" class="text-lg font-black text-white mt-1 block">500 pcs</span>
+                </div>
+                <div class="bg-[#131d36] border border-slate-800 p-3 rounded-2xl text-center shadow-sm">
+                    <span class="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">ON-HAND QTY</span>
+                    <span id="drawerOnHandQty" class="text-lg font-black text-white mt-1 block">500 pcs</span>
+                </div>
+                <div class="bg-[#131d36] border border-emerald-500/40 p-3 rounded-2xl text-center shadow-sm">
+                    <span class="text-[10px] font-bold text-emerald-400 block uppercase tracking-wider">AVAILABLE</span>
+                    <span id="drawerAvailableQty" class="text-lg font-black text-emerald-400 mt-1 block">500 pcs</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Reservations -->
+        <div>
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono-code">
+                    PROJECT RESERVATIONS
+                </h3>
+                <button type="button" onclick="openReservationModalFromDrawer()" class="text-amber-400 hover:text-amber-300 text-xs font-bold flex items-center gap-1 transition-colors">
+                    + New Reservation
+                </button>
+            </div>
+            <div id="drawerReservationsList" class="bg-[#131d36] rounded-2xl p-4 border border-slate-800 shadow-sm">
+                <p class="text-xs italic text-slate-400">No active project allocations.</p>
+            </div>
+        </div>
+
+        <!-- Movement History -->
+        <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 font-mono-code">
+                MOVEMENT HISTORY
+            </h3>
+            <div id="drawerMovementList" class="bg-[#131d36] rounded-2xl p-4 border border-slate-800 space-y-3.5 shadow-sm">
+                <div class="relative pl-6 pb-1">
+                    <div class="absolute left-1.5 top-1.5 bottom-0 w-0.5 bg-cyan-700/60"></div>
+                    <div class="absolute left-0 top-1 w-3 h-3 rounded-full bg-cyan-400 ring-4 ring-cyan-950"></div>
+                    <span class="text-[11px] font-mono text-slate-400 block">2025-10-15 09:30</span>
+                    <span class="text-xs font-semibold text-slate-200 block mt-0.5">RECEIVED: Received initial batch of 500 pcs</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Drawer Sticky Footer -->
+    <div class="p-4 border-t border-slate-800 bg-[#0c1427] sticky bottom-0 flex items-center gap-3">
+        <button 
+            type="button" 
+            onclick="editCurrentDrawerItem()" 
+            class="flex-1 py-2.5 px-4 rounded-xl bg-[#1a2542] hover:bg-[#223158] text-white text-xs font-bold flex items-center justify-center gap-2 border border-slate-700/80 transition-all shadow-sm"
+        >
+            <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit Details
+        </button>
+        <button 
+            type="button" 
+            onclick="closeItemDrawer()" 
+            class="py-2.5 px-6 rounded-xl bg-[#162039] hover:bg-[#1d2a4c] text-slate-300 hover:text-white text-xs font-bold border border-slate-800 transition-colors"
+        >
+            Close
+        </button>
+    </div>
+
+</div>
+
+<!-- ============================================================= -->
+<!-- MODAL: ADD PROJECT RESERVATION                                  -->
+<!-- ============================================================= -->
+<div id="reservationModal" class="fixed inset-0 z-55 hidden overflow-y-auto">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" onclick="closeReservationModal()"></div>
+
+    <div class="min-h-full flex items-center justify-center p-4">
+        <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 z-10 animate-fadeIn">
+            
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">New Project Reservation</h3>
+                    <p class="text-xs text-slate-500" id="resModalSubtitle">Allocate stock for an upcoming installation</p>
+                </div>
+                <button type="button" onclick="closeReservationModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form id="reservationForm" method="POST" action="" class="mt-4 space-y-4">
+                @csrf
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Reserved Quantity (PCS) *</label>
+                    <input 
+                        type="number" 
+                        name="reservation_qty" 
+                        id="resQtyInput" 
+                        min="1" 
+                        required 
+                        placeholder="e.g. 50" 
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-mono-code font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Project Name / Client *</label>
+                    <input 
+                        type="text" 
+                        name="reservation_project" 
+                        id="resProjectInput" 
+                        required 
+                        placeholder="e.g. MOA Arena Stage LED Upgrade" 
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Particulars / Notes</label>
+                    <textarea 
+                        name="reservation_remarks" 
+                        id="resRemarksInput" 
+                        rows="2" 
+                        placeholder="e.g. Staged for setup on October 25" 
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
+                    ></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2.5">
+                    <button 
+                        type="button" 
+                        onclick="closeReservationModal()" 
+                        class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20"
+                    >
+                        Confirm Reservation
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
 <script>
+    let currentDrawerItem = null;
+
+    // Interactive Column Group Toggles
+    function setColumnGroupView(view, btn) {
+        document.querySelectorAll('.col-toggle-btn').forEach(b => {
+            b.classList.remove('active-col-toggle', 'bg-slate-900', 'text-white', 'shadow-xs', 'font-bold');
+            b.classList.add('text-slate-700', 'font-semibold');
+        });
+
+        if (btn) {
+            btn.classList.add('active-col-toggle', 'bg-slate-900', 'text-white', 'shadow-xs', 'font-bold');
+            btn.classList.remove('text-slate-700', 'font-semibold');
+        }
+
+        const basicCols = document.querySelectorAll('.col-group-basic');
+        const invCols = document.querySelectorAll('.col-group-inventory');
+        const resCols = document.querySelectorAll('.col-group-reservation');
+        const histCols = document.querySelectorAll('.col-group-history');
+
+        if (view === 'all') {
+            basicCols.forEach(el => el.classList.remove('hidden'));
+            invCols.forEach(el => el.classList.remove('hidden'));
+            resCols.forEach(el => el.classList.remove('hidden'));
+            histCols.forEach(el => el.classList.remove('hidden'));
+        } else if (view === 'basic') {
+            basicCols.forEach(el => el.classList.remove('hidden'));
+            invCols.forEach(el => el.classList.add('hidden'));
+            resCols.forEach(el => el.classList.add('hidden'));
+            histCols.forEach(el => el.classList.add('hidden'));
+        } else if (view === 'inventory') {
+            basicCols.forEach(el => el.classList.add('hidden'));
+            invCols.forEach(el => el.classList.remove('hidden'));
+            resCols.forEach(el => el.classList.add('hidden'));
+            histCols.forEach(el => el.classList.add('hidden'));
+        } else if (view === 'reservation') {
+            basicCols.forEach(el => el.classList.add('hidden'));
+            invCols.forEach(el => el.classList.add('hidden'));
+            resCols.forEach(el => el.classList.remove('hidden'));
+            histCols.forEach(el => el.classList.add('hidden'));
+        } else if (view === 'history') {
+            basicCols.forEach(el => el.classList.add('hidden'));
+            invCols.forEach(el => el.classList.add('hidden'));
+            resCols.forEach(el => el.classList.add('hidden'));
+            histCols.forEach(el => el.classList.remove('hidden'));
+        }
+    }
+
+    // Slide-Over Drawer
+    function openItemDrawer(item) {
+        currentDrawerItem = item;
+
+        // Tag and title
+        const tagEl = document.getElementById('drawerTag');
+        if (tagEl) {
+            tagEl.textContent = item.tag_number ? item.tag_number : 'NO TAG';
+        }
+
+        const titleEl = document.getElementById('drawerTitle');
+        if (titleEl) {
+            titleEl.textContent = item.po_number || item.tag_number || item.model || 'LED ITEM';
+        }
+
+        // Specs
+        const mfgEl = document.getElementById('drawerMfg');
+        if (mfgEl) mfgEl.textContent = (item.manufacturer || 'UNILUMIN').toUpperCase();
+
+        const modelEl = document.getElementById('drawerModel');
+        if (modelEl) modelEl.textContent = item.model || '—';
+
+        const descEl = document.getElementById('drawerDesc');
+        if (descEl) descEl.textContent = item.item_description || '—';
+
+        const locEl = document.getElementById('drawerLocation');
+        if (locEl) locEl.textContent = (item.location || 'MARIKINA').toUpperCase();
+
+        const dateEl = document.getElementById('drawerDate');
+        if (dateEl) {
+            dateEl.textContent = item.check_in_date ? item.check_in_date.substring(0, 10) : '—';
+        }
+
+        // Status & Remarks
+        const statusBadge = document.getElementById('drawerStatusBadge');
+        if (statusBadge) {
+            const rawStatus = (item.status || 'in_stock').replace('_', ' ').toUpperCase();
+            statusBadge.textContent = rawStatus === 'IN STOCK' ? 'ACTIVE' : rawStatus;
+            
+            statusBadge.className = 'px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider ' +
+                (item.status === 'deficit' ? 'bg-rose-950 text-rose-400 border border-rose-800' :
+                (item.status === 'reserved' ? 'bg-orange-950 text-orange-400 border border-orange-800' :
+                (item.status === 'under_repair' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
+                'bg-emerald-950 text-emerald-400 border border-emerald-800')));
+        }
+
+        const remarksEl = document.getElementById('drawerRemarks');
+        if (remarksEl) {
+            remarksEl.textContent = item.remarks || item.status_particular || 'New shipment in good condition';
+        }
+
+        // Quantities
+        const origQty = item.original_quantity !== null && item.original_quantity !== undefined ? item.original_quantity : item.quantity;
+        const onHandQty = item.quantity || 0;
+        const availQty = item.forecasted_quantity !== null && item.forecasted_quantity !== undefined ? item.forecasted_quantity : item.quantity;
+
+        const origQtyEl = document.getElementById('drawerOriginalQty');
+        if (origQtyEl) origQtyEl.textContent = (origQty || 0) + ' pcs';
+
+        const onHandQtyEl = document.getElementById('drawerOnHandQty');
+        if (onHandQtyEl) onHandQtyEl.textContent = (onHandQty || 0) + ' pcs';
+
+        const availQtyEl = document.getElementById('drawerAvailableQty');
+        if (availQtyEl) availQtyEl.textContent = (availQty || 0) + ' pcs';
+
+        // Project Reservations
+        const resContainer = document.getElementById('drawerReservationsList');
+        if (resContainer) {
+            if (item.reservation_qty > 0 || item.reservation_project) {
+                resContainer.innerHTML = `
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-amber-400">${item.reservation_project || 'Project Allocation'}</span>
+                            <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold font-mono text-[11px] border border-amber-800">${item.reservation_qty || 0} pcs</span>
+                        </div>
+                        <p class="text-xs text-slate-300 italic">${item.reservation_remarks || 'Reserved for deployment'}</p>
+                    </div>
+                `;
+            } else {
+                resContainer.innerHTML = '<p class="text-xs italic text-slate-400">No active project allocations.</p>';
+            }
+        }
+
+        // Movement History
+        const moveContainer = document.getElementById('drawerMovementList');
+        if (moveContainer) {
+            let historyList = [];
+            if (Array.isArray(item.movement_history) && item.movement_history.length > 0) {
+                historyList = item.movement_history;
+            } else {
+                const recDate = (item.check_in_date ? item.check_in_date.substring(0, 10) : '2025-10-15') + ' 09:30';
+                historyList = [
+                    {
+                        date: recDate,
+                        action: 'RECEIVED: Received initial batch of ' + (origQty || onHandQty) + ' pcs'
+                    }
+                ];
+            }
+
+            let html = '';
+            historyList.forEach((entry, idx) => {
+                const isLast = idx === historyList.length - 1;
+                html += `
+                    <div class="relative pl-6 pb-2">
+                        ${!isLast ? '<div class="absolute left-1.5 top-2 bottom-0 w-0.5 bg-cyan-700/60"></div>' : ''}
+                        <div class="absolute left-0 top-1 w-3 h-3 rounded-full bg-cyan-400 ring-4 ring-cyan-950"></div>
+                        <span class="text-[11px] font-mono text-slate-400 block">${entry.date || '—'}</span>
+                        <span class="text-xs font-semibold text-slate-200 block mt-0.5">${entry.action || 'Movement recorded'}</span>
+                    </div>
+                `;
+            });
+            moveContainer.innerHTML = html;
+        }
+
+        // Show drawer with slide-in animation
+        const backdrop = document.getElementById('itemDrawerBackdrop');
+        const windowEl = document.getElementById('itemDrawerWindow');
+        backdrop.classList.remove('hidden');
+        setTimeout(() => {
+            backdrop.classList.remove('opacity-0');
+            windowEl.classList.remove('translate-x-full');
+        }, 10);
+    }
+
+    function closeItemDrawer() {
+        const backdrop = document.getElementById('itemDrawerBackdrop');
+        const windowEl = document.getElementById('itemDrawerWindow');
+        windowEl.classList.add('translate-x-full');
+        backdrop.classList.add('opacity-0');
+        setTimeout(() => {
+            backdrop.classList.add('hidden');
+        }, 300);
+    }
+
+    function editCurrentDrawerItem() {
+        if (!currentDrawerItem) return;
+        const itemToEdit = currentDrawerItem;
+        closeItemDrawer();
+        setTimeout(() => {
+            openEditModal(itemToEdit);
+        }, 320);
+    }
+
+    // Reservation Modal
+    function openReservationModalFromDrawer() {
+        if (!currentDrawerItem) return;
+        const form = document.getElementById('reservationForm');
+        form.action = '/admin/inventory/' + currentDrawerItem.id + '/reserve';
+        
+        const subtitle = document.getElementById('resModalSubtitle');
+        const avail = (currentDrawerItem.forecasted_quantity !== null && currentDrawerItem.forecasted_quantity !== undefined) ? currentDrawerItem.forecasted_quantity : currentDrawerItem.quantity;
+        subtitle.textContent = `Model: ${currentDrawerItem.model} (Max Available: ${avail} pcs)`;
+
+        const qtyInput = document.getElementById('resQtyInput');
+        qtyInput.max = avail;
+        qtyInput.value = '';
+        document.getElementById('resProjectInput').value = '';
+        document.getElementById('resRemarksInput').value = '';
+
+        document.getElementById('reservationModal').classList.remove('hidden');
+    }
+
+    function closeReservationModal() {
+        document.getElementById('reservationModal').classList.add('hidden');
+    }
+
     // Create Modal
     function openCreateModal(defaultCategory) {
         if (defaultCategory) {
@@ -1903,6 +2345,9 @@
         document.getElementById('editModel').value = item.model || '';
         document.getElementById('editScreenSize').value = item.screen_size || '';
         document.getElementById('editQuantity').value = item.quantity || 0;
+        document.getElementById('editOriginalQty').value = item.original_quantity !== null && item.original_quantity !== undefined ? item.original_quantity : item.quantity;
+        document.getElementById('editStatus').value = item.status || 'in_stock';
+        document.getElementById('editRemarks').value = item.remarks || '';
         document.getElementById('editAcuQty').value = item.acu_quantity !== null && item.acu_quantity !== undefined ? item.acu_quantity : '';
         document.getElementById('editForecastedQty').value = item.forecasted_quantity || '';
         document.getElementById('editSqm').value = item.sqm || '';
@@ -1950,6 +2395,8 @@
             closeCreateModal();
             closeEditModal();
             closeDeleteModal();
+            closeItemDrawer();
+            closeReservationModal();
         }
     });
 </script>
