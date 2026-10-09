@@ -1694,23 +1694,61 @@
 </div>
 
 <!-- ============================================================= -->
-<!-- SLIDE-OVER DRAWER: DETAILED INVENTORY ITEM INSPECTOR           -->
+<!-- LUMINA-SPEC STYLES & OVERRIDES FOR SOLID OPAQUE DRAWER        -->
 <!-- ============================================================= -->
-<div id="itemDrawerBackdrop" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden transition-opacity duration-300 opacity-0" onclick="closeItemDrawer()"></div>
+<style>
+    #itemDrawer {
+        position: fixed !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 32rem !important;
+        background-color: #0b0f17 !important;
+        background: #0b0f17 !important;
+        color: #f1f5f9 !important;
+        z-index: 999999 !important;
+        box-shadow: -20px 0 50px rgba(0, 0, 0, 0.95) !important;
+        border-left: 1px solid #1e293b !important;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        opacity: 1 !important;
+    }
+    #itemDrawerBackdrop {
+        position: fixed !important;
+        inset: 0 !important;
+        background-color: rgba(0, 0, 0, 0.75) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+        z-index: 999990 !important;
+        transition: opacity 0.3s ease-in-out !important;
+    }
+    #reserveModal {
+        z-index: 9999999 !important;
+    }
+</style>
 
-<div id="itemDrawerWindow" class="fixed inset-y-0 right-0 z-50 w-full max-w-md sm:max-w-lg bg-[#0c1427] text-white shadow-2xl transition-transform duration-300 transform translate-x-full overflow-y-auto flex flex-col border-l border-slate-800">
+<!-- ============================================================= -->
+<!-- BACKDROP FOR SLIDE-OVER DRAWER                                -->
+<!-- ============================================================= -->
+<div id="itemDrawerBackdrop" class="fixed inset-0 hidden opacity-0" onclick="closeDrawer()" style="background-color: rgba(0, 0, 0, 0.75) !important; z-index: 999990 !important; backdrop-filter: blur(4px) !important;"></div>
+
+<!-- ============================================================= -->
+<!-- SIDE DRAWER DETAILS & HISTORY (LuminaSpec Reference Design)   -->
+<!-- ============================================================= -->
+<div id="itemDrawer" class="fixed inset-y-0 right-0 w-full max-w-lg shadow-2xl transform translate-x-full flex flex-col" style="background-color: #0b0f17 !important; color: #f1f5f9 !important; z-index: 999999 !important; border-left: 1px solid #1e293b !important;">
     
     <!-- Drawer Header -->
-    <div class="p-6 pb-4 border-b border-slate-800/80 sticky top-0 bg-[#0c1427]/95 backdrop-blur z-10 flex items-start justify-between">
+    <div class="p-6 border-b flex justify-between items-center" style="background-color: #0d131f !important; border-color: #1e293b !important;">
         <div>
-            <span id="drawerTag" class="inline-block px-2.5 py-0.5 rounded text-[11px] font-black bg-cyan-950 text-cyan-400 border border-cyan-800 uppercase tracking-wider">
-                NO TAG
+            <span id="drawerTag" class="text-[10px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wider" style="background-color: rgba(14, 165, 233, 0.2) !important; color: #38bdf8 !important; border: 1px solid rgba(14, 165, 233, 0.3) !important;">
+                SKU DETAILS
             </span>
-            <h2 id="drawerTitle" class="text-2xl font-black text-white tracking-wide mt-2">
+            <h2 id="drawerSku" class="text-xl font-bold text-white mt-1 font-mono tracking-wide">
                 AUN2F3362A
             </h2>
+            <h2 id="drawerTitle" class="hidden">AUN2F3362A</h2>
         </div>
-        <button type="button" onclick="closeItemDrawer()" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors">
+        <button type="button" onclick="closeDrawer()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition-colors">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -1718,123 +1756,111 @@
     </div>
 
     <!-- Drawer Body -->
-    <div class="p-6 space-y-5 flex-1">
+    <div class="flex-1 overflow-y-auto p-6 space-y-6" style="background-color: #0b0f17 !important;">
         
-        <!-- Specs Card -->
-        <div class="bg-[#131d36] rounded-2xl p-4 border border-slate-800 space-y-3.5 shadow-sm">
-            <div class="grid grid-cols-2 gap-4">
+        <!-- Item Specifications -->
+        <div class="p-4 rounded-xl space-y-3" style="background-color: #151c28 !important; border: 1px solid #1e293b !important;">
+            <div class="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                    <span class="text-[11px] font-medium text-slate-400 block mb-0.5">Manufacturer</span>
-                    <span id="drawerMfg" class="font-bold text-white uppercase text-sm block">UNILUMIN</span>
+                    <p class="text-slate-400 text-[11px] font-medium uppercase tracking-wider">Manufacturer</p>
+                    <p id="drawerBrand" class="font-bold text-slate-100 uppercase mt-0.5 text-sm">UNILUMIN</p>
+                    <span id="drawerMfg" class="hidden">UNILUMIN</span>
                 </div>
                 <div>
-                    <span class="text-[11px] font-medium text-slate-400 block mb-0.5">Model / Pitch</span>
-                    <span id="drawerModel" class="font-bold text-white text-sm block font-mono">UMINI P1.2 COB</span>
+                    <p class="text-slate-400 text-[11px] font-medium uppercase tracking-wider">Model / Pitch</p>
+                    <p id="drawerModel" class="font-bold text-slate-100 font-mono mt-0.5 text-sm">UMINI P1.2 COB</p>
                 </div>
-            </div>
-
-            <div class="pt-2 border-t border-slate-800/60">
-                <span class="text-[11px] font-medium text-slate-400 block mb-0.5">Description</span>
-                <span id="drawerDesc" class="font-medium text-slate-200 text-xs block leading-relaxed uppercase">
-                    LED DISPLAY (600 X 337.5MM) - INDOOR
-                </span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 pt-2 border-t border-slate-800/60">
-                <div>
-                    <span class="text-[11px] font-medium text-slate-400 block mb-0.5">Location Warehouse</span>
-                    <span id="drawerLocation" class="font-bold text-amber-400 text-xs block uppercase">MARIKINA</span>
+                <div class="col-span-2 pt-2.5" style="border-top: 1px solid rgba(255,255,255,0.08) !important;">
+                    <p class="text-slate-400 text-[11px] font-medium uppercase tracking-wider">Description</p>
+                    <p id="drawerDesc" class="font-medium text-slate-200 text-xs mt-0.5 leading-relaxed uppercase">LED DISPLAY (600 X 337.5MM) - INDOOR</p>
                 </div>
-                <div>
-                    <span class="text-[11px] font-medium text-slate-400 block mb-0.5">Date Received</span>
-                    <span id="drawerDate" class="font-mono text-slate-300 text-xs block">2025-10-15</span>
+                <div class="col-span-2 pt-2.5 flex justify-between items-center" style="border-top: 1px solid rgba(255,255,255,0.08) !important;">
+                    <div>
+                        <p class="text-slate-400 text-[11px] font-medium uppercase tracking-wider">Location Warehouse</p>
+                        <p id="drawerLocation" class="font-bold text-amber-400 text-xs mt-0.5 uppercase">MARIKINA</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-slate-400 text-[11px] font-medium uppercase tracking-wider">Date Received</p>
+                        <p id="drawerDate" class="font-mono font-medium text-slate-200 text-xs mt-0.5">10/15/2025</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Item Status & Remarks Card -->
-        <div class="bg-[#131d36] rounded-2xl p-4 border border-slate-800 space-y-2 shadow-sm">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono-code">ITEM STATUS & REMARKS</span>
-                <span id="drawerStatusBadge" class="px-2.5 py-0.5 rounded text-[11px] font-extrabold bg-emerald-950 text-emerald-400 border border-emerald-800 uppercase tracking-wider">
+        <!-- Status & Remarks Box -->
+        <div class="p-4 rounded-xl space-y-2" style="background-color: #111724 !important; border: 1px solid #1e293b !important;">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Item Status & Remarks</span>
+                <span id="drawerStatusBadge" class="px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     ACTIVE
                 </span>
             </div>
-            <p id="drawerRemarks" class="text-xs italic text-slate-300 leading-relaxed">
-                New shipment in good condition
+            <p id="drawerRemarks" class="text-xs text-slate-300 italic leading-relaxed">
+                No special remarks noted.
             </p>
         </div>
 
-        <!-- Inventory Quantities -->
+        <!-- Inventory Metrics Breakdown -->
         <div>
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 font-mono-code">
-                INVENTORY QUANTITIES
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
+                Inventory Quantities
             </h3>
             <div class="grid grid-cols-3 gap-3">
-                <div class="bg-[#131d36] border border-slate-800 p-3 rounded-2xl text-center shadow-sm">
-                    <span class="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">ORIGINAL QTY</span>
-                    <span id="drawerOriginalQty" class="text-lg font-black text-white mt-1 block">500 pcs</span>
+                <div class="p-3 rounded-xl text-center" style="background-color: #111724 !important; border: 1px solid #1e293b !important;">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Original Qty</span>
+                    <p id="drawerOriginalQty" class="text-base font-extrabold text-slate-200 mt-1">500 pcs</p>
                 </div>
-                <div class="bg-[#131d36] border border-slate-800 p-3 rounded-2xl text-center shadow-sm">
-                    <span class="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">ON-HAND QTY</span>
-                    <span id="drawerOnHandQty" class="text-lg font-black text-white mt-1 block">500 pcs</span>
+                <div class="p-3 rounded-xl text-center" style="background-color: #111724 !important; border: 1px solid #1e293b !important;">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">On-Hand Qty</span>
+                    <p id="drawerOnHand" class="text-base font-extrabold text-white mt-1">500 pcs</p>
+                    <span id="drawerOnHandQty" class="hidden">500 pcs</span>
                 </div>
-                <div class="bg-[#131d36] border border-emerald-500/40 p-3 rounded-2xl text-center shadow-sm">
-                    <span class="text-[10px] font-bold text-emerald-400 block uppercase tracking-wider">AVAILABLE</span>
-                    <span id="drawerAvailableQty" class="text-lg font-black text-emerald-400 mt-1 block">500 pcs</span>
+                <div id="drawerAvailBox" class="p-3 rounded-xl text-center" style="background-color: rgba(6, 78, 59, 0.3) !important; border: 1px solid rgba(16, 185, 129, 0.3) !important;">
+                    <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">Available</span>
+                    <p id="drawerAvailQty" class="text-base font-extrabold text-emerald-400 mt-1">500 pcs</p>
+                    <span id="drawerAvailableQty" class="hidden">500 pcs</span>
                 </div>
             </div>
         </div>
 
-        <!-- Project Reservations -->
+        <!-- Detailed Project Reservations -->
         <div>
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono-code">
-                    PROJECT RESERVATIONS
-                </h3>
-                <button type="button" onclick="openReservationModalFromDrawer()" class="text-amber-400 hover:text-amber-300 text-xs font-bold flex items-center gap-1 transition-colors">
+            <div class="flex justify-between items-center mb-2.5">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Project Reservations</h3>
+                <button type="button" onclick="openReserveForCurrent()" class="text-xs text-amber-400 hover:text-amber-300 font-bold hover:underline transition-colors">
                     + New Reservation
                 </button>
             </div>
-            <div id="drawerReservationsList" class="bg-[#131d36] rounded-2xl p-4 border border-slate-800 shadow-sm">
-                <p class="text-xs italic text-slate-400">No active project allocations.</p>
+            <div id="drawerReservations" class="space-y-2">
+                <p class="text-xs text-slate-500 italic py-2">No active project allocations.</p>
             </div>
+            <div id="drawerReservationsList" class="hidden"></div>
         </div>
 
-        <!-- Movement History -->
+        <!-- Transaction & Movement History -->
         <div>
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 font-mono-code">
-                MOVEMENT HISTORY
-            </h3>
-            <div id="drawerMovementList" class="bg-[#131d36] rounded-2xl p-4 border border-slate-800 space-y-3.5 shadow-sm">
-                <div class="relative pl-6 pb-1">
-                    <div class="absolute left-1.5 top-1.5 bottom-0 w-0.5 bg-cyan-700/60"></div>
-                    <div class="absolute left-0 top-1 w-3 h-3 rounded-full bg-cyan-400 ring-4 ring-cyan-950"></div>
-                    <span class="text-[11px] font-mono text-slate-400 block">2025-10-15 09:30</span>
-                    <span class="text-xs font-semibold text-slate-200 block mt-0.5">RECEIVED: Received initial batch of 500 pcs</span>
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">Movement History</h3>
+            <div id="drawerHistory" class="space-y-2 border-l-2 ml-2 pl-4" style="border-color: #1e293b !important;">
+                <div class="relative pb-3 text-xs">
+                    <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-slate-900"></div>
+                    <div class="text-[10px] text-slate-500 font-mono">2025-10-15 09:30</div>
+                    <div class="font-semibold text-slate-300 mt-0.5">RECEIVED: Initial stock received</div>
                 </div>
             </div>
+            <div id="drawerMovementList" class="hidden"></div>
         </div>
 
     </div>
 
-    <!-- Drawer Sticky Footer -->
-    <div class="p-4 border-t border-slate-800 bg-[#0c1427] sticky bottom-0 flex items-center gap-3">
-        <button 
-            type="button" 
-            onclick="editCurrentDrawerItem()" 
-            class="flex-1 py-2.5 px-4 rounded-xl bg-[#1a2542] hover:bg-[#223158] text-white text-xs font-bold flex items-center justify-center gap-2 border border-slate-700/80 transition-all shadow-sm"
-        >
+    <!-- Drawer Footer Actions -->
+    <div class="p-4 border-t flex gap-2.5" style="background-color: #0d131f !important; border-color: #1e293b !important;">
+        <button type="button" onclick="editCurrentRow()" class="flex-1 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-1.5" style="background-color: #1e293b !important; border: 1px solid #334155 !important;">
             <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             Edit Details
         </button>
-        <button 
-            type="button" 
-            onclick="closeItemDrawer()" 
-            class="py-2.5 px-6 rounded-xl bg-[#162039] hover:bg-[#1d2a4c] text-slate-300 hover:text-white text-xs font-bold border border-slate-800 transition-colors"
-        >
+        <button type="button" onclick="closeDrawer()" class="px-5 text-slate-300 hover:text-white text-xs font-semibold py-2.5 rounded-xl transition" style="background-color: #151c28 !important; border: 1px solid #1e293b !important;">
             Close
         </button>
     </div>
@@ -1842,301 +1868,352 @@
 </div>
 
 <!-- ============================================================= -->
-<!-- MODAL: ADD PROJECT RESERVATION                                  -->
+<!-- EXTENDED RESERVATION MODAL (LuminaSpec Reference Design)      -->
 <!-- ============================================================= -->
-<div id="reservationModal" class="fixed inset-0 z-55 hidden overflow-y-auto">
-    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" onclick="closeReservationModal()"></div>
+<div id="reserveModal" class="fixed inset-0 hidden flex items-center justify-center p-4 overflow-y-auto" style="z-index: 9999999 !important; background-color: rgba(0, 0, 0, 0.8) !important; backdrop-filter: blur(4px) !important;">
+    <div class="rounded-2xl max-w-lg w-full p-6 shadow-2xl relative my-8" style="background-color: #0f172a !important; border: 1px solid #1e293b !important; color: #f1f5f9 !important;">
+        <div class="flex justify-between items-center border-b pb-4 mb-4" style="border-color: #1e293b !important;">
+            <h3 class="font-bold text-amber-400 text-lg flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                </svg>
+                Create Reservation & Allocation
+            </h3>
+            <button type="button" onclick="closeModal('reserveModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
 
-    <div class="min-h-full flex items-center justify-center p-4">
-        <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 z-10 animate-fadeIn">
-            
-            <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-900">New Project Reservation</h3>
-                    <p class="text-xs text-slate-500" id="resModalSubtitle">Allocate stock for an upcoming installation</p>
-                </div>
-                <button type="button" onclick="closeReservationModal()" class="text-slate-400 hover:text-slate-600 p-1">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+        <form id="reserveForm" method="POST" action="" onsubmit="handleReserveStock(event)" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Select LED Display SKU *</label>
+                <select id="reserveSkuSelect" required onchange="onReserveSkuChange(this.value)" class="w-full rounded-xl p-2.5 text-xs text-white focus:outline-none" style="background-color: #0b111e !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                    @foreach ($items as $itm)
+                        <option value="{{ $itm->id }}" data-avail="{{ $itm->forecasted_quantity !== null ? $itm->forecasted_quantity : $itm->quantity }}">
+                            {{ $itm->po_number ?? ($itm->tag_number ?? 'SKU-'.$itm->id) }} — {{ $itm->manufacturer }} {{ $itm->model }} ({{ $itm->location }})
+                        </option>
+                    @endforeach
+                </select>
             </div>
 
-            <form id="reservationForm" method="POST" action="" class="mt-4 space-y-4">
-                @csrf
-
+            <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Reserved Quantity (PCS) *</label>
-                    <input 
-                        type="number" 
-                        name="reservation_qty" 
-                        id="resQtyInput" 
-                        min="1" 
-                        required 
-                        placeholder="e.g. 50" 
-                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-mono-code font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
-                    >
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Project / Client Name *</label>
+                    <input type="text" name="reservation_project" id="reserveProject" required placeholder="e.g. Globe Telco Event" class="w-full rounded-xl p-2.5 text-xs text-white focus:outline-none" style="background-color: #0b111e !important; color: #ffffff !important; border: 1px solid #334155 !important;">
                 </div>
-
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Project Name / Client *</label>
-                    <input 
-                        type="text" 
-                        name="reservation_project" 
-                        id="resProjectInput" 
-                        required 
-                        placeholder="e.g. MOA Arena Stage LED Upgrade" 
-                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
-                    >
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Reserved Quantity (PCS) *</label>
+                    <input type="number" name="reservation_qty" id="reserveQty" required min="1" value="10" class="w-full rounded-xl p-2.5 text-xs text-white focus:outline-none" style="background-color: #0b111e !important; color: #ffffff !important; border: 1px solid #334155 !important;">
                 </div>
+            </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Particulars / Notes</label>
-                    <textarea 
-                        name="reservation_remarks" 
-                        id="resRemarksInput" 
-                        rows="2" 
-                        placeholder="e.g. Staged for setup on October 25" 
-                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
-                    ></textarea>
-                </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Project Details / Location</label>
+                <input type="text" id="reserveProjectDetails" placeholder="e.g. SMX Convention Hall B Main Stage" class="w-full rounded-xl p-2.5 text-xs text-white focus:outline-none" style="background-color: #0b111e !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+            </div>
 
-                <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2.5">
-                    <button 
-                        type="button" 
-                        onclick="closeReservationModal()" 
-                        class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold"
-                    >
-                        Cancel
-                    </button>
-                    <button 
-                        type="submit" 
-                        class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20"
-                    >
-                        Confirm Reservation
-                    </button>
-                </div>
-            </form>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Particulars / Special Specs</label>
+                <textarea name="reservation_remarks" id="reserveParticulars" rows="2" placeholder="e.g. Requires 5x3 setup with hanging bars and power link cables..." class="w-full rounded-xl p-2 text-xs text-white focus:outline-none" style="background-color: #0b111e !important; color: #ffffff !important; border: 1px solid #334155 !important;"></textarea>
+            </div>
 
-        </div>
+            <div class="flex justify-end gap-3 pt-4 border-t" style="border-color: #1e293b !important;">
+                <button type="button" onclick="closeModal('reserveModal')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">Cancel</button>
+                <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition shadow-md shadow-amber-600/30">Confirm Allocation</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <script>
+    let activeDrawerItemId = null;
     let currentDrawerItem = null;
 
-    // Interactive Column Group Toggles
-    function setColumnGroupView(view, btn) {
-        document.querySelectorAll('.col-toggle-btn').forEach(b => {
-            b.classList.remove('active-col-toggle', 'bg-slate-900', 'text-white', 'shadow-xs', 'font-bold');
-            b.classList.add('text-slate-700', 'font-semibold');
+    // Column View Mode Toggle (LuminaSpec Reference)
+    function setColumnView(viewMode) {
+        const groups = ['specs', 'inventory', 'reservation', 'history'];
+        const buttons = {
+            all: 'btnViewAll',
+            specs: 'btnViewSpecs',
+            inventory: 'btnViewInventory',
+            reservation: 'btnViewReservation',
+            history: 'btnViewHistory'
+        };
+
+        Object.keys(buttons).forEach(key => {
+            const btn = document.getElementById(buttons[key]);
+            if (!btn) return;
+            if (key === viewMode) {
+                btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold text-white transition whitespace-nowrap shadow-sm";
+                btn.style.backgroundColor = "#0284c7";
+                btn.style.color = "#ffffff";
+            } else {
+                btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition whitespace-nowrap";
+                btn.style.backgroundColor = "";
+                btn.style.color = "";
+            }
         });
 
-        if (btn) {
-            btn.classList.add('active-col-toggle', 'bg-slate-900', 'text-white', 'shadow-xs', 'font-bold');
-            btn.classList.remove('text-slate-700', 'font-semibold');
-        }
-
-        const basicCols = document.querySelectorAll('.col-group-basic');
-        const invCols = document.querySelectorAll('.col-group-inventory');
-        const resCols = document.querySelectorAll('.col-group-reservation');
-        const histCols = document.querySelectorAll('.col-group-history');
-
-        if (view === 'all') {
-            basicCols.forEach(el => el.classList.remove('hidden'));
-            invCols.forEach(el => el.classList.remove('hidden'));
-            resCols.forEach(el => el.classList.remove('hidden'));
-            histCols.forEach(el => el.classList.remove('hidden'));
-        } else if (view === 'basic') {
-            basicCols.forEach(el => el.classList.remove('hidden'));
-            invCols.forEach(el => el.classList.add('hidden'));
-            resCols.forEach(el => el.classList.add('hidden'));
-            histCols.forEach(el => el.classList.add('hidden'));
-        } else if (view === 'inventory') {
-            basicCols.forEach(el => el.classList.add('hidden'));
-            invCols.forEach(el => el.classList.remove('hidden'));
-            resCols.forEach(el => el.classList.add('hidden'));
-            histCols.forEach(el => el.classList.add('hidden'));
-        } else if (view === 'reservation') {
-            basicCols.forEach(el => el.classList.add('hidden'));
-            invCols.forEach(el => el.classList.add('hidden'));
-            resCols.forEach(el => el.classList.remove('hidden'));
-            histCols.forEach(el => el.classList.add('hidden'));
-        } else if (view === 'history') {
-            basicCols.forEach(el => el.classList.add('hidden'));
-            invCols.forEach(el => el.classList.add('hidden'));
-            resCols.forEach(el => el.classList.add('hidden'));
-            histCols.forEach(el => el.classList.remove('hidden'));
-        }
+        groups.forEach(group => {
+            const elements = document.querySelectorAll(`.col-group-${group}`);
+            elements.forEach(el => {
+                if (viewMode === 'all' || viewMode === group) {
+                    el.style.display = '';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+        });
     }
 
-    // Slide-Over Drawer
-    function openItemDrawer(item) {
+    // Open Slide Drawer (LuminaSpec Reference Design)
+    function openDrawer(item) {
+        if (!item) return;
         currentDrawerItem = item;
+        activeDrawerItemId = item.id;
 
-        // Tag and title
+        const sku = item.po_number || item.tag_number || item.model || ('SKU-' + item.id);
+        const tag = item.tag_number || '';
+        const mfg = (item.manufacturer || 'UNILUMIN').toUpperCase();
+        const model = item.model || '—';
+        const desc = item.item_description || '—';
+        const loc = (item.location || 'MARIKINA').toUpperCase();
+        const date = item.check_in_date ? String(item.check_in_date).substring(0, 10) : '—';
+
+        // Tag and SKU
         const tagEl = document.getElementById('drawerTag');
-        if (tagEl) {
-            tagEl.textContent = item.tag_number ? item.tag_number : 'NO TAG';
-        }
+        if (tagEl) tagEl.textContent = tag ? `TAG: ${tag}` : 'SKU DETAILS';
 
-        const titleEl = document.getElementById('drawerTitle');
-        if (titleEl) {
-            titleEl.textContent = item.po_number || item.tag_number || item.model || 'LED ITEM';
-        }
+        const skuEl = document.getElementById('drawerSku');
+        if (skuEl) skuEl.textContent = sku;
+        const legacyTitle = document.getElementById('drawerTitle');
+        if (legacyTitle) legacyTitle.textContent = sku;
 
         // Specs
-        const mfgEl = document.getElementById('drawerMfg');
-        if (mfgEl) mfgEl.textContent = (item.manufacturer || 'UNILUMIN').toUpperCase();
+        const brandEl = document.getElementById('drawerBrand');
+        if (brandEl) brandEl.textContent = mfg;
+        const legacyMfg = document.getElementById('drawerMfg');
+        if (legacyMfg) legacyMfg.textContent = mfg;
 
         const modelEl = document.getElementById('drawerModel');
-        if (modelEl) modelEl.textContent = item.model || '—';
+        if (modelEl) modelEl.textContent = model;
 
         const descEl = document.getElementById('drawerDesc');
-        if (descEl) descEl.textContent = item.item_description || '—';
+        if (descEl) descEl.textContent = desc;
 
         const locEl = document.getElementById('drawerLocation');
-        if (locEl) locEl.textContent = (item.location || 'MARIKINA').toUpperCase();
+        if (locEl) locEl.textContent = loc;
 
         const dateEl = document.getElementById('drawerDate');
-        if (dateEl) {
-            dateEl.textContent = item.check_in_date ? item.check_in_date.substring(0, 10) : '—';
+        if (dateEl) dateEl.textContent = date;
+
+        // Quantities & Deficit Calculations
+        const origQty = (item.original_quantity !== null && item.original_quantity !== undefined) ? Number(item.original_quantity) : Number(item.quantity || 0);
+        const onHandQty = Number(item.quantity || 0);
+        const reservedQty = Number(item.reservation_qty || 0);
+        const availQty = (item.forecasted_quantity !== null && item.forecasted_quantity !== undefined) ? Number(item.forecasted_quantity) : (onHandQty - reservedQty);
+        const isDeficit = (availQty < 0) || (item.status === 'deficit');
+
+        const origQtyEl = document.getElementById('drawerOriginalQty');
+        if (origQtyEl) origQtyEl.textContent = `${origQty} pcs`;
+
+        const onHandEl = document.getElementById('drawerOnHand');
+        if (onHandEl) onHandEl.textContent = `${onHandQty} pcs`;
+        const legacyOnHand = document.getElementById('drawerOnHandQty');
+        if (legacyOnHand) legacyOnHand.textContent = `${onHandQty} pcs`;
+
+        const availQtyEl = document.getElementById('drawerAvailQty');
+        if (availQtyEl) availQtyEl.textContent = `${availQty} pcs`;
+        const legacyAvail = document.getElementById('drawerAvailableQty');
+        if (legacyAvail) legacyAvail.textContent = `${availQty} pcs`;
+
+        const availBox = document.getElementById('drawerAvailBox');
+        if (availBox) {
+            if (isDeficit) {
+                availBox.style.backgroundColor = "rgba(136, 19, 55, 0.4) !important";
+                availBox.style.borderColor = "rgba(244, 63, 94, 0.4) !important";
+                if (availQtyEl) availQtyEl.className = "text-base font-extrabold text-rose-400 mt-1";
+            } else {
+                availBox.style.backgroundColor = "rgba(6, 78, 59, 0.3) !important";
+                availBox.style.borderColor = "rgba(16, 185, 129, 0.3) !important";
+                if (availQtyEl) availQtyEl.className = "text-base font-extrabold text-emerald-400 mt-1";
+            }
         }
 
         // Status & Remarks
         const statusBadge = document.getElementById('drawerStatusBadge');
         if (statusBadge) {
-            const rawStatus = (item.status || 'in_stock').replace('_', ' ').toUpperCase();
-            statusBadge.textContent = rawStatus === 'IN STOCK' ? 'ACTIVE' : rawStatus;
-            
-            statusBadge.className = 'px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider ' +
-                (item.status === 'deficit' ? 'bg-rose-950 text-rose-400 border border-rose-800' :
-                (item.status === 'reserved' ? 'bg-orange-950 text-orange-400 border border-orange-800' :
-                (item.status === 'under_repair' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
-                'bg-emerald-950 text-emerald-400 border border-emerald-800')));
+            if (isDeficit) {
+                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse";
+                statusBadge.textContent = "DEFICIT";
+            } else if (item.status === 'under_repair' || item.status === 'MAINTENANCE') {
+                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                statusBadge.textContent = "MAINTENANCE";
+            } else if (reservedQty > 0 || item.status === 'reserved') {
+                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-sky-500/20 text-sky-400 border border-sky-500/30";
+                statusBadge.textContent = "RESERVED";
+            } else {
+                statusBadge.className = "px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                statusBadge.textContent = "ACTIVE";
+            }
         }
 
         const remarksEl = document.getElementById('drawerRemarks');
         if (remarksEl) {
-            remarksEl.textContent = item.remarks || item.status_particular || 'New shipment in good condition';
+            remarksEl.textContent = item.remarks || item.status_particular || 'No special remarks noted.';
         }
 
-        // Quantities
-        const origQty = item.original_quantity !== null && item.original_quantity !== undefined ? item.original_quantity : item.quantity;
-        const onHandQty = item.quantity || 0;
-        const availQty = item.forecasted_quantity !== null && item.forecasted_quantity !== undefined ? item.forecasted_quantity : item.quantity;
-
-        const origQtyEl = document.getElementById('drawerOriginalQty');
-        if (origQtyEl) origQtyEl.textContent = (origQty || 0) + ' pcs';
-
-        const onHandQtyEl = document.getElementById('drawerOnHandQty');
-        if (onHandQtyEl) onHandQtyEl.textContent = (onHandQty || 0) + ' pcs';
-
-        const availQtyEl = document.getElementById('drawerAvailableQty');
-        if (availQtyEl) availQtyEl.textContent = (availQty || 0) + ' pcs';
-
         // Project Reservations
-        const resContainer = document.getElementById('drawerReservationsList');
+        const resContainer = document.getElementById('drawerReservations');
         if (resContainer) {
-            if (item.reservation_qty > 0 || item.reservation_project) {
+            if (reservedQty > 0 || item.reservation_project) {
                 resContainer.innerHTML = `
-                    <div class="space-y-1.5">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-amber-400">${item.reservation_project || 'Project Allocation'}</span>
-                            <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold font-mono text-[11px] border border-amber-800">${item.reservation_qty || 0} pcs</span>
+                    <div class="p-3.5 rounded-xl text-xs space-y-1.5" style="background-color: #111724 !important; border: 1px solid #1e293b !important;">
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-slate-100 text-sm">${item.reservation_project || 'Project Allocation'}</span>
+                            <span class="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">${reservedQty} pcs reserved</span>
                         </div>
-                        <p class="text-xs text-slate-300 italic">${item.reservation_remarks || 'Reserved for deployment'}</p>
+                        ${item.reservation_remarks ? `<div class="text-slate-300 text-xs italic"><span class="text-slate-500">Details:</span> ${item.reservation_remarks}</div>` : ''}
                     </div>
                 `;
             } else {
-                resContainer.innerHTML = '<p class="text-xs italic text-slate-400">No active project allocations.</p>';
+                resContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">No active project allocations.</p>`;
             }
         }
 
         // Movement History
-        const moveContainer = document.getElementById('drawerMovementList');
-        if (moveContainer) {
+        const historyContainer = document.getElementById('drawerHistory');
+        if (historyContainer) {
             let historyList = [];
             if (Array.isArray(item.movement_history) && item.movement_history.length > 0) {
                 historyList = item.movement_history;
             } else {
-                const recDate = (item.check_in_date ? item.check_in_date.substring(0, 10) : '2025-10-15') + ' 09:30';
                 historyList = [
                     {
-                        date: recDate,
-                        action: 'RECEIVED: Received initial batch of ' + (origQty || onHandQty) + ' pcs'
+                        date: (date !== '—' ? date : '2025-10-15') + ' 09:30',
+                        desc: `Received initial stock of ${origQty} pcs`
                     }
                 ];
             }
 
-            let html = '';
-            historyList.forEach((entry, idx) => {
-                const isLast = idx === historyList.length - 1;
-                html += `
-                    <div class="relative pl-6 pb-2">
-                        ${!isLast ? '<div class="absolute left-1.5 top-2 bottom-0 w-0.5 bg-cyan-700/60"></div>' : ''}
-                        <div class="absolute left-0 top-1 w-3 h-3 rounded-full bg-cyan-400 ring-4 ring-cyan-950"></div>
-                        <span class="text-[11px] font-mono text-slate-400 block">${entry.date || '—'}</span>
-                        <span class="text-xs font-semibold text-slate-200 block mt-0.5">${entry.action || 'Movement recorded'}</span>
+            historyContainer.innerHTML = historyList.slice().reverse().map(h => {
+                const hDate = h.date || '—';
+                const hText = h.desc || h.action || (h.type ? `${h.type}: ${h.desc}` : 'Movement logged');
+                return `
+                    <div class="relative pb-3 text-xs">
+                        <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-slate-900"></div>
+                        <div class="text-[10px] text-slate-500 font-mono">${hDate}</div>
+                        <div class="font-semibold text-slate-300 mt-0.5">${hText}</div>
                     </div>
                 `;
-            });
-            moveContainer.innerHTML = html;
+            }).join('');
         }
 
-        // Show drawer with slide-in animation
+        // Show Drawer & Backdrop with animation
         const backdrop = document.getElementById('itemDrawerBackdrop');
-        const windowEl = document.getElementById('itemDrawerWindow');
-        backdrop.classList.remove('hidden');
-        setTimeout(() => {
-            backdrop.classList.remove('opacity-0');
-            windowEl.classList.remove('translate-x-full');
-        }, 10);
+        const drawer = document.getElementById('itemDrawer');
+        if (backdrop) {
+            backdrop.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                backdrop.style.opacity = '1';
+            });
+        }
+        if (drawer) {
+            drawer.classList.remove('translate-x-full');
+            drawer.style.transform = 'translateX(0)';
+        }
     }
 
-    function closeItemDrawer() {
+    // Close Slide Drawer
+    function closeDrawer() {
         const backdrop = document.getElementById('itemDrawerBackdrop');
-        const windowEl = document.getElementById('itemDrawerWindow');
-        windowEl.classList.add('translate-x-full');
-        backdrop.classList.add('opacity-0');
-        setTimeout(() => {
-            backdrop.classList.add('hidden');
-        }, 300);
+        const drawer = document.getElementById('itemDrawer');
+        if (drawer) {
+            drawer.classList.add('translate-x-full');
+            drawer.style.transform = 'translateX(100%)';
+        }
+        if (backdrop) {
+            backdrop.style.opacity = '0';
+            setTimeout(() => {
+                backdrop.classList.add('hidden');
+            }, 300);
+        }
+        activeDrawerItemId = null;
     }
 
-    function editCurrentDrawerItem() {
+    // Edit Item Details from Drawer
+    function editCurrentRow() {
         if (!currentDrawerItem) return;
         const itemToEdit = currentDrawerItem;
-        closeItemDrawer();
+        closeDrawer();
         setTimeout(() => {
             openEditModal(itemToEdit);
         }, 320);
     }
 
-    // Reservation Modal
-    function openReservationModalFromDrawer() {
+    // Reservation Modal Controls
+    function openReserveForCurrent() {
         if (!currentDrawerItem) return;
-        const form = document.getElementById('reservationForm');
-        form.action = '/admin/inventory/' + currentDrawerItem.id + '/reserve';
+        const select = document.getElementById('reserveSkuSelect');
+        if (select) {
+            select.value = currentDrawerItem.id;
+            onReserveSkuChange(currentDrawerItem.id);
+        }
+        openModal('reserveModal');
+    }
+
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        if (modalId === 'reserveModal' && currentDrawerItem) {
+            const select = document.getElementById('reserveSkuSelect');
+            if (select) {
+                select.value = currentDrawerItem.id;
+                onReserveSkuChange(currentDrawerItem.id);
+            }
+        }
+        modal.classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function onReserveSkuChange(skuId) {
+        const form = document.getElementById('reserveForm');
+        if (form && skuId) {
+            form.action = '/admin/inventory/' + skuId + '/reserve';
+        }
+    }
+
+    function handleReserveStock(e) {
+        const select = document.getElementById('reserveSkuSelect');
+        if (!select || !select.value) return;
+        const form = document.getElementById('reserveForm');
+        form.action = '/admin/inventory/' + select.value + '/reserve';
+
+        const details = (document.getElementById('reserveProjectDetails')?.value || '').trim();
+        const particulars = (document.getElementById('reserveParticulars')?.value || '').trim();
         
-        const subtitle = document.getElementById('resModalSubtitle');
-        const avail = (currentDrawerItem.forecasted_quantity !== null && currentDrawerItem.forecasted_quantity !== undefined) ? currentDrawerItem.forecasted_quantity : currentDrawerItem.quantity;
-        subtitle.textContent = `Model: ${currentDrawerItem.model} (Max Available: ${avail} pcs)`;
-
-        const qtyInput = document.getElementById('resQtyInput');
-        qtyInput.max = avail;
-        qtyInput.value = '';
-        document.getElementById('resProjectInput').value = '';
-        document.getElementById('resRemarksInput').value = '';
-
-        document.getElementById('reservationModal').classList.remove('hidden');
+        let combinedRemarks = particulars;
+        if (details) {
+            combinedRemarks = details + (particulars ? ' | ' + particulars : '');
+        }
+        const remarksField = document.getElementById('reserveParticulars');
+        if (remarksField) remarksField.value = combinedRemarks;
     }
 
-    function closeReservationModal() {
-        document.getElementById('reservationModal').classList.add('hidden');
-    }
+    // Aliases to support all calls
+    const openItemDrawer = openDrawer;
+    const closeItemDrawer = closeDrawer;
+    const editCurrentDrawerItem = editCurrentRow;
+    const openReservationModalFromDrawer = openReserveForCurrent;
 
-    // Create Modal
+    // Create Modal & Category Field Toggles
     function openCreateModal(defaultCategory) {
         if (defaultCategory) {
             const selectEl = document.getElementById('createCategory');
@@ -2299,6 +2376,8 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         toggleCategoryFields('create');
+        // Initial setup for default column view
+        setColumnView('all');
     });
 
     // Edit Modal
@@ -2385,8 +2464,8 @@
             closeCreateModal();
             closeEditModal();
             closeDeleteModal();
-            closeItemDrawer();
-            closeReservationModal();
+            closeDrawer();
+            closeModal('reserveModal');
         }
     });
 </script>
