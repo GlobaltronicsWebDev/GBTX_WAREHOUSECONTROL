@@ -822,104 +822,104 @@
                         @endforelse
                     </tbody>
 
-                    @if ($items->count() > 0)
+                    @if ($items->total() > 0 || $items->count() > 0)
                         @php
-                            $ledTotalQty = $items->sum('quantity');
-                            $ledTotalAcuQty = $items->sum(function($i) { return (int)($i->acu_quantity ?: $i->quantity); });
-                            $ledTotalOrigQty = $items->sum(function($i) { return (int)($i->original_quantity !== null ? $i->original_quantity : $i->quantity); });
-                            $ledTotalReservedQty = $items->sum(function($i) { return (int)($i->reserved_quantity ?: 0); });
-                            $ledTotalHistoryQty = $items->sum(function($i) { return (int)($i->history_qty ?: 0); });
-                            $ledTotalStatusQty = $items->sum(function($i) { return (int)($i->status_qty ?: 0); });
-                            $ledTotalAvailQty = $items->sum(function($i) {
+                            $ledTotalQty = $categoryTotalQty ?? $items->sum('quantity');
+                            $ledTotalAcuQty = $categoryTotalAcuQty ?? $items->sum(function($i) { return (int)($i->acu_quantity ?: $i->quantity); });
+                            $ledTotalOrigQty = $categoryTotalOriginalQty ?? $items->sum(function($i) { return (int)($i->original_quantity !== null ? $i->original_quantity : $i->quantity); });
+                            $ledTotalReservedQty = $categoryTotalReservedQty ?? $items->sum(function($i) { return (int)($i->reserved_quantity ?: 0); });
+                            $ledTotalHistoryQty = $categoryTotalHistoryQty ?? $items->sum(function($i) { return (int)($i->history_qty ?: 0); });
+                            $ledTotalStatusQty = $categoryTotalStatusQty ?? $items->sum(function($i) { return (int)($i->status_qty ?: 0); });
+                            $ledTotalAvailQty = $categoryTotalForecastedQty ?? $items->sum(function($i) {
                                 $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reserved_quantity ?? 0));
                                 return max(0, (int)$avail);
                             });
-                            $ledTotalAvailSqm = $items->sum(function($i) {
+                            $ledTotalAvailSqm = $categoryTotalSqm ?? $items->sum(function($i) {
                                 $divisor = ($i->acu_quantity ?: $i->quantity) ?: 1;
                                 $perPanel = ($i->sqm && $divisor > 0) ? ($i->sqm / $divisor) : 0;
                                 $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reserved_quantity ?? 0));
                                 return $i->sqm !== null ? ($perPanel * max(0, (int)$avail)) : 0;
                             });
                         @endphp
-                        <tfoot class="border-t-2 border-orange-700 font-bold bg-[#ea580c] text-white">
-                            <tr class="divide-x divide-orange-700/60 h-9">
+                        <tfoot class="border-t-2 border-slate-300 font-bold bg-slate-100 text-slate-900 select-none">
+                            <tr class="divide-x divide-slate-200 h-9">
                                 <!-- TOTAL COUNT (Spans CDX to ITEM DESCRIPTION: 7 cols) -->
-                                <td colspan="7" class="py-2.5 px-4 text-center font-black tracking-wider uppercase text-xs sm:text-sm text-white bg-[#ea580c] select-none">
+                                <td colspan="7" class="py-2.5 px-4 text-center font-black tracking-wider uppercase text-xs sm:text-sm text-slate-900 bg-slate-100 select-none">
                                     TOTAL COUNT
                                 </td>
 
                                 <!-- INVENTORY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalQty) }}
                                 </td>
 
                                 <!-- INVENTORY: ACU. QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalAcuQty) }}
                                 </td>
 
                                 <!-- INVENTORY: PER PANEL SQM -->
-                                <td class="py-2 px-2 text-center text-xs text-orange-200 bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
 
                                 <!-- INVENTORY: TOTAL AVAILABLE SQM -->
-                                <td class="py-2 px-2 text-center font-mono-code font-bold text-xs text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-bold text-xs text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ $ledTotalAvailSqm > 0 ? number_format($ledTotalAvailSqm, 2) . ' m²' : '—' }}
                                 </td>
 
                                 <!-- FORECASTED QTY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalAvailQty) }}
                                 </td>
 
                                 <!-- FORECASTED QTY: SQM -->
-                                <td class="py-2 px-2 text-center font-mono-code font-bold text-xs text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-bold text-xs text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ $ledTotalAvailSqm > 0 ? number_format($ledTotalAvailSqm, 2) . ' m²' : '—' }}
                                 </td>
 
                                 <!-- RESERVATION: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalReservedQty) }}
                                 </td>
 
                                 <!-- RESERVATION: PROJECT DETAILS -->
-                                <td class="py-2 px-2 text-center text-xs text-orange-200 bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
 
                                 <!-- HISTORY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalHistoryQty) }}
                                 </td>
 
                                 <!-- HISTORY: PROJECT -->
-                                <td class="py-2 px-2 text-center text-xs text-orange-200 bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
 
                                 <!-- ORIGINAL QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalOrigQty) }}
                                 </td>
 
                                 <!-- STATUS: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalStatusQty) }}
                                 </td>
 
                                 <!-- STATUS: PARTICULAR -->
-                                <td class="py-2 px-2 text-center text-xs text-orange-200 bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
 
                                 <!-- REMARKS -->
-                                <td class="py-2 px-2 text-center text-xs text-orange-200 bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
 
                                 <!-- ACTIONS -->
-                                <td class="col-actions-sticky py-2 px-2.5 text-center text-xs text-orange-200 bg-[#ea580c] whitespace-nowrap">
+                                <td class="col-actions-sticky py-2 px-2.5 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
                             </tr>
@@ -1163,48 +1163,48 @@
                         @endforelse
                     </tbody>
 
-                    @if ($items->count() > 0)
+                    @if ($items->total() > 0 || $items->count() > 0)
                         @php
-                            $philTotalQty = $items->sum('quantity');
-                            $philTotalAcuQty = $items->sum(function($i) { return (int)($i->acu_quantity ?: $i->quantity); });
-                            $philTotalAvailQty = $items->sum(function($i) {
+                            $philTotalQty = $categoryTotalQty ?? $items->sum('quantity');
+                            $philTotalAcuQty = $categoryTotalAcuQty ?? $items->sum(function($i) { return (int)($i->acu_quantity ?: $i->quantity); });
+                            $philTotalAvailQty = $categoryTotalForecastedQty ?? $items->sum(function($i) {
                                 $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reserved_quantity ?? 0));
                                 return max(0, (int)$avail);
                             });
-                            $philTotalHistoryQty = $items->sum(function($i) { return (int)($i->history_qty ?: 0); });
+                            $philTotalHistoryQty = $categoryTotalHistoryQty ?? $items->sum(function($i) { return (int)($i->history_qty ?: 0); });
                         @endphp
-                        <tfoot class="border-t-2 border-orange-700 font-bold bg-[#ea580c] text-white">
-                            <tr class="divide-x divide-orange-700/60 h-9">
+                        <tfoot class="border-t-2 border-slate-300 font-bold bg-slate-100 text-slate-900 select-none">
+                            <tr class="divide-x divide-slate-200 h-9">
                                 <!-- TOTAL COUNT (Spans LOCATION to SERIAL NO.: 7 cols) -->
-                                <td colspan="7" class="py-2.5 px-4 text-center font-black tracking-wider uppercase text-xs sm:text-sm text-white bg-[#ea580c] select-none">
+                                <td colspan="7" class="py-2.5 px-4 text-center font-black tracking-wider uppercase text-xs sm:text-sm text-slate-900 bg-slate-100 select-none">
                                     TOTAL COUNT
                                 </td>
                                 <!-- INVENTORY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($philTotalQty) }}
                                 </td>
                                 <!-- INVENTORY: ACU. QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($philTotalAcuQty) }}
                                 </td>
                                 <!-- FORECASTED QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($philTotalAvailQty) }}
                                 </td>
                                 <!-- HISTORY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($philTotalHistoryQty) }}
                                 </td>
                                 <!-- HISTORY: PROJECT -->
-                                <td class="py-2 px-2 text-center text-xs text-orange-200 bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
                                 <!-- REMARKS -->
-                                <td class="py-2 px-2 text-center text-xs text-orange-200 bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
                                 <!-- ACTIONS -->
-                                <td class="col-actions-sticky py-2 px-2.5 text-center text-xs text-orange-200 bg-[#ea580c] whitespace-nowrap">
+                                <td class="col-actions-sticky py-2 px-2.5 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
                             </tr>
@@ -1575,6 +1575,105 @@
                         @endforelse
                     </tbody>
 
+                    @if ($items->total() > 0 || $items->count() > 0)
+                        @php
+                            $cLedTotalQty = $categoryTotalQty ?? $items->sum('quantity');
+                            $cLedTotalAcuQty = $categoryTotalAcuQty ?? $items->sum(function($i) { return (int)($i->acu_quantity ?: $i->quantity); });
+                            $cLedTotalOrigQty = $categoryTotalOriginalQty ?? $items->sum(function($i) { return (int)($i->original_quantity !== null ? $i->original_quantity : $i->quantity); });
+                            $cLedTotalReservedQty = $categoryTotalReservedQty ?? $items->sum(function($i) { return (int)($i->reserved_quantity ?: 0); });
+                            $cLedTotalHistoryQty = $categoryTotalHistoryQty ?? $items->sum(function($i) { return (int)($i->history_qty ?: 0); });
+                            $cLedTotalStatusQty = $categoryTotalStatusQty ?? $items->sum(function($i) { return (int)($i->status_qty ?: 0); });
+                            $cLedTotalAvailQty = $categoryTotalForecastedQty ?? $items->sum(function($i) {
+                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reserved_quantity ?? 0));
+                                return max(0, (int)$avail);
+                            });
+                            $cLedTotalAvailSqm = $categoryTotalSqm ?? $items->sum('sqm');
+                        @endphp
+                        <tfoot class="border-t-2 border-slate-300 font-bold bg-slate-100 text-slate-900 select-none">
+                            <tr class="divide-x divide-slate-200 h-9">
+                                <!-- TOTAL COUNT (Spans TAG # to LOCATION: 7 cols) -->
+                                <td colspan="7" class="py-2.5 px-4 text-center font-black tracking-wider uppercase text-xs sm:text-sm text-slate-900 bg-slate-100 select-none">
+                                    TOTAL COUNT
+                                </td>
+
+                                <!-- INVENTORY: ON-HAND -->
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($cLedTotalQty) }}
+                                </td>
+
+                                <!-- INVENTORY: TOTAL ON-HAND -->
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($cLedTotalAcuQty) }}
+                                </td>
+
+                                <!-- INVENTORY: PER PANEL SQM -->
+                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                    —
+                                </td>
+
+                                <!-- INVENTORY: TOTAL AVAILABLE SQM -->
+                                <td class="py-2 px-2 text-center font-mono-code font-bold text-xs text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ $cLedTotalAvailSqm > 0 ? number_format($cLedTotalAvailSqm, 2) . ' m²' : '—' }}
+                                </td>
+
+                                <!-- AVAILABLE QTY: QTY -->
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($cLedTotalAvailQty) }}
+                                </td>
+
+                                <!-- AVAILABLE QTY: SQM -->
+                                <td class="py-2 px-2 text-center font-mono-code font-bold text-xs text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ $cLedTotalAvailSqm > 0 ? number_format($cLedTotalAvailSqm, 2) . ' m²' : '—' }}
+                                </td>
+
+                                <!-- RESERVATION: QTY -->
+                                <td class="col-central-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($cLedTotalReservedQty) }}
+                                </td>
+
+                                <!-- RESERVATION: PROJECT DETAILS -->
+                                <td class="col-central-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                    —
+                                </td>
+
+                                <!-- HISTORY: QTY -->
+                                <td class="col-central-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($cLedTotalHistoryQty) }}
+                                </td>
+
+                                <!-- HISTORY: PROJECT -->
+                                <td class="col-central-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                    —
+                                </td>
+
+                                <!-- ORIGINAL QTY -->
+                                <td class="col-central-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($cLedTotalOrigQty) }}
+                                </td>
+
+                                <!-- STATUS: QTY -->
+                                <td class="col-central-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($cLedTotalStatusQty) }}
+                                </td>
+
+                                <!-- STATUS: PARTICULAR -->
+                                <td class="col-central-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                    —
+                                </td>
+
+                                <!-- REMARKS -->
+                                <td class="col-central-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                    —
+                                </td>
+
+                                <!-- ACTIONS -->
+                                <td class="col-actions-sticky py-2 px-2.5 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                    —
+                                </td>
+                            </tr>
+                        </tfoot>
+                    @endif
+
                 @elseif ($selectedCategory === 'EOL PHILIPS UNITS')
                     <!-- CLEAN SPREADSHEET HEADER FOR EOL PHILIPS UNITS (NO BLUE BACKGROUND) -->
                     <thead>
@@ -1697,22 +1796,22 @@
                         @endforelse
                     </tbody>
 
-                    @if ($items->count() > 0)
+                    @if ($items->total() > 0 || $items->count() > 0)
                         @php
-                            $eolTotalQty = $items->sum('quantity');
+                            $eolTotalQty = $categoryTotalQty ?? $items->sum('quantity');
                         @endphp
-                        <tfoot class="border-t-2 border-orange-700 font-bold bg-[#ea580c] text-white">
-                            <tr class="divide-x divide-orange-700/60 h-9">
+                        <tfoot class="border-t-2 border-slate-300 font-bold bg-slate-100 text-slate-900 select-none">
+                            <tr class="divide-x divide-slate-200 h-9">
                                 <!-- TOTAL COUNT (Spans MANUFACTURER to ITEM DESCRIPTION: 4 cols) -->
-                                <td colspan="4" class="py-2.5 px-4 text-center font-black tracking-wider uppercase text-xs sm:text-sm text-white bg-[#ea580c] select-none">
+                                <td colspan="4" class="py-2.5 px-4 text-center font-black tracking-wider uppercase text-xs sm:text-sm text-slate-900 bg-slate-100 select-none">
                                     TOTAL COUNT
                                 </td>
                                 <!-- QTY -->
-                                <td class="py-2 px-3 text-center font-mono-code font-black text-xs sm:text-sm text-white bg-[#ea580c] whitespace-nowrap">
+                                <td class="py-2 px-3 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($eolTotalQty) }}
                                 </td>
                                 <!-- ACTIONS -->
-                                <td class="col-actions-sticky py-2 px-2.5 text-center text-xs text-orange-200 bg-[#ea580c] whitespace-nowrap">
+                                <td class="col-actions-sticky py-2 px-2.5 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
                             </tr>
@@ -1991,6 +2090,53 @@
                             </tr>
                         @endforelse
                     </tbody>
+
+                    @if ($items->total() > 0 || $items->count() > 0)
+                        @php
+                            $genTotalQty = $categoryTotalQty ?? $items->sum('quantity');
+                            $genTotalAvailQty = $categoryTotalForecastedQty ?? $items->sum(function($i) {
+                                $avail = $i->forecasted_quantity !== null ? $i->forecasted_quantity : ($i->quantity - ($i->reserved_quantity ?? 0));
+                                return max(0, (int)$avail);
+                            });
+                            $genTotalSqm = $categoryTotalSqm ?? $items->sum('sqm');
+                            $genTotalReserved = $categoryTotalReservedQty ?? $items->sum(function($i) { return (int)($i->reserved_quantity ?: 0); });
+                            $prefixCols = ($selectedCategory === 'all') ? 6 : 5;
+                        @endphp
+                        <tfoot class="border-t-2 border-slate-300 font-bold bg-slate-100 text-slate-900 select-none">
+                            <tr class="divide-x divide-slate-200 h-9">
+                                <td colspan="{{ $prefixCols }}" class="py-2.5 px-4 text-center font-black tracking-wider uppercase text-xs sm:text-sm text-slate-900 bg-slate-100 select-none">
+                                    TOTAL COUNT
+                                </td>
+                                <td class="col-group-inventory py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($genTotalQty) }}
+                                </td>
+                                <td class="col-group-inventory py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($genTotalAvailQty) }}
+                                </td>
+                                <td class="col-group-inventory py-2 px-2 text-center font-mono-code font-bold text-xs text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ $genTotalSqm > 0 ? number_format($genTotalSqm, 2) . ' m²' : '—' }}
+                                </td>
+                                <td class="col-group-reservation py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($genTotalReserved) }}
+                                </td>
+                                <td class="col-group-reservation py-2 px-3 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                    —
+                                </td>
+                                <td class="col-group-history py-2 px-2.5 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                    —
+                                </td>
+                                <td class="col-group-history py-2 px-3 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                    —
+                                </td>
+                                <td class="col-group-history py-2 px-3 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                    —
+                                </td>
+                                <td class="col-actions-sticky py-2 px-2.5 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                    —
+                                </td>
+                            </tr>
+                        </tfoot>
+                    @endif
                 @endif
             </table>
         </div>
@@ -3593,9 +3739,10 @@
     }
 
     // Delete Modal
+    const deleteRouteTemplate = "{{ route('admin.inventory.destroy', ':id') }}";
     function openDeleteModal(item) {
-        document.getElementById('deleteForm').action = '/admin/inventory/' + item.id;
-        document.getElementById('deleteModalModel').textContent = item.model + ' (' + item.manufacturer + ')';
+        document.getElementById('deleteForm').action = deleteRouteTemplate.replace(':id', item.id);
+        document.getElementById('deleteModalModel').textContent = (item.model || 'Unit') + (item.manufacturer ? ' (' + item.manufacturer + ')' : '');
         document.getElementById('deleteModal').classList.remove('hidden');
     }
     function closeDeleteModal() {
