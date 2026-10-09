@@ -5,8 +5,22 @@ error_reporting(E_ALL);
 
 echo "<h2>Laravel Diagnostic Details</h2>";
 
-require __DIR__ . '/../vendor/autoload.php';
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+$basePath = realpath(__DIR__ . '/..') ?: dirname(__DIR__);
+echo "<p><strong>Base Path:</strong> " . htmlspecialchars($basePath) . "</p>";
+
+$autoload = $basePath . '/vendor/autoload.php';
+echo "<p><strong>Autoload Path:</strong> " . htmlspecialchars($autoload) . "</p>";
+
+if (!file_exists($autoload)) {
+    echo "<p style='color:red;'>autoload.php does not exist!</p>";
+    exit;
+}
+
+require $autoload;
+echo "<p style='color:green;'>✔ Autoload required successfully!</p>";
+
+$app = require_once $basePath . '/bootstrap/app.php';
+echo "<p style='color:green;'>✔ App bootstrapped successfully!</p>";
 
 // Test DB connection
 try {
@@ -18,7 +32,7 @@ try {
 }
 
 // Check recent logs
-$logFile = __DIR__ . '/../storage/logs/laravel.log';
+$logFile = $basePath . '/storage/logs/laravel.log';
 echo "<h3>Laravel Error Log:</h3>";
 if (file_exists($logFile)) {
     $lines = file($logFile);
@@ -34,7 +48,9 @@ try {
     $request = \Illuminate\Http\Request::create('/', 'GET');
     $response = $kernel->handle($request);
     echo "<h3>Request '/' Status: " . $response->getStatusCode() . "</h3>";
-    if ($response->getStatusCode() !== 200) {
+    if ($response->getStatusCode() === 200) {
+        echo "<p style='color:green;'>✔ Home route executed with status 200 OK!</p>";
+    } else {
         echo "<div style='border:2px solid red;padding:10px;'>" . $response->getContent() . "</div>";
     }
 } catch (\Throwable $e) {
