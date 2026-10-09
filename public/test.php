@@ -12,6 +12,55 @@ echo "<p><strong>Current Working Dir:</strong> " . getcwd() . "</p>";
 // 1. Check .env file directly
 $envFile = $basePath . '/.env';
 echo "<h3>1. Checking .env file</h3>";
+if (!file_exists($envFile)) {
+    echo "<p style='color:orange;'>⚠ .env was missing. Automatically creating now...</p>";
+    $envContent = <<<EOT
+APP_NAME="Globaltronics Warehouse"
+APP_ENV=production
+APP_KEY=base64:YZwCKsJPwmCbnFcIT0ZRrKOz0jY3voTgWn6h422TcIU=
+APP_DEBUG=true
+APP_URL=https://globaltronicswhics.globaltronics.net
+
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=en_US
+APP_MAINTENANCE_DRIVER=file
+
+BCRYPT_ROUNDS=12
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=u553953718_warehouse2026
+DB_USERNAME=u553953718_warehouse
+DB_PASSWORD="kVCfJRk~kS8"
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+SESSION_PATH=/
+SESSION_DOMAIN=null
+
+BROADCAST_CONNECTION=log
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+CACHE_STORE=file
+
+MEMCACHED_HOST=127.0.0.1
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+EOT;
+    file_put_contents($envFile, $envContent);
+    @chmod($envFile, 0644);
+}
+
 if (file_exists($envFile)) {
     echo "<p style='color:green;'>✔ .env file exists (" . filesize($envFile) . " bytes)</p>";
     $envLines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -26,8 +75,6 @@ if (file_exists($envFile)) {
         }
     }
     echo "</pre>";
-} else {
-    echo "<p style='color:red;'>✘ .env file DOES NOT EXIST at {$envFile}!</p>";
 }
 
 // 2. Test direct PDO MySQL connection
