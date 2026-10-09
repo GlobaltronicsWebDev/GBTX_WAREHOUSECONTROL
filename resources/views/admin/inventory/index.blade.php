@@ -991,6 +991,308 @@
                         @endforelse
                     </tbody>
 
+                @elseif ($selectedCategory === 'EOL PHILIPS UNITS')
+                    <!-- CLEAN 2-TIER SPREADSHEET HEADER FOR EOL PHILIPS UNITS (WITH TOGGLEABLE RESERVATION, HISTORY, ORIGINAL QTY, UNFOUND & REMARKS) -->
+                    <thead>
+                        <tr class="divide-x divide-slate-300 border-b border-slate-300 text-[11px] sm:text-xs tracking-wider">
+                            <th rowspan="2" class="py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[140px] whitespace-nowrap bg-sky-200">LOCATION</th>
+                            <th rowspan="2" class="py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[110px] whitespace-nowrap bg-sky-200">DATE RECEIVED</th>
+                            <th rowspan="2" class="py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[130px] whitespace-nowrap bg-sky-200">MANUFACTURER</th>
+                            <th rowspan="2" class="py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[140px] whitespace-nowrap bg-sky-200">MODEL</th>
+                            <th rowspan="2" class="py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[130px] whitespace-nowrap bg-sky-200">PO / SKU No.</th>
+                            <th colspan="2" class="py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-sky-200 text-slate-900 tracking-wider">ITEM DESCRIPTION</th>
+                            <th colspan="2" class="py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-sky-200 text-slate-900 tracking-wider">INVENTORY</th>
+                            <th rowspan="2" class="py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[95px] whitespace-nowrap bg-sky-200">AVAILABLE QTY</th>
+                            
+                            <!-- TOGGLEABLE EXTENDED COLUMNS: RESERVATION, HISTORY, ORIGINAL QTY, UNFOUND, REMARKS -->
+                            <th colspan="2" class="col-philips-ext py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-sky-200 text-slate-900 tracking-wider">RESERVATION</th>
+                            <th colspan="2" class="col-philips-ext py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-sky-200 text-slate-900 tracking-wider">HISTORY</th>
+                            <th rowspan="2" class="col-philips-ext py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[95px] whitespace-nowrap bg-sky-200">ORIGINAL QTY</th>
+                            <th colspan="2" class="col-philips-ext py-2 px-3 text-center font-extrabold uppercase select-none border-b border-slate-300 whitespace-nowrap bg-sky-200 text-slate-900 tracking-wider">UNFOUND</th>
+                            <th rowspan="2" class="col-philips-ext py-3 px-3 text-center text-slate-900 font-extrabold uppercase select-none min-w-[180px] whitespace-nowrap bg-sky-200">REMARKS</th>
+                            
+                            <th rowspan="2" class="py-3 px-3 text-center text-slate-700 select-none min-w-[90px] whitespace-nowrap sticky right-0 bg-slate-50 font-bold uppercase">ACTIONS</th>
+                        </tr>
+                        <tr class="divide-x divide-slate-300 border-b border-slate-300">
+                            <!-- ITEM DESCRIPTION SUBHEADERS -->
+                            <th class="py-1.5 px-3 text-left text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[260px] bg-slate-200/90">PARTICULAR</th>
+                            <th class="py-1.5 px-3 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[140px] whitespace-nowrap bg-slate-200/90">SERIAL NO.</th>
+                            
+                            <!-- INVENTORY SUBHEADERS -->
+                            <th class="py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[65px] whitespace-nowrap bg-slate-200/90">QTY</th>
+                            <th class="py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[75px] whitespace-nowrap bg-slate-200/90">ACU. QTY</th>
+
+                            <!-- RESERVATION SUBHEADERS -->
+                            <th class="col-philips-ext py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[70px] whitespace-nowrap bg-slate-200/90">QTY</th>
+                            <th class="col-philips-ext py-1.5 px-3 text-left text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[220px] bg-slate-200/90">PROJECT DETAILS</th>
+
+                            <!-- HISTORY SUBHEADERS -->
+                            <th class="col-philips-ext py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[70px] whitespace-nowrap bg-slate-200/90">QTY</th>
+                            <th class="col-philips-ext py-1.5 px-3 text-left text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[220px] bg-slate-200/90">PROJECT</th>
+
+                            <!-- UNFOUND SUBHEADERS -->
+                            <th class="col-philips-ext py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[70px] whitespace-nowrap bg-slate-200/90">QTY</th>
+                            <th class="col-philips-ext py-1.5 px-2.5 text-center text-slate-900 font-extrabold uppercase text-[10px] tracking-wider select-none min-w-[95px] whitespace-nowrap bg-slate-200/90">STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-xs sm:text-sm font-medium">
+                        @php
+                            $currentSize = null;
+                        @endphp
+
+                        @forelse ($items as $item)
+                            <!-- Screen Size Header Group (e.g. 55", 65", 43", etc.) -->
+                            @if ($item->screen_size && $item->screen_size !== $currentSize && !$search)
+                                @php
+                                    $currentSize = $item->screen_size;
+                                @endphp
+                                <tr class="bg-sky-50/90 border-y border-slate-300">
+                                    <td colspan="19" class="py-1 px-4 text-center font-extrabold text-sky-950 font-mono-code text-xs tracking-wider select-none">
+                                        PHILIPS {{ $currentSize }} MONITORS / COMMERCIAL DISPLAYS
+                                    </td>
+                                </tr>
+                            @endif
+
+                            <tr onclick="openDrawer({{ json_encode($item) }})" class="hover:bg-blue-50/70 transition-colors cursor-pointer group">
+                                
+                                <!-- LOCATION -->
+                                <td class="py-3 px-3 border-r border-slate-200 font-mono-code align-top">
+                                    @if (!empty($item->movement_history['locations']) && count($item->movement_history['locations']) > 1)
+                                        <div class="flex flex-col gap-1 items-start">
+                                            @foreach ($item->movement_history['locations'] as $loc)
+                                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200 whitespace-nowrap">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                                                    <span>{{ strtoupper($loc['location'] ?? 'A JUAN - 2ND FLR') }}:</span>
+                                                    <span class="font-bold font-mono">{{ $loc['qty'] ?? 0 }} pcs</span>
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                                            {{ $item->location ?: 'A JUAN - 2ND FLR' }}
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <!-- DATE RECEIVED -->
+                                <td class="py-3 px-3 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap align-top">
+                                    {{ $item->check_in_date ? $item->check_in_date->format('n/j/Y') : '—' }}
+                                </td>
+
+                                <!-- MANUFACTURER -->
+                                <td class="py-3 px-3 font-semibold text-slate-800 uppercase font-mono-code border-r border-slate-200 text-center whitespace-nowrap align-top">
+                                    {{ $item->manufacturer ?: 'PHILIPS' }}
+                                </td>
+
+                                <!-- MODEL -->
+                                <td class="py-3 px-3 font-mono-code font-semibold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap align-top">
+                                    {{ $item->model }}
+                                </td>
+
+                                <!-- PO / SKU No. -->
+                                <td class="py-3 px-3 font-mono-code text-center text-slate-800 border-r border-slate-200 whitespace-nowrap font-bold align-top">
+                                    {{ $item->po_number ?? '—' }}
+                                </td>
+
+                                <!-- ITEM DESCRIPTION: PARTICULAR -->
+                                <td class="py-3 px-4 text-slate-800 uppercase font-medium leading-relaxed border-r border-slate-200 min-w-[260px] align-top">
+                                    <div class="whitespace-pre-line">{{ $item->item_description }}</div>
+                                </td>
+
+                                <!-- ITEM DESCRIPTION: SERIAL NO. -->
+                                <td class="py-2.5 px-3 font-mono-code font-bold text-center text-slate-800 border-r border-slate-200 align-top">
+                                    @if ($item->tag_number)
+                                        @php
+                                            $serials = preg_split('/[\r\n,;|]+/', $item->tag_number, -1, PREG_SPLIT_NO_EMPTY);
+                                        @endphp
+                                        <div class="flex flex-col items-center justify-center space-y-1">
+                                            @foreach ($serials as $sn)
+                                                <span class="text-xs font-mono-code font-bold italic text-slate-900 whitespace-nowrap block bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                                                    {{ trim($sn) }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- INVENTORY: QTY -->
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
+                                        {{ $item->quantity }}
+                                    </span>
+                                </td>
+
+                                <!-- INVENTORY: ACU. QTY -->
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
+                                        {{ $item->acu_quantity ?? $item->quantity }}
+                                    </span>
+                                </td>
+
+                                <!-- AVAILABLE QTY -->
+                                @php
+                                    $philAvailQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : max(0, (int)$item->quantity - (int)($item->reservation_qty ?? 0));
+                                @endphp
+                                <td class="py-3 px-3 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <span class="inline-flex items-center justify-center min-w-[2.25rem] px-2 py-0.5 rounded font-bold text-xs {{ $philAvailQty > 0 ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-slate-100 text-slate-400' }}">
+                                        {{ $philAvailQty }}
+                                    </span>
+                                </td>
+
+                                <!-- TOGGLEABLE: RESERVATION QTY -->
+                                <td class="col-philips-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    @if (($item->reservation_qty ?? 0) > 0)
+                                        <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded font-bold text-xs bg-amber-50 text-amber-800 border border-amber-300">
+                                            {{ $item->reservation_qty }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: RESERVATION PROJECT DETAILS (EXTENDED CARDS) -->
+                                <td class="col-philips-ext py-3 px-3 border-r border-slate-200 min-w-[280px] text-xs align-top">
+                                    @if (!empty($item->movement_history['reservations']) && count($item->movement_history['reservations']) > 0)
+                                        <div class="flex flex-col gap-1.5">
+                                            @foreach ($item->movement_history['reservations'] as $res)
+                                                <div class="p-2 rounded-lg bg-amber-50/80 border border-amber-200/80 text-amber-950 text-xs shadow-xs space-y-1">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="px-1.5 py-0.2 rounded bg-amber-200/80 text-amber-900 font-bold font-mono text-[10px]">{{ $res['qty'] ?? 0 }} pcs</span>
+                                                        <span class="font-bold text-[11px] leading-tight">{{ $res['project'] ?? 'Project Reservation' }}</span>
+                                                    </div>
+                                                    @if (!empty($res['remarks']))
+                                                        <div class="text-[10px] text-amber-800/80 italic pl-1">{{ $res['remarks'] }}</div>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @elseif ($item->reservation_project)
+                                        <div class="whitespace-pre-line text-slate-700 font-medium py-0.5" title="{{ $item->reservation_project }}">{{ $item->reservation_project }}</div>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: HISTORY QTY -->
+                                <td class="col-philips-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    @if (($item->history_qty ?? 0) > 0)
+                                        <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded font-bold text-xs bg-blue-50 text-blue-800 border border-blue-300">
+                                            {{ $item->history_qty }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: HISTORY PROJECT (EXTENDED CARDS) -->
+                                <td class="col-philips-ext py-3 px-3 border-r border-slate-200 min-w-[280px] text-xs align-top">
+                                    @if (!empty($item->movement_history['history']) && count($item->movement_history['history']) > 0)
+                                        <div class="flex flex-col gap-1.5">
+                                            @foreach ($item->movement_history['history'] as $hist)
+                                                <div class="p-2 rounded-lg bg-blue-50/80 border border-blue-200/80 text-blue-950 text-xs shadow-xs space-y-0.5">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="px-1.5 py-0.2 rounded bg-blue-200/80 text-blue-900 font-bold font-mono text-[10px]">{{ $hist['qty'] ?? 0 }} pcs</span>
+                                                        <span class="font-bold text-[11px] leading-tight">{{ $hist['project'] ?? 'Project Delivery' }}</span>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @elseif ($item->history_project)
+                                        <div class="whitespace-pre-line text-slate-700 font-medium py-0.5" title="{{ $item->history_project }}">{{ $item->history_project }}</div>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: ORIGINAL QTY -->
+                                <td class="col-philips-ext py-3 px-3 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top font-bold text-slate-700">
+                                    {{ $item->original_quantity ?? $item->quantity }}
+                                </td>
+
+                                <!-- TOGGLEABLE: UNFOUND QTY -->
+                                <td class="col-philips-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    @if (($item->status_qty ?? 0) > 0)
+                                        <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded font-bold text-xs bg-rose-50 text-rose-800 border border-rose-300">
+                                            {{ $item->status_qty }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">0</span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: UNFOUND STATUS -->
+                                <td class="col-philips-ext py-3 px-2 text-center border-r border-slate-200 whitespace-nowrap align-top">
+                                    @php
+                                        $stPart = strtoupper(trim((string)($item->status_particular ?? 'OK')));
+                                    @endphp
+                                    @if ($stPart === 'OK' || empty($stPart))
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                            OK
+                                        </span>
+                                    @elseif (str_contains($stPart, 'UNFOUND'))
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                            {{ $stPart }}
+                                        </span>
+                                    @elseif (str_contains($stPart, 'REPAIR'))
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                            {{ $stPart }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                            {{ $stPart }}
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <!-- TOGGLEABLE: REMARKS (FULLY OPENED & EXTENDED) -->
+                                <td class="col-philips-ext py-3 px-3 border-r border-slate-200 min-w-[200px] text-xs text-slate-600 align-top">
+                                    @if ($item->remarks)
+                                        <div class="whitespace-pre-line font-medium text-slate-700 py-0.5" title="{{ $item->remarks }}">{{ $item->remarks }}</div>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- ACTIONS -->
+                                <td class="py-3 px-3 text-center whitespace-nowrap sticky right-0 bg-white/95 backdrop-blur-xs group-hover:bg-blue-50/95 transition-colors align-top shadow-xs">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <button 
+                                            type="button" 
+                                            onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
+                                            class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-slate-100 border border-slate-200 transition-colors"
+                                            title="Edit Item Details"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onclick="event.stopPropagation(); openDeleteModal({{ json_encode($item) }})" 
+                                            class="p-1.5 rounded-lg text-slate-600 hover:text-rose-600 hover:bg-slate-100 border border-slate-200 transition-colors"
+                                            title="Delete Item Record"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="19" class="py-12 text-center text-slate-500">
+                                    <div class="max-w-xs mx-auto space-y-2">
+                                        <p class="font-bold text-slate-700">No Philips display items found</p>
+                                        <p class="text-xs text-slate-400">Add a Philips monitor unit using the button above to populate this category.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+
                 @else
                     <!-- CLEAN SPREADSHEET HEADER FOR EOL PHILIPS UNITS, SERVICE UNITS & ALL -->
                     <thead>
@@ -1289,6 +1591,7 @@
                         >
                             <option value="">-- Select Location --</option>
                             <option value="GLOBALTRONICS" selected>GLOBALTRONICS</option>
+                            <option value="A JUAN - 2ND FLR">A JUAN - 2ND FLR</option>
                             <option value="MARIKINA">MARIKINA</option>
                             <option value="2ND FLR OCAP">2ND FLR OCAP</option>
                             <option value="AJUAN - 1ST FLR">AJUAN - 1ST FLR</option>
@@ -1616,6 +1919,7 @@
                         >
                             <option value="">-- Select Location --</option>
                             <option value="GLOBALTRONICS">GLOBALTRONICS</option>
+                            <option value="A JUAN - 2ND FLR">A JUAN - 2ND FLR</option>
                             <option value="MARIKINA">MARIKINA</option>
                             <option value="2ND FLR OCAP">2ND FLR OCAP</option>
                             <option value="AJUAN - 1ST FLR">AJUAN - 1ST FLR</option>
@@ -2482,21 +2786,25 @@
             }
         } else if (isEolPhilips) {
             if (modalTitle && mode === 'create') modalTitle.textContent = 'Add Philips Display Unit';
-            if (tagLabel) tagLabel.textContent = 'TAG / Serial #';
-            if (tagInput) tagInput.placeholder = 'e.g. BDL-2026-01';
-            if (tagHint) tagHint.classList.add('hidden');
+            if (tagLabel) tagLabel.textContent = 'SERIAL NO.';
+            if (tagInput) tagInput.placeholder = 'e.g. SN-PHILIPS-001, SN-PHILIPS-002';
+            if (tagHint) tagHint.classList.remove('hidden');
             if (poInput) poInput.placeholder = 'e.g. PO-2024-001';
             if (modelLabel) modelLabel.textContent = 'Model *';
             if (modelInput) modelInput.placeholder = 'e.g. 55BDL4050D';
-            if (descLabel) descLabel.textContent = 'Item Description *';
+            if (descLabel) descLabel.textContent = 'Particular / Item Description *';
             if (screenSizeGroup) screenSizeGroup.classList.remove('hidden');
-            if (acuQtyGroup) acuQtyGroup.classList.add('hidden');
-            if (forecastedQtyGroup) forecastedQtyGroup.classList.add('hidden');
+            if (acuQtyGroup) acuQtyGroup.classList.remove('hidden');
+            if (forecastedQtyGroup) forecastedQtyGroup.classList.remove('hidden');
             if (sqmGroup) sqmGroup.classList.add('hidden');
             if (breakdownCard) breakdownCard.classList.add('hidden');
             if (descInput) descInput.placeholder = 'e.g. 55" PHILIPS FLAT WIDE MONITOR';
             if (subtitle && mode === 'create') subtitle.textContent = 'Create a new entry in Philips Display Inventory';
             if (mfg) mfg.value = 'PHILIPS';
+            const locSelect = document.querySelector('select[name="location"]');
+            if (locSelect && (!locSelect.value || locSelect.value === 'GLOBALTRONICS')) {
+                locSelect.value = 'A JUAN - 2ND FLR';
+            }
         } else {
             if (modalTitle && mode === 'create') modalTitle.textContent = 'Add ' + cat;
             if (tagLabel) tagLabel.textContent = 'TAG / Serial #';
@@ -2685,9 +2993,45 @@
         }
     }
 
+    // EOL Philips Extended Columns Toggle
+    function togglePhilipsColumns() {
+        const table = document.getElementById('centralLedTable');
+        if (!table) return;
+        const isCurrentlyHidden = table.classList.contains('hide-philips-ext');
+        setPhilipsToggleUI(isCurrentlyHidden);
+        localStorage.setItem('philips_ext_visible', isCurrentlyHidden ? '1' : '0');
+    }
+
+    function setPhilipsToggleUI(show) {
+        const table = document.getElementById('centralLedTable');
+        if (table) {
+            if (show) {
+                table.classList.remove('hide-philips-ext');
+            } else {
+                table.classList.add('hide-philips-ext');
+            }
+        }
+        const btn = document.getElementById('btnTogglePhilipsDetails');
+        const lbl = document.getElementById('lblTogglePhilipsDetails');
+        const badge = document.getElementById('badgeTogglePhilipsDetails');
+        if (btn) {
+            if (show) {
+                btn.className = "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-900";
+                if (lbl) lbl.textContent = "Hide Extended (Reservation, History, Unfound, Status)";
+                if (badge) { badge.textContent = "OPEN"; badge.className = "px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-sky-200 text-sky-900"; }
+            } else {
+                btn.className = "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-700";
+                if (lbl) lbl.textContent = "Open Extended (Reservation, History, Unfound, Status)";
+                if (badge) { badge.textContent = "HIDDEN"; badge.className = "px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-slate-100 text-slate-600"; }
+            }
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const savedExt = localStorage.getItem('central_led_ext_visible');
         setCentralizedLedToggleUI(savedExt === '1');
+        const savedPhilExt = localStorage.getItem('philips_ext_visible');
+        setPhilipsToggleUI(savedPhilExt === '1');
     });
 
     // Close on Escape Key
