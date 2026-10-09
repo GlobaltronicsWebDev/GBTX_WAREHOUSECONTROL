@@ -746,21 +746,32 @@
                                 </td>
 
                                 <!-- LOCATION -->
-                                <td class="py-3 px-3 text-center border-r border-slate-200 font-mono-code whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
-                                        {{ $item->location }}
-                                    </span>
+                                <td class="py-3 px-3 border-r border-slate-200 font-mono-code align-top">
+                                    @if (!empty($item->movement_history['locations']) && count($item->movement_history['locations']) > 1)
+                                        <div class="space-y-1.5 py-0.5">
+                                            @foreach ($item->movement_history['locations'] as $loc)
+                                                <span class="inline-flex items-center justify-between gap-1.5 w-full px-2 py-1 rounded-lg text-[10px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                                                    <span>{{ $loc['location'] }}</span>
+                                                    <span class="font-extrabold text-slate-900 bg-white px-1.5 py-0.2 rounded border border-slate-200">{{ $loc['qty'] }} pcs</span>
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                                            {{ $item->location }}
+                                        </span>
+                                    @endif
                                 </td>
 
                                 <!-- ON-HAND -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ number_format($item->quantity) }}
                                     </span>
                                 </td>
 
                                 <!-- TOTAL ON-HAND -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     @if ($item->acu_quantity !== null)
                                         <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-yellow-50 text-amber-900 border border-yellow-200">
                                             {{ number_format($item->acu_quantity) }}
@@ -771,7 +782,7 @@
                                 </td>
 
                                 <!-- PER PANEL SQM -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     <span class="font-medium text-xs text-slate-600">
                                         @php
                                             $divisor = $item->acu_quantity ?: $item->quantity;
@@ -781,14 +792,14 @@
                                 </td>
 
                                 <!-- TOTAL AVAILABLE SQM -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     <span class="font-bold text-xs text-slate-900">
                                         {{ $item->sqm !== null ? number_format($item->sqm, 2) : '—' }}
                                     </span>
                                 </td>
 
                                 <!-- AVAILABLE QTY: QTY -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     @php
                                         $availQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : $item->quantity;
                                     @endphp
@@ -798,7 +809,7 @@
                                 </td>
 
                                 <!-- AVAILABLE QTY: SQM -->
-                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     @php
                                         $availQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : $item->quantity;
                                         $divisor = ($item->acu_quantity ?: $item->quantity) ?: 1;
@@ -815,7 +826,7 @@
                                 </td>
 
                                 <!-- TOGGLEABLE: RESERVATION QTY -->
-                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     @if ($item->reservation_qty)
                                         <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-amber-50 text-amber-800 border border-amber-200">
                                             {{ number_format($item->reservation_qty) }}
@@ -825,17 +836,35 @@
                                     @endif
                                 </td>
 
-                                <!-- TOGGLEABLE: RESERVATION PROJECT DETAILS -->
-                                <td class="col-central-ext py-3 px-3 border-r border-slate-200 min-w-[220px] max-w-[320px] text-xs text-slate-800">
-                                    @if ($item->reservation_project)
-                                        <span class="line-clamp-2 hover:line-clamp-none font-medium" title="{{ $item->reservation_project }}">{{ $item->reservation_project }}</span>
+                                <!-- TOGGLEABLE: RESERVATION PROJECT DETAILS (FULLY OPENED & EXTENDED) -->
+                                <td class="col-central-ext py-3 px-3 border-r border-slate-200 min-w-[340px] text-xs text-slate-800 align-top">
+                                    @if (!empty($item->movement_history['reservations']) && count($item->movement_history['reservations']) > 0)
+                                        <div class="space-y-2 py-0.5">
+                                            @foreach ($item->movement_history['reservations'] as $res)
+                                                <div class="p-2.5 rounded-xl bg-amber-50/90 border border-amber-200 text-xs shadow-2xs">
+                                                    @if (!empty($res['qty']))
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md font-extrabold text-[10px] bg-amber-200 text-amber-900 mb-1 font-mono-code">
+                                                            {{ number_format($res['qty']) }} pcs
+                                                        </span>
+                                                    @endif
+                                                    <div class="font-medium text-slate-900 leading-snug whitespace-pre-line">{{ $res['project'] }}</div>
+                                                    @if (!empty($res['remarks']))
+                                                        <div class="mt-1 text-[11px] text-amber-800/90 italic border-t border-amber-200/70 pt-1">
+                                                            {{ $res['remarks'] }}
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @elseif ($item->reservation_project)
+                                        <div class="whitespace-pre-line font-medium text-slate-900 leading-relaxed py-0.5">{{ $item->reservation_project }}</div>
                                     @else
                                         <span class="text-slate-400">—</span>
                                     @endif
                                 </td>
 
                                 <!-- TOGGLEABLE: HISTORY QTY -->
-                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     @if ($item->history_qty)
                                         <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-blue-50 text-blue-800 border border-blue-200">
                                             {{ number_format($item->history_qty) }}
@@ -845,31 +874,44 @@
                                     @endif
                                 </td>
 
-                                <!-- TOGGLEABLE: HISTORY PROJECT -->
-                                <td class="col-central-ext py-3 px-3 border-r border-slate-200 min-w-[220px] max-w-[320px] text-xs text-slate-800">
-                                    @if ($item->history_project)
-                                        <span class="line-clamp-2 hover:line-clamp-none font-medium" title="{{ $item->history_project }}">{{ $item->history_project }}</span>
+                                <!-- TOGGLEABLE: HISTORY PROJECT (FULLY OPENED & EXTENDED) -->
+                                <td class="col-central-ext py-3 px-3 border-r border-slate-200 min-w-[340px] text-xs text-slate-800 align-top">
+                                    @if (!empty($item->movement_history['history']) && count($item->movement_history['history']) > 0)
+                                        <div class="space-y-2 py-0.5">
+                                            @foreach ($item->movement_history['history'] as $hist)
+                                                <div class="p-2.5 rounded-xl bg-blue-50/90 border border-blue-200 text-xs shadow-2xs">
+                                                    @if (!empty($hist['qty']))
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md font-extrabold text-[10px] bg-blue-200 text-blue-900 mb-1 font-mono-code">
+                                                            {{ number_format($hist['qty']) }} pcs
+                                                        </span>
+                                                    @endif
+                                                    <div class="font-medium text-slate-900 leading-snug whitespace-pre-line">{{ $hist['project'] }}</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @elseif ($item->history_project)
+                                        <div class="whitespace-pre-line font-medium text-slate-900 leading-relaxed py-0.5">{{ $item->history_project }}</div>
                                     @else
                                         <span class="text-slate-400">—</span>
                                     @endif
                                 </td>
 
                                 <!-- TOGGLEABLE: ORIGINAL QTY -->
-                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     <span class="font-bold text-xs text-slate-700">
                                         {{ $item->original_quantity !== null ? number_format($item->original_quantity) : number_format($item->quantity) }}
                                     </span>
                                 </td>
 
                                 <!-- TOGGLEABLE: STATUS QTY -->
-                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-central-ext py-3 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     <span class="text-xs font-semibold text-slate-700">
                                         {{ $item->status_qty !== null ? number_format($item->status_qty) : '0' }}
                                     </span>
                                 </td>
 
                                 <!-- TOGGLEABLE: STATUS PARTICULAR -->
-                                <td class="col-central-ext py-3 px-2 text-center border-r border-slate-200 whitespace-nowrap">
+                                <td class="col-central-ext py-3 px-2 text-center border-r border-slate-200 whitespace-nowrap align-top">
                                     @php
                                         $part = strtoupper(trim((string)($item->status_particular ?? 'OK')));
                                     @endphp
@@ -882,10 +924,10 @@
                                     @endif
                                 </td>
 
-                                <!-- TOGGLEABLE: REMARKS -->
-                                <td class="col-central-ext py-3 px-3 border-r border-slate-200 min-w-[140px] max-w-[240px] text-xs text-slate-600">
+                                <!-- TOGGLEABLE: REMARKS (FULLY OPENED & EXTENDED) -->
+                                <td class="col-central-ext py-3 px-3 border-r border-slate-200 min-w-[200px] text-xs text-slate-600 align-top">
                                     @if ($item->remarks)
-                                        <span class="line-clamp-2 hover:line-clamp-none" title="{{ $item->remarks }}">{{ $item->remarks }}</span>
+                                        <div class="whitespace-pre-line font-medium text-slate-700 py-0.5" title="{{ $item->remarks }}">{{ $item->remarks }}</div>
                                     @else
                                         <span class="text-slate-400">—</span>
                                     @endif
@@ -2144,16 +2186,33 @@
         // Project Reservations
         const resContainer = document.getElementById('drawerReservations');
         if (resContainer) {
-            if (reservedQty > 0 || item.reservation_project) {
-                resContainer.innerHTML = `
+            let resItems = [];
+            if (item.movement_history && Array.isArray(item.movement_history.reservations) && item.movement_history.reservations.length > 0) {
+                resItems = item.movement_history.reservations;
+            } else if (reservedQty > 0 || item.reservation_project) {
+                const rawParts = (item.reservation_project || '').split(/\n\n•\s*|\n\n|;\s*/).filter(Boolean);
+                if (rawParts.length > 0) {
+                    resItems = rawParts.map(p => {
+                        let q = reservedQty;
+                        let m = p.match(/^\((\d+)\s*pcs\)\s*(.*)/s);
+                        if (m) { q = parseInt(m[1]); p = m[2]; }
+                        return { qty: q, project: p.trim() };
+                    });
+                } else if (reservedQty > 0) {
+                    resItems = [{ qty: reservedQty, project: item.reservation_project || 'Project Allocation' }];
+                }
+            }
+
+            if (resItems.length > 0) {
+                resContainer.innerHTML = resItems.map(r => `
                     <div class="p-3.5 rounded-xl text-xs space-y-1.5" style="background-color: #111724 !important; border: 1px solid #1e293b !important;">
-                        <div class="flex justify-between items-start">
-                            <span class="font-bold text-slate-100 text-sm">${item.reservation_project || 'Project Allocation'}</span>
-                            <span class="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">${reservedQty} pcs reserved</span>
+                        <div class="flex justify-between items-start gap-2">
+                            <span class="font-bold text-slate-100 text-sm whitespace-pre-line">${r.project || 'Project Allocation'}</span>
+                            <span class="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 shrink-0 font-mono">${r.qty || 0} pcs reserved</span>
                         </div>
-                        ${item.reservation_remarks ? `<div class="text-slate-300 text-xs italic"><span class="text-slate-500">Details:</span> ${item.reservation_remarks}</div>` : ''}
+                        ${r.remarks ? `<div class="text-slate-300 text-xs italic"><span class="text-slate-500">Details:</span> ${r.remarks}</div>` : ''}
                     </div>
-                `;
+                `).join('');
             } else {
                 resContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">No active project allocations.</p>`;
             }
@@ -2162,29 +2221,42 @@
         // Movement History
         const historyContainer = document.getElementById('drawerHistory');
         if (historyContainer) {
-            let historyList = [];
-            if (Array.isArray(item.movement_history) && item.movement_history.length > 0) {
-                historyList = item.movement_history;
-            } else {
-                historyList = [
-                    {
-                        date: (date !== '—' ? date : '2025-10-15') + ' 09:30',
-                        desc: `Received initial stock of ${origQty} pcs`
-                    }
-                ];
+            let histItems = [];
+            if (item.movement_history && Array.isArray(item.movement_history.history) && item.movement_history.history.length > 0) {
+                histItems = item.movement_history.history;
+            } else if (item.history_qty > 0 || item.history_project) {
+                const rawParts = (item.history_project || '').split(/\n\n•\s*|\n\n|;\s*/).filter(Boolean);
+                if (rawParts.length > 0) {
+                    histItems = rawParts.map(p => {
+                        let q = item.history_qty;
+                        let m = p.match(/^\((\d+)\s*pcs\)\s*(.*)/s);
+                        if (m) { q = parseInt(m[1]); p = m[2]; }
+                        return { qty: q, project: p.trim() };
+                    });
+                } else if (item.history_qty > 0) {
+                    histItems = [{ qty: item.history_qty, project: item.history_project || 'Project History' }];
+                }
             }
 
-            historyContainer.innerHTML = historyList.slice().reverse().map(h => {
-                const hDate = h.date || '—';
-                const hText = h.desc || h.action || (h.type ? `${h.type}: ${h.desc}` : 'Movement logged');
-                return `
+            if (histItems.length > 0) {
+                historyContainer.innerHTML = histItems.map(h => `
                     <div class="relative pb-3 text-xs">
                         <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-slate-900"></div>
-                        <div class="text-[10px] text-slate-500 font-mono">${hDate}</div>
-                        <div class="font-semibold text-slate-300 mt-0.5">${hText}</div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-cyan-300 font-bold font-mono text-[11px] bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">${h.qty || 0} pcs dispatched</span>
+                        </div>
+                        <div class="font-semibold text-slate-200 mt-1 whitespace-pre-line">${h.project || 'Project Delivery'}</div>
+                    </div>
+                `).join('');
+            } else {
+                historyContainer.innerHTML = `
+                    <div class="relative pb-3 text-xs">
+                        <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-slate-900"></div>
+                        <div class="text-[10px] text-slate-500 font-mono">${date !== '—' ? date : 'Initial stock'}</div>
+                        <div class="font-semibold text-slate-300 mt-0.5">Received stock of ${origQty} pcs</div>
                     </div>
                 `;
-            }).join('');
+            }
         }
 
         // Show Drawer & Backdrop with animation
