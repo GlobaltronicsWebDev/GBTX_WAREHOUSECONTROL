@@ -1253,6 +1253,47 @@
                     </div>
                 </div>
 
+                <!-- Status & Original Quantity -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Status Badge</label>
+                        <select 
+                            name="status" 
+                            id="createStatus"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                        >
+                            <option value="in_stock" selected>ACTIVE / IN STOCK</option>
+                            <option value="low_stock">LOW STOCK</option>
+                            <option value="reserved">RESERVED</option>
+                            <option value="deficit">DEFICIT</option>
+                            <option value="under_repair">UNDER REPAIR</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Original Received Qty</label>
+                        <input 
+                            type="number" 
+                            id="createOriginalQty" 
+                            name="original_quantity" 
+                            min="0" 
+                            placeholder="Defaults to QTY if empty"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-mono-code font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                        >
+                    </div>
+                </div>
+
+                <!-- Remarks -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Operational Remarks</label>
+                    <input 
+                        type="text" 
+                        name="remarks" 
+                        id="createRemarks"
+                        placeholder="e.g. New shipment in good condition" 
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                    >
+                </div>
+
                 <!-- Item Description / Particular -->
                 <div>
                     <label id="createDescriptionLabel" class="block text-xs font-bold text-slate-700 mb-1">Item Description *</label>
@@ -1536,6 +1577,47 @@
                             <span id="editCalcTotalSqm" class="font-bold text-slate-900">—</span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Status & Original Quantity -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Status Badge</label>
+                        <select 
+                            name="status" 
+                            id="editStatus"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                        >
+                            <option value="in_stock">ACTIVE / IN STOCK</option>
+                            <option value="low_stock">LOW STOCK</option>
+                            <option value="reserved">RESERVED</option>
+                            <option value="deficit">DEFICIT</option>
+                            <option value="under_repair">UNDER REPAIR</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Original Received Qty</label>
+                        <input 
+                            type="number" 
+                            id="editOriginalQty" 
+                            name="original_quantity" 
+                            min="0" 
+                            placeholder="e.g. 500"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-mono-code font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                        >
+                    </div>
+                </div>
+
+                <!-- Operational Remarks -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Operational Remarks</label>
+                    <input 
+                        type="text" 
+                        name="remarks" 
+                        id="editRemarks"
+                        placeholder="e.g. New shipment in good condition" 
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                    >
                 </div>
 
                 <!-- Item Description / Particular -->
