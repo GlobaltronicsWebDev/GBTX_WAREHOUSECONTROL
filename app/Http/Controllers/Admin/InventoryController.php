@@ -142,6 +142,7 @@ class InventoryController extends Controller
         $standardLocations = [
             'MARIKINA',
             'GLOBALTRONICS',
+            'A JUAN - 2ND FLR',
             'AJUAN - 1ST FLR',
             'A JUAN MAIN 1ST FLOOR',
             '2ND FLR OCAP',
