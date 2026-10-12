@@ -1137,9 +1137,18 @@
 
                                 <!-- HISTORY: PROJECT -->
                                 <td class="py-2 px-2.5 border-r border-slate-200 min-w-[200px] text-xs text-slate-800 align-top">
-                                    @if (!empty($item->movement_history['history']) && count($item->movement_history['history']) > 0)
-                                        <div class="space-y-1.5 max-h-24 overflow-y-auto pr-1">
-                                            @foreach ($item->movement_history['history'] as $hist)
+                                    @php
+                                        $philHistList = [];
+                                        if (!empty($item->movement_history)) {
+                                            $mh = is_array($item->movement_history) ? $item->movement_history : json_decode((string)$item->movement_history, true);
+                                            if (!empty($mh['history']) && is_array($mh['history'])) {
+                                                $philHistList = $mh['history'];
+                                            }
+                                        }
+                                    @endphp
+                                    @if (!empty($philHistList) && count($philHistList) > 0)
+                                        <div class="space-y-1.5 max-h-28 overflow-y-auto pr-1">
+                                            @foreach ($philHistList as $hist)
                                                 <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs shadow-2xs">
                                                     @if (!empty($hist['qty']))
                                                         <span class="inline-flex items-center px-1.5 py-0.2 rounded font-extrabold text-[10px] bg-slate-200 text-slate-800 mb-0.5 font-mono-code">
@@ -1151,7 +1160,7 @@
                                             @endforeach
                                         </div>
                                     @elseif ($item->history_project)
-                                        <div class="line-clamp-2 font-medium text-slate-900 text-xs" title="{{ $item->history_project }}">{{ $item->history_project }}</div>
+                                        <div class="line-clamp-3 font-medium text-slate-900 text-xs whitespace-pre-line" title="{{ $item->history_project }}">{{ $item->history_project }}</div>
                                     @else
                                         <span class="text-slate-400">—</span>
                                     @endif
