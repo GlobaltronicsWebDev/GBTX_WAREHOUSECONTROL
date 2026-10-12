@@ -814,37 +814,29 @@ class InventoryController extends Controller
         }
 
         if ($isPhilipsService) {
-            $headers = [
-                'LOCATION',
-                'MANUFACTURER',
-                'CHECK IN DATE',
-                'MODEL',
-                'PO / SKU No.',
-                'ITEM DESCRIPTION',
-                'SERIAL NO.',
-                'QTY',
-                'ACU. QTY',
-                'FORECASTED QTY',
-                'HISTORY QTY',
-                'HISTORY PROJECT',
-                'REMARKS',
+            $header1 = ['LOCATION', 'MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'PO / SKU No.', 'ITEM DESCRIPTION', '', 'INVENTORY', '', 'FORECASTED QTY', 'HISTORY', '', 'REMARKS'];
+            $header2 = ['', '', '', '', '', 'PARTICULAR', 'SERIAL NO.', 'QTY', 'ACU. QTY', '', 'QTY', 'PROJECT', ''];
+            $sampleRows = [
+                ['WAREHOUSE A', 'ROE VISUAL', date('Y-m-d'), 'BP2V2', 'PO-88102', 'LED Wall Module 500x500', 'ROE-SN-99014', 100, 98, 20, 5, 'Concert Tour 2026', 'Tested OK'],
+                ['WAREHOUSE B', 'ABSEN', date('Y-m-d'), 'PL2.5 PRO', 'PO-88220', 'Curved Touring Panel', 'ABS-SN-44120', 60, 60, 10, 0, 'None', 'Flight cases ready'],
+                ['MANILA HUB', 'UNILUMIN', date('Y-m-d'), 'UPAD IV', 'PO-88350', 'Indoor High-Res Cabinet', 'UNI-SN-12003', 80, 75, 15, 8, 'Auto Expo 2026', 'Good condition'],
             ];
-            $sampleRow = [
-                'MARIKINA',
-                'PHILIPS',
-                date('Y-m-d'),
-                '10BDL4151T/00',
-                'PO-2026-001',
-                '10" PHILIPS TOUCH SCREEN MONITOR',
-                'AU0B1521000146, AU0B1518000139',
-                13,
-                13,
-                13,
-                0,
-                '',
-                'Philips Service demo unit',
-            ];
-        } elseif ($isPhilipsEol) {
+
+            return response()->streamDownload(function () use ($header1, $header2, $sampleRows) {
+                $handle = fopen('php://output', 'w');
+                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+                fputcsv($handle, $header1);
+                fputcsv($handle, $header2);
+                foreach ($sampleRows as $row) {
+                    fputcsv($handle, $row);
+                }
+                fclose($handle);
+            }, $filename, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+            ]);
+        }
+
+        if ($isPhilipsEol) {
             $headers = ['MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'ITEM DESCRIPTION', 'QTY'];
             $sampleRow = ['PHILIPS', date('Y-m-d'), 'BDL3230QL/75', '31.5" PHILIPS FLAT WIDE MONITOR', 103];
         } else {
@@ -1452,9 +1444,13 @@ class InventoryController extends Controller
                             $screenSize = $sm[1] . '"';
                         }
 
-                        // Insert each serial number as its own separate row with QTY = 1
+                        // Insert each serial number as its own separate row
                         foreach ($serialsList as $snIndex => $sn) {
-                            $itemQty = ($sn !== '' || $cItem['explicit_qty'] <= 1) ? 1 : $cItem['explicit_qty'];
+                            if ($serialCount > 1) {
+                                $itemQty = 1; // When multiple serial numbers are in one cell, each serial gets QTY = 1
+                            } else {
+                                $itemQty = $cItem['explicit_qty'] > 0 ? $cItem['explicit_qty'] : ($sn !== '' ? 1 : 0);
+                            }
 
                             $itemData = [
                                 'category' => 'Philips Service Units',
@@ -1465,15 +1461,15 @@ class InventoryController extends Controller
                                 'model' => mb_substr($cItem['model'], 0, 100),
                                 'po_number' => mb_substr($cItem['po_number'], 0, 100),
                                 'item_description' => $cItem['item_description'],
-                                'quantity' => $itemQty, // The QTY for all serial numbers is 1
+                                'quantity' => $itemQty,
                                 'status' => 'in_stock',
                             ];
 
                             if ($hasColumn('acu_quantity')) {
-                                $itemData['acu_quantity'] = $actQty;
+                                $itemData['acu_quantity'] = $actQty !== null ? $actQty : $itemQty;
                             }
                             if ($hasColumn('forecasted_quantity')) {
-                                $itemData['forecasted_quantity'] = $forecastQty;
+                                $itemData['forecasted_quantity'] = $forecastQty !== null ? $forecastQty : $itemQty;
                             }
                             if ($hasColumn('original_quantity')) {
                                 $itemData['original_quantity'] = $itemQty;
