@@ -755,10 +755,32 @@ class InventoryController extends Controller
         $category = $request->query('category', 'CENTRALIZED LED INVENTORY');
         $filename = 'sample_template_' . strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', $category)) . '.csv';
 
-        $isCentralLed = ($category === 'CENTRALIZED LED INVENTORY');
+        $isCentralLed = in_array(strtoupper(trim($category)), ['CENTRALIZED LED INVENTORY', 'CENTRALIZED LED', 'CENTRAL LED INVENTORY', 'CENTRAL LED'], true) || stripos($category, 'Central') !== false;
         $isPhilipsEol = in_array($category, ['EOL PHILIPS UNITS', 'EOL Philips Units'], true);
         $isPhilipsService = in_array($category, ['Philips Service Units', 'PHILIPS SERVICE UNITS'], true);
         $isLedService = in_array($category, ['LED Service Units', 'LED SERVICE UNITS'], true);
+
+        if ($isCentralLed) {
+            $header1 = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'MANUFACTURER', 'MODEL / PIXEL PITCH', 'ITEM DESCRIPTION', 'LOCATION', 'INVENTORY', '', '', '', 'AVAILABLE QTY', '', 'RESERVATION', '', 'HISTORY', '', 'ORIGINAL QTY', 'STATUS', '', 'REMARKS'];
+            $header2 = ['', '', '', '', '', '', '', 'ON-HAND', 'TOTAL ON-HAND', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM', 'QTY', 'SQM', 'QTY', 'PROJECT DETAILS', 'QTY', 'PROJECT', '', 'QTY', 'PARTICULAR', ''];
+            $sampleRows = [
+                ['TAG-LED-001', date('Y-m-d'), 'PO-2026-081', 'UNILUMIN', 'Upad IV P2.6', 'UNILUMIN UPAD IV P2.6 INDOOR 500X500MM DIE CAST CABINET', 'Globaltronics', 150, 150, 0.25, 37.5, 150, 37.5, 0, '', 0, '', 150, 0, 'OK', 'New delivery batch'],
+                ['TAG-LED-002', date('Y-m-d'), 'PO-2026-082', 'ABSEN', 'PL2.5 Plus', 'ABSEN PL2.5 PLUS INDOOR 500X500MM CABINET', 'AJUAN', 80, 80, 0.25, 20.0, 60, 15.0, 20, 'Mall Display Project', 0, '', 80, 0, 'OK', 'Warehouse stock'],
+            ];
+
+            return response()->streamDownload(function () use ($header1, $header2, $sampleRows) {
+                $handle = fopen('php://output', 'w');
+                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+                fputcsv($handle, $header1);
+                fputcsv($handle, $header2);
+                foreach ($sampleRows as $row) {
+                    fputcsv($handle, $row);
+                }
+                fclose($handle);
+            }, $filename, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+            ]);
+        }
 
         if ($isLedService) {
             $header1 = ['CDX', 'LOCATION', 'MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'PO / SKU No.', 'ITEM DESCRIPTION', 'INVENTORY', '', '', '', 'FORECASTED QTY', '', 'RESERVATION', '', 'HISTORY', '', 'ORIGINAL QTY', 'STATUS', '', 'REMARKS'];
@@ -813,9 +835,6 @@ class InventoryController extends Controller
                 '',
                 'Philips Service demo unit',
             ];
-        } elseif ($isCentralLed) {
-            $headers = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'MANUFACTURER', 'MODEL / PIXEL PITCH', 'ITEM DESCRIPTION', 'LOCATION', 'ON-HAND', 'TOTAL ON-HAND', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM', 'ORIGINAL QTY', 'RESERVATION QTY', 'RESERVATION PROJECT', 'REMARKS'];
-            $sampleRow = ['TAG-LED-001', date('Y-m-d'), 'PO-2026-081', 'UNILUMIN', 'Upad IV P2.6', 'UNILUMIN UPAD IV P2.6 INDOOR 500X500MM DIE CAST CABINET', 'Globaltronics', 150, 150, 0.25, 37.5, 150, 0, '', 'New delivery batch'];
         } elseif ($isPhilipsEol) {
             $headers = ['MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'ITEM DESCRIPTION', 'QTY'];
             $sampleRow = ['PHILIPS', date('Y-m-d'), 'BDL3230QL/75', '31.5" PHILIPS FLAT WIDE MONITOR', 103];
@@ -914,8 +933,12 @@ class InventoryController extends Controller
                 return trim(preg_replace('/\s+/', ' ', $val));
             };
 
-            // Detect LED Service Units Category or CDX Header
+            // Detect Categories
             $normCat = strtoupper(trim($category));
+            $isCentralLedCat = in_array($normCat, [
+                'CENTRALIZED LED INVENTORY', 'CENTRALIZED LED', 'CENTRAL LED INVENTORY', 'CENTRAL LED'
+            ], true) || stripos($category, 'Central') !== false;
+
             $isLedServiceCat = in_array($normCat, [
                 'LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT'
             ], true) || stripos($category, 'LED Service') !== false || stripos($category, 'LED SERVICES') !== false;
@@ -929,8 +952,192 @@ class InventoryController extends Controller
             }
             $hasCdxHeader = str_contains($firstJoined, 'CDX');
 
+            // Dedicated Importer for Centralized LED Inventory matching exact 21-column layout
+            if ($isCentralLedCat) {
+                $startIndex = 0;
+                for ($i = 0; $i < min(4, count($rows)); $i++) {
+                    $line = strtoupper(implode(' ', $rows[$i]));
+                    if (
+                        str_contains($line, 'TAG') ||
+                        str_contains($line, 'CDX') ||
+                        str_contains($line, 'LOCATION') ||
+                        str_contains($line, 'MANUFACTURER') ||
+                        str_contains($line, 'INVENTORY') ||
+                        str_contains($line, 'ON-HAND') ||
+                        str_contains($line, 'ACT. QTY') ||
+                        str_contains($line, 'PER PANEL')
+                    ) {
+                        $startIndex = $i + 1;
+                    }
+                }
+
+                // Check whether the first header uses CDX format or standard TAG # format
+                $isCdxFormat = false;
+                for ($h = 0; $h < max(1, $startIndex); $h++) {
+                    if (isset($rows[$h])) {
+                        $c0 = strtoupper(trim((string)($rows[$h][0] ?? '')));
+                        $c1 = strtoupper(trim((string)($rows[$h][1] ?? '')));
+                        if ($c0 === 'CDX' || ($c1 === 'LOCATION' && !str_contains($c0, 'TAG'))) {
+                            $isCdxFormat = true;
+                            break;
+                        }
+                    }
+                }
+
+                $cleanNum = fn($v) => (int) preg_replace('/[^\d-]/', '', (string)($v ?? 0));
+                $cleanFloat = fn($v) => (float) preg_replace('/[^\d.-]/', '', (string)($v ?? 0));
+
+                $importedCount = 0;
+
+                DB::beginTransaction();
+                try {
+                    for ($i = $startIndex; $i < count($rows); $i++) {
+                        $row = $rows[$i];
+                        if (empty(array_filter($row, fn($v) => trim((string)$v) !== ''))) {
+                            continue;
+                        }
+
+                        $rowJoined = strtolower(implode(' ', $row));
+                        if (str_contains($rowJoined, 'total count') || str_contains($rowJoined, 'total inventory') || str_contains($rowJoined, 'total summaries')) {
+                            continue;
+                        }
+
+                        // Skip repeated header rows
+                        $firstCell = strtoupper(trim((string)($row[0] ?? '')));
+                        if (in_array($firstCell, ['TAG #', 'TAG', 'TAG NO', 'CDX'], true)) {
+                            continue;
+                        }
+                        $rowJoinedUpper = strtoupper($rowJoined);
+                        if (str_contains($rowJoinedUpper, 'ON-HAND') || str_contains($rowJoinedUpper, 'TOTAL ON-HAND') || str_contains($rowJoinedUpper, 'PER PANEL SQM')) {
+                            continue;
+                        }
+
+                        if ($isCdxFormat) {
+                            $tagNumber = $cleanStr($row[0] ?? '');
+                            $location = $cleanStr($row[1] ?? 'Globaltronics');
+                            $mfg = $cleanStr($row[2] ?? 'UNILUMIN');
+                            $rawDate = $cleanStr($row[3] ?? '');
+                            $checkInDate = !empty($rawDate) && strtotime($rawDate) ? date('Y-m-d', strtotime($rawDate)) : now()->toDateString();
+                            $model = $cleanStr($row[4] ?? '');
+                            $poSkuNo = $cleanStr($row[5] ?? '');
+                            $itemDesc = $cleanStr($row[6] ?? '');
+                        } else {
+                            $tagNumber = $cleanStr($row[0] ?? '');
+                            $rawDate = $cleanStr($row[1] ?? '');
+                            $checkInDate = !empty($rawDate) && strtotime($rawDate) ? date('Y-m-d', strtotime($rawDate)) : now()->toDateString();
+                            $poSkuNo = $cleanStr($row[2] ?? '');
+                            $mfg = $cleanStr($row[3] ?? 'UNILUMIN');
+                            $model = $cleanStr($row[4] ?? '');
+                            $itemDesc = $cleanStr($row[5] ?? '');
+                            $location = $cleanStr($row[6] ?? 'Globaltronics');
+                        }
+
+                        if (empty($model) && empty($itemDesc)) {
+                            continue;
+                        }
+                        if (empty($model)) {
+                            $model = mb_substr($itemDesc, 0, 50);
+                        }
+                        if (empty($itemDesc)) {
+                            $itemDesc = $model;
+                        }
+
+                        $qty = $cleanNum($row[7] ?? 0);
+                        $actQty = isset($row[8]) && trim((string)$row[8]) !== '' ? $cleanNum($row[8]) : $qty;
+                        $perPanelSqm = isset($row[9]) ? $cleanFloat($row[9]) : 0;
+                        $totalAvailableSqm = isset($row[10]) ? $cleanFloat($row[10]) : 0;
+                        $forecastQty = isset($row[11]) && trim((string)$row[11]) !== '' ? $cleanNum($row[11]) : null;
+                        $forecastSqm = isset($row[12]) ? $cleanFloat($row[12]) : 0;
+                        $reservationQty = isset($row[13]) && trim((string)$row[13]) !== '' ? $cleanNum($row[13]) : 0;
+                        $projectDetails = $cleanStr($row[14] ?? '');
+                        $historyQty = isset($row[15]) && trim((string)$row[15]) !== '' ? $cleanNum($row[15]) : 0;
+                        $historyProject = $cleanStr($row[16] ?? '');
+                        $originalQty = isset($row[17]) && trim((string)$row[17]) !== '' ? $cleanNum($row[17]) : ($actQty ?: $qty);
+                        $statusQty = isset($row[18]) && trim((string)$row[18]) !== '' ? $cleanNum($row[18]) : 0;
+                        $statusParticular = $cleanStr($row[19] ?? 'OK');
+                        $remarks = $cleanStr($row[20] ?? '');
+
+                        $itemData = [
+                            'category' => 'CENTRALIZED LED INVENTORY',
+                            'tag_number' => $tagNumber,
+                            'location' => mb_substr($location ?: 'Globaltronics', 0, 100),
+                            'manufacturer' => mb_substr($mfg ?: 'UNILUMIN', 0, 100),
+                            'check_in_date' => $checkInDate,
+                            'model' => mb_substr($model, 0, 100),
+                            'po_number' => mb_substr($poSkuNo, 0, 100),
+                            'item_description' => $itemDesc,
+                            'quantity' => $qty,
+                            'status' => 'in_stock',
+                        ];
+
+                        if ($hasColumn('acu_quantity')) {
+                            $itemData['acu_quantity'] = $actQty;
+                        }
+                        if ($hasColumn('sqm')) {
+                            $itemData['sqm'] = $totalAvailableSqm;
+                        }
+                        if ($hasColumn('forecasted_quantity')) {
+                            $itemData['forecasted_quantity'] = $forecastQty !== null ? $forecastQty : max(0, $qty - $reservationQty);
+                        }
+                        if ($hasColumn('original_quantity')) {
+                            $itemData['original_quantity'] = $originalQty;
+                        }
+                        if ($hasColumn('reservation_qty')) {
+                            $itemData['reservation_qty'] = $reservationQty;
+                        }
+                        if ($hasColumn('reservation_project')) {
+                            $itemData['reservation_project'] = $isTextCol ? $projectDetails : mb_substr($projectDetails, 0, 240);
+                        }
+                        if ($hasColumn('history_qty')) {
+                            $itemData['history_qty'] = $historyQty;
+                        }
+                        if ($hasColumn('history_project')) {
+                            $itemData['history_project'] = $isTextCol ? $historyProject : mb_substr($historyProject, 0, 240);
+                        }
+                        if ($hasColumn('status_qty')) {
+                            $itemData['status_qty'] = $statusQty;
+                        }
+                        if ($hasColumn('status_particular')) {
+                            $itemData['status_particular'] = $statusParticular ?: 'OK';
+                        }
+                        if ($hasColumn('remarks')) {
+                            $itemData['remarks'] = $remarks;
+                        }
+                        if ($hasColumn('created_by')) {
+                            $itemData['created_by'] = $creatorId;
+                        }
+
+                        // Detailed Movement History
+                        if ($hasColumn('movement_history')) {
+                            $itemData['movement_history'] = [
+                                'reservations' => ($reservationQty > 0 || !empty($projectDetails)) ? [
+                                    ['qty' => $reservationQty, 'project' => $projectDetails, 'remarks' => '']
+                                ] : [],
+                                'history' => ($historyQty > 0 || !empty($historyProject)) ? [
+                                    ['qty' => $historyQty, 'project' => $historyProject]
+                                ] : [],
+                                'locations' => [
+                                    ['location' => $itemData['location'], 'qty' => $qty]
+                                ],
+                            ];
+                        }
+
+                        $safeData = array_intersect_key($itemData, array_flip($tableColumns));
+                        InventoryItem::create($safeData);
+                        $importedCount++;
+                    }
+
+                    DB::commit();
+
+                    return back()->with('success', "Centralized LED Inventory import completed! {$importedCount} items imported.");
+                } catch (\Throwable $e) {
+                    DB::rollBack();
+                    return back()->withErrors(['file' => 'Centralized LED Inventory import failed: ' . $e->getMessage()]);
+                }
+            }
+
             // Dedicated Importer for LED Service Units matching exact 21-column schema
-            if ($isLedServiceCat || $hasCdxHeader) {
+            if (($isLedServiceCat || $hasCdxHeader) && !$isCentralLedCat) {
                 $startIndex = 0;
                 for ($i = 0; $i < min(4, count($rows)); $i++) {
                     $line = strtoupper(implode(' ', $rows[$i]));
