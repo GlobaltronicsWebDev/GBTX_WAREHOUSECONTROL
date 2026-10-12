@@ -467,6 +467,21 @@
                 display: none !important;
             }
 
+            /* NON-SCROLLABLE INLINE EDITABLE TEXTAREAS (AUTO-EXPANDING HEIGHT) */
+            textarea.inline-edit-input {
+                overflow: hidden !important;
+                resize: none !important;
+                field-sizing: content;
+                min-height: 1.85rem;
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
+            }
+            textarea.inline-edit-input::-webkit-scrollbar {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+            }
+
             /* STICKY COLUMN LABELS & SCROLLABLE CONTAINER FOR ALL CATEGORIES */
             #tableScrollContainer {
                 max-height: calc(100vh - 200px);
@@ -667,17 +682,18 @@
                                     {{ $item->po_number ?? '—' }}
                                 </td>
 
-                                <!-- ITEM DESCRIPTION (INLINE EDITABLE) -->
-                                <td class="py-1 px-2 text-slate-800 border-r border-slate-200 min-w-[260px] max-w-sm align-top">
+                                <!-- ITEM DESCRIPTION (INLINE EDITABLE, NON-SCROLLABLE) -->
+                                <td class="py-1 px-2 text-slate-800 border-r border-slate-200 min-w-[260px] align-top">
                                     <div class="relative group/edit">
                                         <textarea 
-                                            rows="2"
+                                            rows="1"
                                             data-item-id="{{ $item->id }}" 
                                             data-field="item_description" 
                                             data-original-val="{{ $item->item_description }}"
                                             onblur="handleInlineSave(this)" 
                                             onkeydown="handleInlineKey(event, this)" 
-                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-y leading-tight"
+                                            oninput="autoResizeTextarea(this)"
+                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-none overflow-hidden leading-snug [field-sizing:content]"
                                             title="Click to edit item description (auto-saves on blur or Ctrl+Enter)"
                                         >{{ $item->item_description }}</textarea>
                                     </div>
@@ -1061,17 +1077,18 @@
                                     {{ $item->po_number ?? '—' }}
                                 </td>
 
-                                <!-- ITEM DESCRIPTION: PARTICULAR (INLINE EDITABLE) -->
-                                <td class="py-1 px-2 text-slate-800 border-r border-slate-200 min-w-[240px] max-w-sm align-top">
+                                <!-- ITEM DESCRIPTION: PARTICULAR (INLINE EDITABLE, NON-SCROLLABLE) -->
+                                <td class="py-1 px-2 text-slate-800 border-r border-slate-200 min-w-[240px] align-top">
                                     <div class="relative group/edit">
                                         <textarea 
-                                            rows="2"
+                                            rows="1"
                                             data-item-id="{{ $item->id }}" 
                                             data-field="item_description" 
                                             data-original-val="{{ $item->item_description }}"
                                             onblur="handleInlineSave(this)" 
                                             onkeydown="handleInlineKey(event, this)" 
-                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-y leading-tight"
+                                            oninput="autoResizeTextarea(this)"
+                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-none overflow-hidden leading-snug [field-sizing:content]"
                                             title="Click to edit particular description (auto-saves on blur or Ctrl+Enter)"
                                         >{{ $item->item_description }}</textarea>
                                     </div>
