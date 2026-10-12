@@ -1314,6 +1314,10 @@ class InventoryController extends Controller
 
                 DB::beginTransaction();
                 try {
+                    // Accumulate items to handle both single-cell multiline serials AND Excel merged-cell continuation rows
+                    $itemsToInsert = [];
+                    $currentItem = null;
+
                     for ($i = $startIndex; $i < count($rows); $i++) {
                         $row = $rows[$i];
                         if (empty(array_filter($row, fn($v) => trim((string)$v) !== ''))) {
@@ -1334,59 +1338,131 @@ class InventoryController extends Controller
                             continue;
                         }
 
-                        // Exact 13 Columns:
-                        // 0: LOCATION, 1: MANUFACTURER, 2: CHECK IN DATE, 3: MODEL, 4: PO / SKU No.,
-                        // 5: ITEM DESCRIPTION, 6: SERIAL NO., 7: QTY, 8: ACU. QTY, 9: FORECASTED QTY,
-                        // 10: HISTORY QTY, 11: HISTORY PROJECT, 12: REMARKS
-                        $location = $cleanStr($row[0] ?? 'MARIKINA');
-                        $mfg = $cleanStr($row[1] ?? 'PHILIPS');
+                        $rowLocation = $cleanStr($row[0] ?? '');
+                        $rowMfg = $cleanStr($row[1] ?? '');
                         $rawDate = $cleanStr($row[2] ?? '');
-                        $checkInDate = !empty($rawDate) && strtotime($rawDate) ? date('Y-m-d', strtotime($rawDate)) : now()->toDateString();
-                        $model = $cleanStr($row[3] ?? '');
-                        $poSkuNo = $cleanStr($row[4] ?? '');
-                        $itemDesc = $cleanStr($row[5] ?? '');
-                        $serialNo = $cleanStr($row[6] ?? '');
+                        $rowModel = $cleanStr($row[3] ?? '');
+                        $rowPo = $cleanStr($row[4] ?? '');
+                        $rowDesc = $cleanStr($row[5] ?? '');
+                        $rowSerial = $cleanStr($row[6] ?? '');
+                        $rowQty = $cleanNum($row[7] ?? 0);
+                        $rowActQty = isset($row[8]) && trim((string)$row[8]) !== '' ? $cleanNum($row[8]) : null;
+                        $rowForecastQty = isset($row[9]) && trim((string)$row[9]) !== '' ? $cleanNum($row[9]) : null;
+                        $rowHistoryQty = isset($row[10]) && trim((string)$row[10]) !== '' ? $cleanNum($row[10]) : 0;
+                        $rowHistoryProject = $cleanStr($row[11] ?? '');
+                        $rowRemarks = $cleanStr($row[12] ?? '');
 
-                        if (empty($model) && empty($itemDesc)) {
-                            continue;
-                        }
-                        if (empty($model)) {
-                            $model = mb_substr($itemDesc, 0, 50);
-                        }
-                        if (empty($itemDesc)) {
-                            $itemDesc = $model;
-                        }
-
-                        $qty = $cleanNum($row[7] ?? 0);
-                        // If qty is 0 but serials exist, count serials
-                        if ($qty <= 0 && !empty($serialNo)) {
-                            $serials = preg_split('/[\r\n,;|]+/', $serialNo, -1, PREG_SPLIT_NO_EMPTY);
-                            if (count($serials) > 0) {
-                                $qty = count($serials);
+                        // Extract all serials present in $rowSerial (handles newlines, commas, semicolons, pipes)
+                        $subSerials = [];
+                        if (!empty($rowSerial)) {
+                            $parts = preg_split('/[\r\n,;|]+/', $rowSerial, -1, PREG_SPLIT_NO_EMPTY);
+                            foreach ($parts as $p) {
+                                $cleanP = trim($p);
+                                if (!empty($cleanP)) {
+                                    $subSerials[] = $cleanP;
+                                }
                             }
                         }
 
-                        $actQty = isset($row[8]) && trim((string)$row[8]) !== '' ? $cleanNum($row[8]) : $qty;
-                        $forecastQty = isset($row[9]) && trim((string)$row[9]) !== '' ? $cleanNum($row[9]) : $qty;
-                        $historyQty = isset($row[10]) && trim((string)$row[10]) !== '' ? $cleanNum($row[10]) : 0;
-                        $historyProject = $cleanStr($row[11] ?? '');
-                        $remarks = $cleanStr($row[12] ?? '');
+                        // Continuation row: Model and Description are empty, but serial exists, and we have an active master item
+                        if (empty($rowModel) && empty($rowDesc) && $currentItem !== null && !empty($subSerials)) {
+                            foreach ($subSerials as $s) {
+                                $currentItem['serials'][] = $s;
+                            }
+                            if ($rowQty > 0) {
+                                $currentItem['sub_qty_sum'] += $rowQty;
+                            }
+                            if (!empty($rowHistoryProject) && empty($currentItem['history_project'])) {
+                                $currentItem['history_project'] = $rowHistoryProject;
+                            }
+                            if ($rowHistoryQty > 0 && empty($currentItem['history_qty'])) {
+                                $currentItem['history_qty'] = $rowHistoryQty;
+                            }
+                            if (!empty($rowRemarks) && empty($currentItem['remarks'])) {
+                                $currentItem['remarks'] = $rowRemarks;
+                            }
+                            continue;
+                        }
+
+                        // Master Row: must have model or description
+                        if (empty($rowModel) && empty($rowDesc)) {
+                            continue;
+                        }
+
+                        // If previous item was being accumulated, save it
+                        if ($currentItem !== null) {
+                            $itemsToInsert[] = $currentItem;
+                        }
+
+                        $checkInDate = !empty($rawDate) && strtotime($rawDate) ? date('Y-m-d', strtotime($rawDate)) : now()->toDateString();
+                        if (empty($rowModel)) {
+                            $rowModel = mb_substr($rowDesc, 0, 50);
+                        }
+                        if (empty($rowDesc)) {
+                            $rowDesc = $rowModel;
+                        }
+
+                        $currentItem = [
+                            'location' => $rowLocation ?: 'MARIKINA',
+                            'manufacturer' => $rowMfg ?: 'PHILIPS',
+                            'check_in_date' => $checkInDate,
+                            'model' => $rowModel,
+                            'po_number' => $rowPo,
+                            'item_description' => $rowDesc,
+                            'serials' => $subSerials,
+                            'explicit_qty' => $rowQty,
+                            'sub_qty_sum' => $rowQty > 0 ? $rowQty : 0,
+                            'act_qty' => $rowActQty,
+                            'forecast_qty' => $rowForecastQty,
+                            'history_qty' => $rowHistoryQty,
+                            'history_project' => $rowHistoryProject,
+                            'remarks' => $rowRemarks,
+                        ];
+                    }
+
+                    if ($currentItem !== null) {
+                        $itemsToInsert[] = $currentItem;
+                    }
+
+                    foreach ($itemsToInsert as $cItem) {
+                        $uniqueSerials = array_values(array_unique($cItem['serials']));
+                        $serialCount = count($uniqueSerials);
+
+                        // Resolve quantity accurately:
+                        // 1. If explicit ACU. QTY was given in the master row (e.g. 6 in merged cell), use it
+                        // 2. Otherwise if serialCount > explicit_qty, use serialCount
+                        // 3. Otherwise if sum of sub-rows > explicit_qty, use sub_qty_sum
+                        // 4. Otherwise use explicit_qty
+                        $qty = $cItem['explicit_qty'];
+                        if ($cItem['act_qty'] !== null && $cItem['act_qty'] > 0) {
+                            $qty = $cItem['act_qty'];
+                        } elseif ($serialCount > 0 && $serialCount > $qty) {
+                            $qty = $serialCount;
+                        } elseif ($cItem['sub_qty_sum'] > $qty) {
+                            $qty = $cItem['sub_qty_sum'];
+                        }
+
+                        $actQty = $cItem['act_qty'] !== null ? $cItem['act_qty'] : $qty;
+                        $forecastQty = $cItem['forecast_qty'] !== null ? $cItem['forecast_qty'] : $qty;
+
+                        // Combine serials with comma separation for popover display
+                        $serialString = implode(', ', $uniqueSerials);
 
                         // Extract screen size (e.g., 55" from '55" PHILIPS FLAT WIDE MONITOR')
                         $screenSize = null;
-                        if (preg_match('/(\d+(?:\.\d+)?)\s*"/i', $itemDesc, $sm)) {
+                        if (preg_match('/(\d+(?:\.\d+)?)\s*"/i', $cItem['item_description'], $sm)) {
                             $screenSize = $sm[1] . '"';
                         }
 
                         $itemData = [
                             'category' => 'Philips Service Units',
-                            'tag_number' => $serialNo,
-                            'location' => mb_substr($location ?: 'MARIKINA', 0, 100),
-                            'manufacturer' => mb_substr($mfg ?: 'PHILIPS', 0, 100),
-                            'check_in_date' => $checkInDate,
-                            'model' => mb_substr($model, 0, 100),
-                            'po_number' => mb_substr($poSkuNo, 0, 100),
-                            'item_description' => $itemDesc,
+                            'tag_number' => $serialString,
+                            'location' => mb_substr($cItem['location'] ?: 'MARIKINA', 0, 100),
+                            'manufacturer' => mb_substr($cItem['manufacturer'] ?: 'PHILIPS', 0, 100),
+                            'check_in_date' => $cItem['check_in_date'],
+                            'model' => mb_substr($cItem['model'], 0, 100),
+                            'po_number' => mb_substr($cItem['po_number'], 0, 100),
+                            'item_description' => $cItem['item_description'],
                             'quantity' => $qty,
                             'status' => 'in_stock',
                         ];
@@ -1401,16 +1477,16 @@ class InventoryController extends Controller
                             $itemData['original_quantity'] = $actQty ?: $qty;
                         }
                         if ($hasColumn('history_qty')) {
-                            $itemData['history_qty'] = $historyQty;
+                            $itemData['history_qty'] = $cItem['history_qty'];
                         }
                         if ($hasColumn('history_project')) {
-                            $itemData['history_project'] = $isTextCol ? $historyProject : mb_substr($historyProject, 0, 240);
+                            $itemData['history_project'] = $isTextCol ? $cItem['history_project'] : mb_substr($cItem['history_project'], 0, 240);
                         }
                         if ($hasColumn('screen_size') && $screenSize) {
                             $itemData['screen_size'] = $screenSize;
                         }
                         if ($hasColumn('remarks')) {
-                            $itemData['remarks'] = $remarks;
+                            $itemData['remarks'] = $cItem['remarks'];
                         }
                         if ($hasColumn('created_by')) {
                             $itemData['created_by'] = $creatorId;
@@ -1420,8 +1496,8 @@ class InventoryController extends Controller
                         if ($hasColumn('movement_history')) {
                             $itemData['movement_history'] = [
                                 'reservations' => [],
-                                'history' => ($historyQty > 0 || !empty($historyProject)) ? [
-                                    ['qty' => $historyQty, 'project' => $historyProject]
+                                'history' => ($cItem['history_qty'] > 0 || !empty($cItem['history_project'])) ? [
+                                    ['qty' => $cItem['history_qty'], 'project' => $cItem['history_project']]
                                 ] : [],
                                 'locations' => [
                                     ['location' => $itemData['location'], 'qty' => $qty]
