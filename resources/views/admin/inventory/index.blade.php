@@ -1063,11 +1063,11 @@
                                             <div class="relative inline-block text-center">
                                                 <button 
                                                     type="button" 
-                                                    onclick="toggleSerialPopover(this, event)" 
-                                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono-code font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer shadow-2xs whitespace-nowrap"
-                                                    title="Click to view {{ $serialCount }} serial numbers">
+                                                    onclick="openSerialViewer('{{ addslashes($item->model) }}', {{ json_encode($serials) }})" 
+                                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono-code font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-300 transition-colors cursor-pointer shadow-2xs whitespace-nowrap"
+                                                    title="Click to extend and view all {{ $serialCount }} serial numbers">
                                                     <span>🔢 {{ $serialCount }} Serials</span>
-                                                    <svg class="w-3 h-3 text-slate-500 shrink-0 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg class="w-3 h-3 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                                     </svg>
                                                 </button>
