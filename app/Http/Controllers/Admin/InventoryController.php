@@ -760,13 +760,29 @@ class InventoryController extends Controller
         $isPhilipsService = in_array($category, ['Philips Service Units', 'PHILIPS SERVICE UNITS'], true);
         $isLedService = in_array($category, ['LED Service Units', 'LED SERVICE UNITS'], true);
 
-        if ($isCentralLed) {
-            $headers = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'MANUFACTURER', 'MODEL / PIXEL PITCH', 'ITEM DESCRIPTION', 'LOCATION', 'ON-HAND', 'TOTAL ON-HAND', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM', 'ORIGINAL QTY', 'RESERVATION QTY', 'RESERVATION PROJECT', 'REMARKS'];
-            $sampleRow = ['TAG-LED-001', date('Y-m-d'), 'PO-2026-081', 'UNILUMIN', 'Upad IV P2.6', 'UNILUMIN UPAD IV P2.6 INDOOR 500X500MM DIE CAST CABINET', 'Globaltronics', 150, 150, 0.25, 37.5, 150, 0, '', 'New delivery batch'];
-        } elseif ($isPhilipsEol) {
-            $headers = ['MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'ITEM DESCRIPTION', 'QTY'];
-            $sampleRow = ['PHILIPS', date('Y-m-d'), 'BDL3230QL/75', '31.5" PHILIPS FLAT WIDE MONITOR', 103];
-        } elseif ($isPhilipsService) {
+        if ($isLedService) {
+            $header1 = ['CDX', 'LOCATION', 'MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'PO / SKU No.', 'ITEM DESCRIPTION', 'INVENTORY', '', '', '', 'FORECASTED QTY', '', 'RESERVATION', '', 'HISTORY', '', 'ORIGINAL QTY', 'STATUS', '', 'REMARKS'];
+            $header2 = ['', '', '', '', '', '', '', 'QTY', 'ACT. QTY', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM', 'QTY', 'SQM', 'QTY', 'PROJECT DETAILS', 'QTY', 'PROJECT', '', 'QTY', 'PARTICULAR', ''];
+            $sampleRows = [
+                ['CDX-201', 'WAREHOUSE A', 'UNILUMIN', date('Y-m-d'), 'UPAD IV', 'PO-991', 'Indoor P2.6 Rental Display', 100, 100, 0.25, 25.00, 10, 2.50, 20, 'Concert Tour', 0, 'None', 100, 0, 'Ready', 'All calibrated'],
+                ['CDX-202', 'WAREHOUSE B', 'ABSEN', date('Y-m-d'), 'PL2.5', 'PO-992', 'Tour LED Screen', 50, 48, 0.50, 24.00, 0, 0.00, 10, 'Convention', 5, 'Mall Event', 50, 2, 'Service Required', 'Checked'],
+            ];
+
+            return response()->streamDownload(function () use ($header1, $header2, $sampleRows) {
+                $handle = fopen('php://output', 'w');
+                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+                fputcsv($handle, $header1);
+                fputcsv($handle, $header2);
+                foreach ($sampleRows as $row) {
+                    fputcsv($handle, $row);
+                }
+                fclose($handle);
+            }, $filename, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+            ]);
+        }
+
+        if ($isPhilipsService) {
             $headers = [
                 'LOCATION',
                 'MANUFACTURER',
@@ -797,40 +813,26 @@ class InventoryController extends Controller
                 '',
                 'Philips Service demo unit',
             ];
-        } elseif ($isLedService) {
-            $header1 = ['CDX', 'LOCATION', 'MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'PO / SKU No.', 'ITEM DESCRIPTION', 'INVENTORY', '', '', '', 'FORECASTED QTY', '', 'RESERVATION', '', 'HISTORY', '', 'ORIGINAL QTY', 'STATUS', '', 'REMARKS'];
-            $header2 = ['', '', '', '', '', '', '', 'QTY', 'ACT. QTY', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM', 'QTY', 'SQM', 'QTY', 'PROJECT DETAILS', 'QTY', 'PROJECT', '', 'QTY', 'PARTICULAR', ''];
-            $sampleRows = [
-                ['CDX-201', 'WAREHOUSE A', 'UNILUMIN', date('Y-m-d'), 'UPAD IV', 'PO-991', 'Indoor P2.6 Rental Display', 100, 100, 0.25, 25.00, 10, 2.50, 20, 'Concert Tour', 0, 'None', 100, 0, 'Ready', 'All calibrated'],
-                ['CDX-202', 'WAREHOUSE B', 'ABSEN', date('Y-m-d'), 'PL2.5', 'PO-992', 'Tour LED Screen', 50, 48, 0.50, 24.00, 0, 0.00, 10, 'Convention', 5, 'Mall Event', 50, 2, 'Service Required', 'Checked'],
-            ];
-
-            return response()->streamDownload(function () use ($header1, $header2, $sampleRows) {
-                $handle = fopen('php://output', 'w');
-                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-                fputcsv($handle, $header1);
-                fputcsv($handle, $header2);
-                foreach ($sampleRows as $row) {
-                    fputcsv($handle, $row);
-                }
-                fclose($handle);
-            }, $filename, [
-                'Content-Type' => 'text/csv; charset=UTF-8',
-            ]);
+        } elseif ($isCentralLed) {
+            $headers = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'MANUFACTURER', 'MODEL / PIXEL PITCH', 'ITEM DESCRIPTION', 'LOCATION', 'ON-HAND', 'TOTAL ON-HAND', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM', 'ORIGINAL QTY', 'RESERVATION QTY', 'RESERVATION PROJECT', 'REMARKS'];
+            $sampleRow = ['TAG-LED-001', date('Y-m-d'), 'PO-2026-081', 'UNILUMIN', 'Upad IV P2.6', 'UNILUMIN UPAD IV P2.6 INDOOR 500X500MM DIE CAST CABINET', 'Globaltronics', 150, 150, 0.25, 37.5, 150, 0, '', 'New delivery batch'];
+        } elseif ($isPhilipsEol) {
+            $headers = ['MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'ITEM DESCRIPTION', 'QTY'];
+            $sampleRow = ['PHILIPS', date('Y-m-d'), 'BDL3230QL/75', '31.5" PHILIPS FLAT WIDE MONITOR', 103];
         } else {
             $headers = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'CATEGORY', 'MANUFACTURER', 'MODEL', 'ITEM DESCRIPTION', 'LOCATION', 'QTY', 'STATUS', 'REMARKS'];
             $sampleRow = ['TAG-SU-001', date('Y-m-d'), 'PO-2026-015', $category, 'NOVASTAR', 'VX1000', 'NOVASTAR ALL-IN-ONE VIDEO PROCESSOR CONTROLLER', 'Globaltronics', 5, 'in_stock', 'Event demo unit'];
-
-            return response()->streamDownload(function () use ($headers, $sampleRow) {
-                $handle = fopen('php://output', 'w');
-                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-                fputcsv($handle, $headers);
-                fputcsv($handle, $sampleRow);
-                fclose($handle);
-            }, $filename, [
-                'Content-Type' => 'text/csv; charset=UTF-8',
-            ]);
         }
+
+        return response()->streamDownload(function () use ($headers, $sampleRow) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($handle, $headers);
+            fputcsv($handle, $sampleRow);
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     /**
@@ -1113,6 +1115,15 @@ class InventoryController extends Controller
 
                         $rowJoined = strtolower(implode(' ', $row));
                         if (str_contains($rowJoined, 'total count') || str_contains($rowJoined, 'total inventory') || str_contains($rowJoined, 'total summaries')) {
+                            continue;
+                        }
+
+                        $firstCell = strtoupper(trim((string)($row[0] ?? '')));
+                        if ($firstCell === 'LOCATION' || $firstCell === 'MANUFACTURER') {
+                            continue;
+                        }
+                        $rowJoinedUpper = strtoupper($rowJoined);
+                        if (str_contains($rowJoinedUpper, 'SERIAL NO') || str_contains($rowJoinedUpper, 'ACU. QTY') || str_contains($rowJoinedUpper, 'ITEM DESCRIPTION')) {
                             continue;
                         }
 
