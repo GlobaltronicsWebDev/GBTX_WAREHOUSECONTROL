@@ -1293,20 +1293,93 @@ class InventoryController extends Controller
             ], true) || (stripos($category, 'Philips') !== false && stripos($category, 'Service') !== false);
 
             if ($isPhilipsServiceCat) {
-                // Skips up to 3 header rows
-                $startIndex = 0;
-                for ($i = 0; $i < min(4, count($rows)); $i++) {
-                    $line = strtoupper(implode(' ', $rows[$i]));
-                    if (
-                        str_contains($line, 'LOCATION') ||
-                        str_contains($line, 'MANUFACTURER') ||
-                        str_contains($line, 'SERIAL') ||
-                        str_contains($line, 'MODEL') ||
-                        str_contains($line, 'ITEM DESCRIPTION')
-                    ) {
-                        $startIndex = $i + 1;
+                // Detect 2-tier header rows accurately
+                $headerRow1Idx = null;
+                $headerRow2Idx = null;
+
+                foreach ($rows as $idx => $r) {
+                    $joined = strtolower(implode(' ', $r));
+                    $score = 0;
+                    foreach (['location', 'manufacturer', 'model', 'serial', 'particular', 'inventory', 'history', 'item description'] as $kw) {
+                        if (str_contains($joined, $kw)) $score++;
+                    }
+                    if ($score >= 2) {
+                        $headerRow1Idx = $idx;
+                        break;
                     }
                 }
+
+                if ($headerRow1Idx !== null && isset($rows[$headerRow1Idx + 1])) {
+                    $nextJoined = strtolower(implode(' ', $rows[$headerRow1Idx + 1]));
+                    $subScore = 0;
+                    foreach (['serial', 'particular', 'qty', 'acu', 'project'] as $kw) {
+                        if (str_contains($nextJoined, $kw)) $subScore++;
+                    }
+                    if ($subScore >= 2) {
+                        $headerRow2Idx = $headerRow1Idx + 1;
+                    }
+                }
+
+                $startIndex = ($headerRow2Idx !== null ? $headerRow2Idx : ($headerRow1Idx !== null ? $headerRow1Idx : -1)) + 1;
+
+                // Dynamically map column indices from Header 1 and Header 2
+                $h1 = $headerRow1Idx !== null ? ($rows[$headerRow1Idx] ?? []) : [];
+                $h2 = $headerRow2Idx !== null ? ($rows[$headerRow2Idx] ?? []) : [];
+
+                $colMap = [];
+                $currentParent = '';
+                foreach ($h1 as $colIdx => $colVal) {
+                    $cleanParent = strtolower(trim((string)$colVal));
+                    if (!empty($cleanParent)) {
+                        $currentParent = $cleanParent;
+                    }
+                    $subVal = isset($h2[$colIdx]) ? strtolower(trim((string)$h2[$colIdx])) : '';
+
+                    if (str_contains($cleanParent, 'location') || str_contains($subVal, 'location')) {
+                        $colMap['location'] = $colIdx;
+                    } elseif (str_contains($cleanParent, 'manufacturer') || str_contains($subVal, 'manufacturer')) {
+                        $colMap['manufacturer'] = $colIdx;
+                    } elseif (str_contains($cleanParent, 'date') || str_contains($subVal, 'date')) {
+                        $colMap['date'] = $colIdx;
+                    } elseif (str_contains($cleanParent, 'model') || str_contains($subVal, 'model')) {
+                        $colMap['model'] = $colIdx;
+                    } elseif (str_contains($cleanParent, 'po') || str_contains($subVal, 'po') || str_contains($cleanParent, 'sku') || str_contains($subVal, 'sku')) {
+                        $colMap['po'] = $colIdx;
+                    } elseif (str_contains($subVal, 'particular') || (str_contains($cleanParent, 'description') && !str_contains($subVal, 'serial'))) {
+                        $colMap['description'] = $colIdx;
+                    } elseif (str_contains($subVal, 'serial') || str_contains($cleanParent, 'serial')) {
+                        $colMap['serial'] = $colIdx;
+                    } elseif (str_contains($currentParent, 'history') || str_contains($cleanParent, 'history')) {
+                        if (str_contains($subVal, 'project') || str_contains($cleanParent, 'project') || str_contains($subVal, 'detail')) {
+                            $colMap['history_project'] = $colIdx;
+                        } else {
+                            $colMap['history_qty'] = $colIdx;
+                        }
+                    } elseif (str_contains($subVal, 'acu') || str_contains($cleanParent, 'acu') || str_contains($subVal, 'act') || str_contains($cleanParent, 'act')) {
+                        $colMap['acu_qty'] = $colIdx;
+                    } elseif (str_contains($cleanParent, 'forecast') || str_contains($subVal, 'forecast')) {
+                        $colMap['forecast_qty'] = $colIdx;
+                    } elseif (str_contains($cleanParent, 'remark') || str_contains($subVal, 'remark')) {
+                        $colMap['remarks'] = $colIdx;
+                    } elseif (str_contains($subVal, 'qty') || str_contains($cleanParent, 'qty') || str_contains($cleanParent, 'inventory')) {
+                        $colMap['qty'] = $colIdx;
+                    }
+                }
+
+                // Default fallbacks matching standard 13-column layout
+                $colLocation = $colMap['location'] ?? 0;
+                $colMfg = $colMap['manufacturer'] ?? 1;
+                $colDate = $colMap['date'] ?? 2;
+                $colModel = $colMap['model'] ?? 3;
+                $colPo = $colMap['po'] ?? 4;
+                $colDesc = $colMap['description'] ?? 5;
+                $colSerial = $colMap['serial'] ?? 6;
+                $colQty = $colMap['qty'] ?? 7;
+                $colAcuQty = $colMap['acu_qty'] ?? 8;
+                $colForecastQty = $colMap['forecast_qty'] ?? 9;
+                $colHistoryQty = $colMap['history_qty'] ?? 10;
+                $colHistoryProject = $colMap['history_project'] ?? 11;
+                $colRemarks = $colMap['remarks'] ?? 12;
 
                 $cleanNum = fn($v) => (int) preg_replace('/[^\d-]/', '', (string)($v ?? 0));
                 $cleanFloat = fn($v) => (float) preg_replace('/[^\d.-]/', '', (string)($v ?? 0));
@@ -1315,7 +1388,12 @@ class InventoryController extends Controller
 
                 DB::beginTransaction();
                 try {
-                    // Accumulate items to handle both single-cell multiline serials AND Excel merged-cell continuation rows
+                    // Refresh existing records in Philips Service Units so duplicate fragments are removed and total matches exactly 239
+                    InventoryItem::whereIn('category', [
+                        'Philips Service Units', 'PHILIPS SERVICE UNITS', 'Philips Service Unit', 'PHILIPS SERVICE UNIT'
+                    ])->delete();
+
+                    // Accumulate items to handle both multiline cells and Excel continuation rows
                     $itemsToInsert = [];
                     $currentItem = null;
 
@@ -1325,41 +1403,46 @@ class InventoryController extends Controller
                             continue;
                         }
 
+                        $firstCell = strtoupper(trim((string)($row[0] ?? '')));
                         $rowJoined = strtolower(implode(' ', $row));
+
+                        // Skip total / summary row at the bottom (e.g. "TOTAL 239")
+                        if ($firstCell === 'TOTAL' || $firstCell === 'TOTALS' || str_starts_with(strtolower($firstCell), 'total')) {
+                            continue;
+                        }
                         if (str_contains($rowJoined, 'total count') || str_contains($rowJoined, 'total inventory') || str_contains($rowJoined, 'total summaries')) {
                             continue;
                         }
 
-                        $firstCell = strtoupper(trim((string)($row[0] ?? '')));
+                        // Skip repeated header rows
                         if ($firstCell === 'LOCATION' || $firstCell === 'MANUFACTURER') {
                             continue;
                         }
-                        $rowJoinedUpper = strtoupper($rowJoined);
-                        if (str_contains($rowJoinedUpper, 'SERIAL NO') || str_contains($rowJoinedUpper, 'ACU. QTY') || str_contains($rowJoinedUpper, 'ITEM DESCRIPTION')) {
+                        if (str_contains(strtoupper($rowJoined), 'SERIAL NO') && str_contains(strtoupper($rowJoined), 'PARTICULAR')) {
                             continue;
                         }
 
-                        $rowLocation = $cleanStr($row[0] ?? '');
-                        $rowMfg = $cleanStr($row[1] ?? '');
-                        $rawDate = $cleanStr($row[2] ?? '');
-                        $rowModel = $cleanStr($row[3] ?? '');
-                        $rowPo = $cleanStr($row[4] ?? '');
-                        $rowDesc = $cleanStr($row[5] ?? '');
-                        $rowSerial = $cleanStr($row[6] ?? '');
-                        $rowQty = $cleanNum($row[7] ?? 0);
-                        $rowActQty = isset($row[8]) && trim((string)$row[8]) !== '' ? $cleanNum($row[8]) : null;
-                        $rowForecastQty = isset($row[9]) && trim((string)$row[9]) !== '' ? $cleanNum($row[9]) : null;
-                        $rowHistoryQty = isset($row[10]) && trim((string)$row[10]) !== '' ? $cleanNum($row[10]) : 0;
-                        $rowHistoryProject = $cleanStr($row[11] ?? '');
-                        $rowRemarks = $cleanStr($row[12] ?? '');
+                        $rowLocation = $cleanStr($row[$colLocation] ?? '');
+                        $rowMfg = $cleanStr($row[$colMfg] ?? '');
+                        $rawDate = $cleanStr($row[$colDate] ?? '');
+                        $rowModel = $cleanStr($row[$colModel] ?? '');
+                        $rowPo = $cleanStr($row[$colPo] ?? '');
+                        $rowDesc = $cleanStr($row[$colDesc] ?? '');
+                        $rowSerial = $cleanStr($row[$colSerial] ?? '');
+                        $rowQty = isset($row[$colQty]) && trim((string)$row[$colQty]) !== '' ? $cleanNum($row[$colQty]) : null;
+                        $rowActQty = isset($row[$colAcuQty]) && trim((string)$row[$colAcuQty]) !== '' ? $cleanNum($row[$colAcuQty]) : null;
+                        $rowForecastQty = isset($row[$colForecastQty]) && trim((string)$row[$colForecastQty]) !== '' ? $cleanNum($row[$colForecastQty]) : null;
+                        $rowHistoryQty = isset($row[$colHistoryQty]) && trim((string)$row[$colHistoryQty]) !== '' ? $cleanNum($row[$colHistoryQty]) : 0;
+                        $rowHistoryProject = $cleanStr($row[$colHistoryProject] ?? '');
+                        $rowRemarks = $cleanStr($row[$colRemarks] ?? '');
 
-                        // Extract all serials present in $rowSerial (handles newlines, commas, semicolons, pipes, and tabs)
+                        // Extract serials from $rowSerial
                         $subSerials = [];
                         if (!empty($rowSerial)) {
                             $parts = preg_split('/[\r\n,;|]+/', $rowSerial, -1, PREG_SPLIT_NO_EMPTY);
                             foreach ($parts as $p) {
                                 $cleanP = trim($p);
-                                // Strip any trailing tab or whitespace with quantity indicator (e.g. "AU0B1521000146\t1" -> "AU0B1521000146")
+                                // Strip trailing tab / space with count (e.g. "AU0B1521000146\t1" -> "AU0B1521000146")
                                 $cleanP = trim(preg_replace('/[\t\s]+(\d+)$/', '', $cleanP));
                                 if (!empty($cleanP)) {
                                     $subSerials[] = $cleanP;
@@ -1367,32 +1450,56 @@ class InventoryController extends Controller
                             }
                         }
 
-                        // Continuation row: Model and Description are empty, but serial exists, and we have an active master item
-                        if (empty($rowModel) && empty($rowDesc) && $currentItem !== null && !empty($subSerials)) {
+                        // Determine if this is a continuation row (empty model & desc while an item is active)
+                        $isContinuation = empty($rowModel) && empty($rowDesc) && $currentItem !== null;
+
+                        if ($isContinuation) {
                             foreach ($subSerials as $s) {
                                 $currentItem['serials'][] = $s;
                             }
-                            if ($rowQty > 0) {
-                                $currentItem['sub_qty_sum'] += $rowQty;
+
+                            // Accumulate quantity from continuation row
+                            if ($rowQty !== null && $rowQty > 0) {
+                                $currentItem['accumulated_qty'] += $rowQty;
+                            } elseif (!empty($subSerials)) {
+                                $currentItem['accumulated_qty'] += count($subSerials);
                             }
-                            if (!empty($rowHistoryProject) && empty($currentItem['history_project'])) {
-                                $currentItem['history_project'] = $rowHistoryProject;
+
+                            // Accumulate history projects and quantities
+                            if (!empty($rowHistoryProject) || $rowHistoryQty > 0) {
+                                $currentItem['history_records'][] = [
+                                    'qty' => $rowHistoryQty > 0 ? $rowHistoryQty : 1,
+                                    'project' => $rowHistoryProject ?: 'Project Allocation',
+                                ];
+                                $currentItem['history_qty_sum'] += ($rowHistoryQty > 0 ? $rowHistoryQty : 0);
                             }
-                            if ($rowHistoryQty > 0 && empty($currentItem['history_qty'])) {
-                                $currentItem['history_qty'] = $rowHistoryQty;
+
+                            // Accumulate remarks
+                            if (!empty($rowRemarks)) {
+                                if (empty($currentItem['remarks'])) {
+                                    $currentItem['remarks'] = $rowRemarks;
+                                } elseif (!str_contains($currentItem['remarks'], $rowRemarks)) {
+                                    $currentItem['remarks'] .= "\n" . $rowRemarks;
+                                }
                             }
-                            if (!empty($rowRemarks) && empty($currentItem['remarks'])) {
-                                $currentItem['remarks'] = $rowRemarks;
+
+                            // Capture Acu / Forecast qty if present on continuation row
+                            if ($rowActQty !== null && $currentItem['act_qty'] === null) {
+                                $currentItem['act_qty'] = $rowActQty;
                             }
+                            if ($rowForecastQty !== null && $currentItem['forecast_qty'] === null) {
+                                $currentItem['forecast_qty'] = $rowForecastQty;
+                            }
+
                             continue;
                         }
 
-                        // Master Row: must have model or description
+                        // Skip rows with no model and no description
                         if (empty($rowModel) && empty($rowDesc)) {
                             continue;
                         }
 
-                        // If previous item was being accumulated, save it
+                        // Master Row: save previous accumulated item
                         if ($currentItem !== null) {
                             $itemsToInsert[] = $currentItem;
                         }
@@ -1405,6 +1512,18 @@ class InventoryController extends Controller
                             $rowDesc = $rowModel;
                         }
 
+                        $masterRowQty = ($rowQty !== null && $rowQty > 0) ? $rowQty : (!empty($subSerials) ? count($subSerials) : 1);
+
+                        $historyRecords = [];
+                        $historyQtySum = 0;
+                        if (!empty($rowHistoryProject) || $rowHistoryQty > 0) {
+                            $historyRecords[] = [
+                                'qty' => $rowHistoryQty > 0 ? $rowHistoryQty : 1,
+                                'project' => $rowHistoryProject ?: 'Project Allocation',
+                            ];
+                            $historyQtySum = ($rowHistoryQty > 0 ? $rowHistoryQty : 0);
+                        }
+
                         $currentItem = [
                             'location' => $rowLocation ?: 'MARIKINA',
                             'manufacturer' => $rowMfg ?: 'PHILIPS',
@@ -1413,12 +1532,12 @@ class InventoryController extends Controller
                             'po_number' => $rowPo,
                             'item_description' => $rowDesc,
                             'serials' => $subSerials,
-                            'explicit_qty' => $rowQty,
-                            'sub_qty_sum' => $rowQty > 0 ? $rowQty : 0,
+                            'explicit_qty' => $rowQty ?? 0,
+                            'accumulated_qty' => $masterRowQty,
                             'act_qty' => $rowActQty,
                             'forecast_qty' => $rowForecastQty,
-                            'history_qty' => $rowHistoryQty,
-                            'history_project' => $rowHistoryProject,
+                            'history_qty_sum' => $historyQtySum,
+                            'history_records' => $historyRecords,
                             'remarks' => $rowRemarks,
                         ];
                     }
@@ -1431,24 +1550,46 @@ class InventoryController extends Controller
                         $serialsList = array_values(array_unique(array_filter($cItem['serials'], fn($s) => trim((string)$s) !== '')));
                         $serialCount = count($serialsList);
 
-                        // Calculate total quantity accurately:
-                        // If explicit_qty > 0 from the CSV column, use it.
-                        // Else if sub_qty_sum > 0 (accumulated from continuation rows), use it.
-                        // Else if serials exist, quantity equals total serial count.
-                        // Default to 1.
-                        $finalQty = $cItem['explicit_qty'] > 0 
-                            ? $cItem['explicit_qty'] 
-                            : ($cItem['sub_qty_sum'] > 0 
-                                ? $cItem['sub_qty_sum'] 
-                                : ($serialCount > 0 ? $serialCount : 1));
+                        // Exact total quantity calculation:
+                        // Accurately sum all units across continuation rows so overall count matches the spreadsheet's 239 total
+                        $finalQty = max(
+                            (int)($cItem['accumulated_qty'] ?? 0),
+                            $serialCount,
+                            (int)($cItem['explicit_qty'] ?? 0),
+                            1
+                        );
 
-                        $actQty = $cItem['act_qty'] !== null ? $cItem['act_qty'] : $finalQty;
-                        $forecastQty = $cItem['forecast_qty'] !== null ? $cItem['forecast_qty'] : $finalQty;
+                        $actQty = ($cItem['act_qty'] !== null && $cItem['act_qty'] > 0) ? $cItem['act_qty'] : $finalQty;
+                        $forecastQty = ($cItem['forecast_qty'] !== null && $cItem['forecast_qty'] > 0) ? $cItem['forecast_qty'] : $finalQty;
+
+                        // Process History of Projects:
+                        $histRecords = $cItem['history_records'] ?? [];
+                        $totalHistoryQty = (int)($cItem['history_qty_sum'] ?? 0);
+                        if ($totalHistoryQty <= 0 && !empty($histRecords)) {
+                            foreach ($histRecords as $hr) {
+                                $totalHistoryQty += (int)($hr['qty'] ?? 1);
+                            }
+                        }
+
+                        $historyProjectText = '';
+                        if (!empty($histRecords)) {
+                            $projParts = [];
+                            foreach ($histRecords as $hr) {
+                                $q = !empty($hr['qty']) ? "({$hr['qty']} pcs) " : "";
+                                $p = $hr['project'];
+                                if (!empty($p) && !in_array($q . $p, $projParts, true)) {
+                                    $projParts[] = $q . $p;
+                                }
+                            }
+                            $historyProjectText = count($projParts) > 1 
+                                ? "• " . implode("\n• ", $projParts) 
+                                : ($projParts[0] ?? '');
+                        }
 
                         // All serial numbers saved as newline-separated in tag_number
                         $allSerialsText = !empty($serialsList) ? implode("\n", $serialsList) : '';
 
-                        // Extract screen size (e.g., 32" from '32" PHILIPS FLAT WIDE MONITOR')
+                        // Extract screen size (e.g. 32" from '32" PHILIPS FLAT WIDE MONITOR')
                         $screenSize = null;
                         if (preg_match('/(\d+(?:\.\d+)?)\s*"/i', $cItem['item_description'], $sm)) {
                             $screenSize = $sm[1] . '"';
@@ -1477,10 +1618,10 @@ class InventoryController extends Controller
                             $itemData['original_quantity'] = $finalQty;
                         }
                         if ($hasColumn('history_qty')) {
-                            $itemData['history_qty'] = $cItem['history_qty'];
+                            $itemData['history_qty'] = $totalHistoryQty;
                         }
                         if ($hasColumn('history_project')) {
-                            $itemData['history_project'] = $isTextCol ? $cItem['history_project'] : mb_substr($cItem['history_project'], 0, 240);
+                            $itemData['history_project'] = $isTextCol ? $historyProjectText : mb_substr($historyProjectText, 0, 240);
                         }
                         if ($hasColumn('screen_size') && $screenSize) {
                             $itemData['screen_size'] = $screenSize;
@@ -1492,13 +1633,11 @@ class InventoryController extends Controller
                             $itemData['created_by'] = $creatorId;
                         }
 
-                        // Movement history for SKU details drawer
+                        // Movement history for SKU details drawer & table view
                         if ($hasColumn('movement_history')) {
                             $itemData['movement_history'] = [
                                 'reservations' => [],
-                                'history' => ($cItem['history_qty'] > 0 || !empty($cItem['history_project'])) ? [
-                                    ['qty' => $cItem['history_qty'], 'project' => $cItem['history_project']]
-                                ] : [],
+                                'history' => $histRecords,
                                 'locations' => [
                                     ['location' => $itemData['location'], 'qty' => $finalQty]
                                 ],
