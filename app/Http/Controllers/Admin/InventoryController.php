@@ -948,8 +948,6 @@ class InventoryController extends Controller
                 $cleanFloat = fn($v) => (float) preg_replace('/[^\d.-]/', '', (string)($v ?? 0));
 
                 $importedCount = 0;
-                $updatedCount = 0;
-                $categoryVariants = $this->getCategoryVariants('LED Service Units');
 
                 DB::beginTransaction();
                 try {
@@ -1063,45 +1061,14 @@ class InventoryController extends Controller
                             ];
                         }
 
-                        $existing = null;
-                        if (!empty($itemData['tag_number'])) {
-                            $existing = InventoryItem::whereIn('category', $categoryVariants)
-                                ->where('tag_number', $itemData['tag_number'])
-                                ->first();
-                        }
-
-                        if (!$existing && !empty($itemData['model'])) {
-                            $mQuery = InventoryItem::whereIn('category', $categoryVariants)
-                                ->where('model', $itemData['model']);
-                            if (!empty($location)) {
-                                $mQuery->where('location', $itemData['location']);
-                            }
-                            if (!empty($poSkuNo)) {
-                                $mQuery->where('po_number', $poSkuNo);
-                            }
-                            $existing = $mQuery->first();
-
-                            if (!$existing) {
-                                $existing = InventoryItem::whereIn('category', $categoryVariants)
-                                    ->where('model', $itemData['model'])
-                                    ->first();
-                            }
-                        }
-
                         $safeData = array_intersect_key($itemData, array_flip($tableColumns));
-
-                        if ($existing) {
-                            $existing->update($safeData);
-                            $updatedCount++;
-                        } else {
-                            InventoryItem::create($safeData);
-                            $importedCount++;
-                        }
+                        InventoryItem::create($safeData);
+                        $importedCount++;
                     }
 
                     DB::commit();
 
-                    return back()->with('success', "LED Service Units import completed! {$importedCount} new items created, {$updatedCount} items updated.");
+                    return back()->with('success', "LED Service Units import completed! {$importedCount} items imported.");
                 } catch (\Throwable $e) {
                     DB::rollBack();
                     return back()->withErrors(['file' => 'LED Service Units import failed: ' . $e->getMessage()]);
