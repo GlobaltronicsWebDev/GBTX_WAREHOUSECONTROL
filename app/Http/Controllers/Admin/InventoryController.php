@@ -191,6 +191,7 @@ class InventoryController extends Controller
             'AJUAN - 1ST FLR',
             'A JUAN MAIN 1ST FLOOR',
             '2ND FLR OCAP',
+            '4TH FLR OCAP',
         ];
         $availableLocations = collect($standardLocations)
             ->merge(InventoryItem::select('location')->distinct()->pluck('location'))
