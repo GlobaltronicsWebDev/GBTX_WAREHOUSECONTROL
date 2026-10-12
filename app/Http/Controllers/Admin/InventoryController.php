@@ -1434,12 +1434,27 @@ class InventoryController extends Controller
 
                 DB::beginTransaction();
                 try {
-                    // Refresh existing records in Philips Service Units and separated Defective/DeadPixel categories
-                    InventoryItem::whereIn('category', [
-                        'Philips Service Units', 'PHILIPS SERVICE UNITS', 'Philips Service Unit', 'PHILIPS SERVICE UNIT',
-                        'DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS',
-                        'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS'
-                    ])->delete();
+                    // Refresh existing records ONLY for the specific category being imported
+                    $targetCatUpper = strtoupper(trim($category));
+                    if (in_array($targetCatUpper, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL'])) {
+                        $categoriesToDelete = [
+                            'DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS',
+                            'DeadPixel Unit', 'DEADPIXEL UNIT', 'Dead Pixel Unit', 'DEAD PIXEL UNIT'
+                        ];
+                    } elseif (in_array($targetCatUpper, ['DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE', 'DEFECTIVE UNIT'])) {
+                        $categoriesToDelete = [
+                            'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS',
+                            'Defective Unit', 'DEFECTIVE UNIT'
+                        ];
+                    } elseif (str_contains($targetCatUpper, 'PHILIPS')) {
+                        $categoriesToDelete = [
+                            'Philips Service Units', 'PHILIPS SERVICE UNITS', 'Philips Service Unit', 'PHILIPS SERVICE UNIT'
+                        ];
+                    } else {
+                        $categoriesToDelete = [$category, strtolower($category), strtoupper($category), ucwords(strtolower($category))];
+                    }
+
+                    InventoryItem::whereIn('category', $categoriesToDelete)->delete();
 
                     // Accumulate items to handle both multiline cells and Excel continuation rows
                     $itemsToInsert = [];
