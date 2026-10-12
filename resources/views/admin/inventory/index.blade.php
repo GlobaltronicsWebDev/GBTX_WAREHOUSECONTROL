@@ -3650,6 +3650,58 @@
         popover.classList.toggle('hidden');
     }
 
+    // Dedicated Serial Numbers Modal Viewer
+    let currentViewerSerials = [];
+    function openSerialViewer(modelName, serials) {
+        currentViewerSerials = Array.isArray(serials) ? serials : (serials ? String(serials).split(/[\r\n,;|]+/).map(s => s.trim()).filter(Boolean) : []);
+        const titleEl = document.getElementById('serialViewerTitle');
+        const countEl = document.getElementById('serialViewerCount');
+        const searchEl = document.getElementById('serialSearchInput');
+        if (titleEl) titleEl.textContent = modelName ? `Serial Numbers: ${modelName}` : 'Serial Numbers';
+        if (countEl) countEl.textContent = `${currentViewerSerials.length} Total Serialized Units`;
+        if (searchEl) searchEl.value = '';
+        renderViewerSerials(currentViewerSerials);
+        const modal = document.getElementById('serialViewerModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeSerialViewerModal() {
+        const modal = document.getElementById('serialViewerModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function renderViewerSerials(serials) {
+        const listEl = document.getElementById('serialViewerList');
+        if (!listEl) return;
+        if (serials.length === 0) {
+            listEl.innerHTML = '<p class="text-slate-400 text-center py-4 italic">No matching serial numbers found.</p>';
+            return;
+        }
+        listEl.innerHTML = serials.map((sn, idx) => `
+            <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors group">
+                <span class="font-bold text-slate-800 select-all"><span class="text-slate-400 font-normal mr-2">${idx + 1}.</span>${sn}</span>
+                <button type="button" onclick="navigator.clipboard.writeText('${sn}'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy', 1200);" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 px-2 py-0.5 rounded hover:bg-blue-50 transition-colors">Copy</button>
+            </div>
+        `).join('');
+    }
+
+    function filterViewerSerials() {
+        const q = (document.getElementById('serialSearchInput')?.value || '').toLowerCase().trim();
+        if (!q) {
+            renderViewerSerials(currentViewerSerials);
+        } else {
+            const filtered = currentViewerSerials.filter(s => s.toLowerCase().includes(q));
+            renderViewerSerials(filtered);
+        }
+    }
+
+    function copyAllViewerSerials() {
+        if (currentViewerSerials.length === 0) return;
+        navigator.clipboard.writeText(currentViewerSerials.join('\n')).then(() => {
+            alert(`Copied ${currentViewerSerials.length} serial numbers to clipboard!`);
+        });
+    }
+
     // Close any open serial popover on click outside or escape key
     document.addEventListener('click', function (e) {
         if (!e.target.closest('.serial-popover') && !e.target.closest('button[onclick*="toggleSerialPopover"]')) {
@@ -3660,6 +3712,7 @@
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             document.querySelectorAll('.serial-popover').forEach(p => p.classList.add('hidden'));
+            closeSerialViewerModal();
             closeDrawer();
         }
     });
@@ -4218,6 +4271,37 @@
             </div>
         </form>
 
+    </div>
+</div>
+
+<!-- Serial Numbers Viewer Modal -->
+<div id="serialViewerModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <!-- Header -->
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+            <div>
+                <h3 id="serialViewerTitle" class="text-sm font-bold text-slate-900">Serial Numbers</h3>
+                <p id="serialViewerCount" class="text-xs text-slate-500 font-semibold mt-0.5">0 Total Serials</p>
+            </div>
+            <button type="button" onclick="closeSerialViewerModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 flex items-center justify-center transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <!-- Search & Action Toolbar -->
+        <div class="px-5 py-3 border-b border-slate-100 bg-white flex items-center gap-2">
+            <div class="relative flex-1">
+                <input type="text" id="serialSearchInput" oninput="filterViewerSerials()" placeholder="Search serial numbers..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white font-mono-code">
+                <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <button type="button" onclick="copyAllViewerSerials()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-xs transition-colors shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                <span>Copy All</span>
+            </button>
+        </div>
+        <!-- Serials List -->
+        <div id="serialViewerList" class="p-5 overflow-y-auto max-h-[50vh] space-y-1.5 font-mono-code text-xs">
+            <!-- Dynamically populated serials -->
+        </div>
     </div>
 </div>
 @endsection

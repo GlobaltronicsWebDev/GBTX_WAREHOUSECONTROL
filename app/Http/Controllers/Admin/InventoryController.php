@@ -1428,17 +1428,25 @@ class InventoryController extends Controller
                     }
 
                     foreach ($itemsToInsert as $cItem) {
-                        $serialsList = array_values(array_unique($cItem['serials']));
+                        $serialsList = array_values(array_unique(array_filter($cItem['serials'], fn($s) => trim((string)$s) !== '')));
                         $serialCount = count($serialsList);
 
-                        // If no serials were provided, insert 1 row
-                        if (empty($serialsList)) {
-                            $serialsList = [''];
-                        }
+                        // Calculate total quantity accurately:
+                        // If explicit_qty > 0 from the CSV column, use it.
+                        // Else if sub_qty_sum > 0 (accumulated from continuation rows), use it.
+                        // Else if serials exist, quantity equals total serial count.
+                        // Default to 1.
+                        $finalQty = $cItem['explicit_qty'] > 0 
+                            ? $cItem['explicit_qty'] 
+                            : ($cItem['sub_qty_sum'] > 0 
+                                ? $cItem['sub_qty_sum'] 
+                                : ($serialCount > 0 ? $serialCount : 1));
 
-                        // Determine Acu Qty and Forecast Qty from master row
-                        $actQty = $cItem['act_qty'] !== null ? $cItem['act_qty'] : max(1, $serialCount);
-                        $forecastQty = $cItem['forecast_qty'] !== null ? $cItem['forecast_qty'] : max(1, $serialCount);
+                        $actQty = $cItem['act_qty'] !== null ? $cItem['act_qty'] : $finalQty;
+                        $forecastQty = $cItem['forecast_qty'] !== null ? $cItem['forecast_qty'] : $finalQty;
+
+                        // All serial numbers saved as newline-separated in tag_number
+                        $allSerialsText = !empty($serialsList) ? implode("\n", $serialsList) : '';
 
                         // Extract screen size (e.g., 32" from '32" PHILIPS FLAT WIDE MONITOR')
                         $screenSize = null;
@@ -1446,70 +1454,60 @@ class InventoryController extends Controller
                             $screenSize = $sm[1] . '"';
                         }
 
-                        // Insert each serial number as its own separate row
-                        foreach ($serialsList as $snIndex => $sn) {
-                            // When serial number is present (or multiple serial numbers), each individual serial unit has QTY = 1
-                            if ($sn !== '' && $sn !== null) {
-                                $itemQty = 1;
-                            } else {
-                                $itemQty = $cItem['explicit_qty'] > 0 ? $cItem['explicit_qty'] : 1;
-                            }
+                        $itemData = [
+                            'category' => 'Philips Service Units',
+                            'tag_number' => $allSerialsText,
+                            'location' => mb_substr($cItem['location'] ?: 'MARIKINA', 0, 100),
+                            'manufacturer' => mb_substr($cItem['manufacturer'] ?: 'PHILIPS', 0, 100),
+                            'check_in_date' => $cItem['check_in_date'],
+                            'model' => mb_substr($cItem['model'], 0, 100),
+                            'po_number' => mb_substr($cItem['po_number'], 0, 100),
+                            'item_description' => $cItem['item_description'],
+                            'quantity' => $finalQty,
+                            'status' => 'in_stock',
+                        ];
 
-                            $itemData = [
-                                'category' => 'Philips Service Units',
-                                'tag_number' => $sn,
-                                'location' => mb_substr($cItem['location'] ?: 'MARIKINA', 0, 100),
-                                'manufacturer' => mb_substr($cItem['manufacturer'] ?: 'PHILIPS', 0, 100),
-                                'check_in_date' => $cItem['check_in_date'],
-                                'model' => mb_substr($cItem['model'], 0, 100),
-                                'po_number' => mb_substr($cItem['po_number'], 0, 100),
-                                'item_description' => $cItem['item_description'],
-                                'quantity' => $itemQty,
-                                'status' => 'in_stock',
-                            ];
-
-                            if ($hasColumn('acu_quantity')) {
-                                $itemData['acu_quantity'] = ($sn !== '' && $sn !== null) ? 1 : ($actQty !== null ? $actQty : $itemQty);
-                            }
-                            if ($hasColumn('forecasted_quantity')) {
-                                $itemData['forecasted_quantity'] = ($sn !== '' && $sn !== null) ? 1 : ($forecastQty !== null ? $forecastQty : $itemQty);
-                            }
-                            if ($hasColumn('original_quantity')) {
-                                $itemData['original_quantity'] = $itemQty;
-                            }
-                            if ($hasColumn('history_qty')) {
-                                $itemData['history_qty'] = ($snIndex === 0) ? $cItem['history_qty'] : 0;
-                            }
-                            if ($hasColumn('history_project')) {
-                                $itemData['history_project'] = $isTextCol ? $cItem['history_project'] : mb_substr($cItem['history_project'], 0, 240);
-                            }
-                            if ($hasColumn('screen_size') && $screenSize) {
-                                $itemData['screen_size'] = $screenSize;
-                            }
-                            if ($hasColumn('remarks')) {
-                                $itemData['remarks'] = $cItem['remarks'];
-                            }
-                            if ($hasColumn('created_by')) {
-                                $itemData['created_by'] = $creatorId;
-                            }
-
-                            // Movement history for SKU details drawer
-                            if ($hasColumn('movement_history')) {
-                                $itemData['movement_history'] = [
-                                    'reservations' => [],
-                                    'history' => ($cItem['history_qty'] > 0 || !empty($cItem['history_project'])) ? [
-                                        ['qty' => $cItem['history_qty'], 'project' => $cItem['history_project']]
-                                    ] : [],
-                                    'locations' => [
-                                        ['location' => $itemData['location'], 'qty' => $itemQty]
-                                    ],
-                                ];
-                            }
-
-                            $safeData = array_intersect_key($itemData, array_flip($tableColumns));
-                            InventoryItem::create($safeData);
-                            $importedCount++;
+                        if ($hasColumn('acu_quantity')) {
+                            $itemData['acu_quantity'] = $actQty;
                         }
+                        if ($hasColumn('forecasted_quantity')) {
+                            $itemData['forecasted_quantity'] = $forecastQty;
+                        }
+                        if ($hasColumn('original_quantity')) {
+                            $itemData['original_quantity'] = $finalQty;
+                        }
+                        if ($hasColumn('history_qty')) {
+                            $itemData['history_qty'] = $cItem['history_qty'];
+                        }
+                        if ($hasColumn('history_project')) {
+                            $itemData['history_project'] = $isTextCol ? $cItem['history_project'] : mb_substr($cItem['history_project'], 0, 240);
+                        }
+                        if ($hasColumn('screen_size') && $screenSize) {
+                            $itemData['screen_size'] = $screenSize;
+                        }
+                        if ($hasColumn('remarks')) {
+                            $itemData['remarks'] = $cItem['remarks'];
+                        }
+                        if ($hasColumn('created_by')) {
+                            $itemData['created_by'] = $creatorId;
+                        }
+
+                        // Movement history for SKU details drawer
+                        if ($hasColumn('movement_history')) {
+                            $itemData['movement_history'] = [
+                                'reservations' => [],
+                                'history' => ($cItem['history_qty'] > 0 || !empty($cItem['history_project'])) ? [
+                                    ['qty' => $cItem['history_qty'], 'project' => $cItem['history_project']]
+                                ] : [],
+                                'locations' => [
+                                    ['location' => $itemData['location'], 'qty' => $finalQty]
+                                ],
+                            ];
+                        }
+
+                        $safeData = array_intersect_key($itemData, array_flip($tableColumns));
+                        InventoryItem::create($safeData);
+                        $importedCount++;
                     }
 
                     DB::commit();
