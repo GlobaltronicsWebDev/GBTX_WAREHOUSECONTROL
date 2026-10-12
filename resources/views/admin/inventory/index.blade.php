@@ -1153,7 +1153,7 @@
                                 </td>
 
                                 <!-- HISTORY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     @if ($item->history_qty)
                                         <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                             {{ number_format($item->history_qty) }}
@@ -1164,7 +1164,7 @@
                                 </td>
 
                                 <!-- HISTORY: PROJECT -->
-                                <td class="py-2 px-2.5 border-r border-slate-200 min-w-[200px] text-xs text-slate-800 align-top">
+                                <td class="col-service-ext py-2 px-2.5 border-r border-slate-200 min-w-[200px] text-xs text-slate-800 align-top">
                                     @php
                                         $philHistList = [];
                                         if (!empty($item->movement_history)) {
@@ -1195,7 +1195,7 @@
                                 </td>
 
                                 <!-- REMARKS -->
-                                <td class="py-2 px-2.5 border-r border-slate-200 min-w-[160px] text-xs text-slate-600 align-top">
+                                <td class="col-service-ext py-2 px-2.5 border-r border-slate-200 min-w-[160px] text-xs text-slate-600 align-top">
                                     @if ($item->remarks)
                                         <div class="line-clamp-2 font-medium text-slate-700" title="{{ $item->remarks }}">{{ $item->remarks }}</div>
                                     @else
@@ -1282,15 +1282,15 @@
                                     {{ number_format($philTotalAvailQty) }}
                                 </td>
                                 <!-- HISTORY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($philTotalHistoryQty) }}
                                 </td>
                                 <!-- HISTORY: PROJECT -->
-                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                <td class="col-service-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
                                 <!-- REMARKS -->
-                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                <td class="col-service-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
                                 <!-- ACTIONS -->
@@ -4171,11 +4171,50 @@
         }
     }
 
+    // Service Units & All Sub-Categories Extended Columns Toggle (Button Icon Only)
+    function toggleServiceColumns() {
+        const table = document.getElementById('centralLedTable');
+        if (!table) return;
+        const isCurrentlyHidden = table.classList.contains('hide-service-ext');
+        setServiceToggleUI(isCurrentlyHidden);
+        localStorage.setItem('service_ext_visible', isCurrentlyHidden ? '1' : '0');
+    }
+
+    function setServiceToggleUI(show) {
+        const table = document.getElementById('centralLedTable');
+        if (table) {
+            if (show) {
+                table.classList.remove('hide-service-ext');
+            } else {
+                table.classList.add('hide-service-ext');
+            }
+        }
+        const btn = document.getElementById('btnToggleServiceDetails');
+        if (btn) {
+            if (show) {
+                btn.className = "inline-flex items-center justify-center p-2 rounded-xl text-xs font-bold transition-all shadow-sm border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-700 focus:outline-none cursor-pointer";
+                btn.title = "Hide Extended (Reservation, History, Status, Remarks) [OPEN]";
+                btn.innerHTML = `<svg id="iconToggleServiceDetails" class="w-4 h-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>`;
+            } else {
+                btn.className = "inline-flex items-center justify-center p-2 rounded-xl text-xs font-bold transition-all shadow-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 focus:outline-none cursor-pointer";
+                btn.title = "Open Extended (Reservation, History, Status, Remarks) [HIDDEN]";
+                btn.innerHTML = `<svg id="iconToggleServiceDetails" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                </svg>`;
+            }
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const savedExt = localStorage.getItem('central_led_ext_visible');
         setCentralizedLedToggleUI(savedExt === '1');
         const savedPhilExt = localStorage.getItem('philips_ext_visible');
         setPhilipsToggleUI(savedPhilExt === '1');
+        const savedServExt = localStorage.getItem('service_ext_visible');
+        setServiceToggleUI(savedServExt === '1');
         const savedColView = localStorage.getItem('inv_active_column_view') || 'all';
         setColumnView(savedColView);
     });
