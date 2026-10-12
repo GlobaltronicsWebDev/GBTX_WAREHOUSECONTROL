@@ -278,18 +278,20 @@
 
         @if ($isDefectiveTabActive)
             <!-- Defective & DeadPixel Units Sub-Categories Strip -->
-            <div class="flex flex-wrap items-center gap-1.5 pt-2 pb-1 border-t border-rose-100 text-xs bg-rose-50/70 p-2.5 rounded-xl">
-                <span class="text-[11px] font-bold text-rose-800 uppercase tracking-wider mr-1">Defective Categories:</span>
+            <div class="flex flex-wrap items-center gap-1.5 pt-2 pb-1 border-t border-slate-200 text-xs bg-slate-50/70 p-2.5 rounded-xl">
+                <span class="text-[11px] font-bold text-slate-800 uppercase tracking-wider mr-1">Defective Categories:</span>
                 <a 
                     href="{{ route('admin.inventory.index', ['category' => 'DeadPixel Units', 'location' => $selectedLocation]) }}"
-                    class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all {{ $isDeadPixelActive ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-rose-200 hover:bg-rose-100' }}"
+                    class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all {{ $isDeadPixelActive ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100' }}"
+                    style="{{ $isDeadPixelActive ? 'background-color: #0f172a !important; color: #ffffff !important;' : 'background-color: #ffffff !important; color: #334155 !important;' }}"
                     title="DeadPixel Units: {{ number_format($deadPixelTotalUnits ?? 0) }} total units"
                 >
                     DeadPixel Units ({{ number_format($deadPixelTotalUnits ?? 0) }})
                 </a>
                 <a 
                     href="{{ route('admin.inventory.index', ['category' => 'Defective Units', 'location' => $selectedLocation]) }}"
-                    class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all {{ $isDefectiveActive ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-rose-200 hover:bg-rose-100' }}"
+                    class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all {{ $isDefectiveActive ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100' }}"
+                    style="{{ $isDefectiveActive ? 'background-color: #0f172a !important; color: #ffffff !important;' : 'background-color: #ffffff !important; color: #334155 !important;' }}"
                     title="Defective Units: {{ number_format($defectiveTotalUnits ?? 0) }} total units"
                 >
                     Defective Units ({{ number_format($defectiveTotalUnits ?? 0) }})
@@ -693,9 +695,8 @@
                                         @endphp
                                         @if ($serialCount > 1)
                                             <div class="relative inline-block text-center">
-                                                <button type="button" onclick="toggleSerialPopover(this, event)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono-code font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 cursor-pointer shadow-2xs whitespace-nowrap">
+                                                <button type="button" onclick="openSerialViewer('{{ addslashes($item->model) }}', {{ json_encode($serials) }})" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono-code font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 cursor-pointer shadow-2xs whitespace-nowrap">
                                                     <span>🔢 {{ $serialCount }} Serials</span>
-                                                    <svg class="w-3 h-3 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                                                 </button>
                                                 <div class="serial-popover hidden absolute left-1/2 -translate-x-1/2 mt-1.5 w-64 max-h-52 overflow-y-auto bg-white rounded-xl shadow-xl border border-slate-200 p-2.5 z-50 text-left">
                                                     <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-100">
@@ -1446,9 +1447,8 @@
                                         @endphp
                                         @if ($serialCount > 1)
                                             <div class="relative inline-block text-center">
-                                                <button type="button" onclick="toggleSerialPopover(this, event)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono-code font-bold bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-300 cursor-pointer shadow-2xs whitespace-nowrap">
+                                                <button type="button" onclick="openSerialViewer('{{ addslashes($item->model) }}', {{ json_encode($serials) }})" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono-code font-bold bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-300 cursor-pointer shadow-2xs whitespace-nowrap">
                                                     <span>🏷️ {{ $serialCount }} Tags</span>
-                                                    <svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                                                 </button>
                                                 <div class="serial-popover hidden absolute left-1/2 -translate-x-1/2 mt-1.5 w-64 max-h-52 overflow-y-auto bg-white rounded-xl shadow-xl border border-slate-200 p-2.5 z-50 text-left">
                                                     <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-100">
@@ -2094,13 +2094,10 @@
                                                 <div class="relative inline-block text-center">
                                                     <button 
                                                         type="button" 
-                                                        onclick="toggleSerialPopover(this, event)" 
+                                                        onclick="openSerialViewer('{{ addslashes($item->model) }}', {{ json_encode($serials) }})" 
                                                         class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-mono-code font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-900 border border-blue-200 transition-colors cursor-pointer shadow-2xs whitespace-nowrap"
-                                                        title="Click to view {{ $serialCount }} serials">
+                                                        title="Click to view all {{ $serialCount }} serials">
                                                         <span>🔢 {{ $serialCount }} SN</span>
-                                                        <svg class="w-2.5 h-2.5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                                        </svg>
                                                     </button>
                                                     <div class="serial-popover hidden absolute left-1/2 -translate-x-1/2 mt-1.5 w-60 max-h-48 overflow-y-auto bg-white rounded-xl shadow-xl border border-slate-200 p-2 z-50 text-left">
                                                         <div class="flex items-center justify-between pb-1 mb-1 border-b border-slate-100">
@@ -2514,6 +2511,7 @@
                             <option value="A JUAN - 2ND FLR">A JUAN - 2ND FLR</option>
                             <option value="MARIKINA">MARIKINA</option>
                             <option value="2ND FLR OCAP">2ND FLR OCAP</option>
+                            <option value="4TH FLR OCAP">4TH FLR OCAP</option>
                             <option value="AJUAN - 1ST FLR">AJUAN - 1ST FLR</option>
                             <option value="A JUAN MAIN 1ST FLOOR">A JUAN MAIN 1ST FLOOR</option>
                             <option value="Globaltronics">Globaltronics (Legacy)</option>
@@ -2847,6 +2845,7 @@
                             <option value="A JUAN - 2ND FLR">A JUAN - 2ND FLR</option>
                             <option value="MARIKINA">MARIKINA</option>
                             <option value="2ND FLR OCAP">2ND FLR OCAP</option>
+                            <option value="4TH FLR OCAP">4TH FLR OCAP</option>
                             <option value="AJUAN - 1ST FLR">AJUAN - 1ST FLR</option>
                             <option value="A JUAN MAIN 1ST FLOOR">A JUAN MAIN 1ST FLOOR</option>
                             <option value="Globaltronics">Globaltronics (Legacy)</option>
