@@ -239,7 +239,7 @@ class InventoryController extends Controller
             'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS',
         ]);
         $serviceUnitsCount = (clone $serviceUnitsQuery)->count();
-        $serviceUnitsTotalUnits = (int) (clone $serviceUnitsQuery)->sum('quantity');
+        $serviceUnitsTotalUnits = (int) (clone $serviceUnitsQuery)->sum(DB::raw('CASE WHEN acu_quantity IS NOT NULL AND acu_quantity > 0 THEN acu_quantity ELSE quantity END'));
 
         // DeadPixel & Defective Units Counts (Separated outside Inventory / Service Units)
         $deadPixelVariants = $this->getCategoryVariants('DeadPixel Units');
@@ -250,7 +250,7 @@ class InventoryController extends Controller
         $deadPixelTotalUnits = (int) InventoryItem::where(function ($q) use ($deadPixelVariants) {
             $q->whereIn('category', $deadPixelVariants)
                 ->orWhereRaw('LOWER(category) = ?', ['deadpixel units']);
-        })->sum('quantity');
+        })->sum(DB::raw('CASE WHEN acu_quantity IS NOT NULL AND acu_quantity > 0 THEN acu_quantity ELSE quantity END'));
 
         $defectiveVariants = $this->getCategoryVariants('Defective Units');
         $defectiveCount = InventoryItem::where(function ($q) use ($defectiveVariants) {
@@ -260,7 +260,7 @@ class InventoryController extends Controller
         $defectiveTotalUnits = (int) InventoryItem::where(function ($q) use ($defectiveVariants) {
             $q->whereIn('category', $defectiveVariants)
                 ->orWhereRaw('LOWER(category) = ?', ['defective units']);
-        })->sum('quantity');
+        })->sum(DB::raw('CASE WHEN acu_quantity IS NOT NULL AND acu_quantity > 0 THEN acu_quantity ELSE quantity END'));
 
         $subCategoryCounts = [];
         $subCategoryQuantities = [];
@@ -271,7 +271,7 @@ class InventoryController extends Controller
                     ->orWhereRaw('LOWER(category) = ?', [strtolower(trim($sub))]);
             });
             $subCategoryCounts[$sub] = (clone $subQ)->count();
-            $subCategoryQuantities[$sub] = (int) (clone $subQ)->sum('quantity');
+            $subCategoryQuantities[$sub] = (int) (clone $subQ)->sum(DB::raw('CASE WHEN acu_quantity IS NOT NULL AND acu_quantity > 0 THEN acu_quantity ELSE quantity END'));
         }
 
         return view('admin.inventory.index', [
@@ -1649,12 +1649,28 @@ class InventoryController extends Controller
                         $itemStatus = 'in_stock';
 
                         $targetCatUpper = strtoupper(trim($category));
+                        $isPhilipsTarget = str_contains($targetCatUpper, 'PHILIPS');
+
                         if (in_array($targetCatUpper, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL'])) {
                             $assignedCategory = 'DeadPixel Units';
                             $itemStatus = 'defective';
                         } elseif (in_array($targetCatUpper, ['DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE'])) {
                             $assignedCategory = 'Defective Units';
                             $itemStatus = 'defective';
+                        } elseif ($isPhilipsTarget) {
+                            $assignedCategory = 'Philips Service Units';
+                            if (
+                                str_contains($checkRemarks, 'DEAD PIXEL') || 
+                                str_contains($checkRemarks, 'DEADPIXEL') || 
+                                str_contains($checkRemarks, 'DEAD-PIXEL') ||
+                                str_contains($checkRemarks, 'DEFECTIVE') || 
+                                str_contains($checkRemarks, 'DEF POLARIZER') || 
+                                str_contains($checkRemarks, 'DEFECT') ||
+                                str_contains($checkRemarks, 'DEF.') ||
+                                preg_match('/\bDEF\b/i', $checkRemarks)
+                            ) {
+                                $itemStatus = 'defective';
+                            }
                         } else {
                             if (str_contains($checkRemarks, 'DEAD PIXEL') || str_contains($checkRemarks, 'DEADPIXEL') || str_contains($checkRemarks, 'DEAD-PIXEL')) {
                                 $assignedCategory = 'DeadPixel Units';
@@ -1671,6 +1687,9 @@ class InventoryController extends Controller
                             }
                         }
 
+                        // For Philips Service Units: Set QTY to 1 per model/row item as requested, while ACU. QTY preserves accumulated units
+                        $rowQtyToSave = ($isPhilipsTarget || str_contains(strtoupper($assignedCategory), 'PHILIPS')) ? 1 : $finalQty;
+
                         $itemData = [
                             'category' => $assignedCategory,
                             'tag_number' => $allSerialsText,
@@ -1680,7 +1699,7 @@ class InventoryController extends Controller
                             'model' => mb_substr($cItem['model'], 0, 100),
                             'po_number' => mb_substr($cItem['po_number'], 0, 100),
                             'item_description' => $cItem['item_description'],
-                            'quantity' => $finalQty,
+                            'quantity' => $rowQtyToSave,
                             'status' => $itemStatus,
                         ];
 

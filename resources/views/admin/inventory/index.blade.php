@@ -1231,7 +1231,8 @@
 
                                 <!-- FORECASTED QTY -->
                                 @php
-                                    $philAvail = $item->forecasted_quantity !== null ? $item->forecasted_quantity : ($item->quantity - ($item->reservation_qty ?? 0));
+                                    $philAcu = ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity;
+                                    $philAvail = $item->forecasted_quantity !== null ? $item->forecasted_quantity : ($philAcu - ($item->reservation_qty ?? 0));
                                 @endphp
                                 <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
