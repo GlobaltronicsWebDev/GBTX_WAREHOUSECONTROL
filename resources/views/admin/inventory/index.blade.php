@@ -3794,17 +3794,25 @@
         popover.classList.toggle('hidden');
     }
 
-    // Dedicated Serial Numbers Modal Viewer
+    // Dedicated Serial Numbers Modal Viewer with 5-per-page Pagination
     let currentViewerSerials = [];
+    let filteredViewerSerials = [];
+    let currentSerialPage = 1;
+    const serialPageSize = 5;
+
     function openSerialViewer(modelName, serials) {
         currentViewerSerials = Array.isArray(serials) ? serials : (serials ? String(serials).split(/[\r\n,;|]+/).map(s => s.trim()).filter(Boolean) : []);
+        filteredViewerSerials = [...currentViewerSerials];
+        currentSerialPage = 1;
+
         const titleEl = document.getElementById('serialViewerTitle');
         const countEl = document.getElementById('serialViewerCount');
         const searchEl = document.getElementById('serialSearchInput');
         if (titleEl) titleEl.textContent = modelName ? `Serial Numbers: ${modelName}` : 'Serial Numbers';
         if (countEl) countEl.textContent = `${currentViewerSerials.length} Total Serialized Units`;
         if (searchEl) searchEl.value = '';
-        renderViewerSerials(currentViewerSerials);
+
+        renderViewerSerials();
         const modal = document.getElementById('serialViewerModal');
         if (modal) modal.classList.remove('hidden');
     }
@@ -3814,35 +3822,95 @@
         if (modal) modal.classList.add('hidden');
     }
 
-    function renderViewerSerials(serials) {
+    function renderViewerSerials() {
         const listEl = document.getElementById('serialViewerList');
+        const pagEl = document.getElementById('serialViewerPagination');
+        const pageInfoEl = document.getElementById('serialViewerPageInfo');
+        const pageNumEl = document.getElementById('serialViewerPageNumber');
+        const prevBtn = document.getElementById('serialViewerPrevBtn');
+        const nextBtn = document.getElementById('serialViewerNextBtn');
+
         if (!listEl) return;
-        if (serials.length === 0) {
-            listEl.innerHTML = '<p class="text-slate-400 text-center py-4 italic">No matching serial numbers found.</p>';
+
+        const totalItems = filteredViewerSerials.length;
+        const totalPages = Math.max(1, Math.ceil(totalItems / serialPageSize));
+
+        if (currentSerialPage > totalPages) {
+            currentSerialPage = totalPages;
+        }
+        if (currentSerialPage < 1) {
+            currentSerialPage = 1;
+        }
+
+        if (totalItems === 0) {
+            listEl.innerHTML = '<p class="text-slate-400 text-center py-8 italic">No matching serial numbers found.</p>';
+            if (pagEl) pagEl.classList.add('hidden');
             return;
         }
-        listEl.innerHTML = serials.map((sn, idx) => `
-            <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors group">
-                <span class="font-bold text-slate-800 select-all"><span class="text-slate-400 font-normal mr-2">${idx + 1}.</span>${sn}</span>
-                <button type="button" onclick="navigator.clipboard.writeText('${sn}'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy', 1200);" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 px-2 py-0.5 rounded hover:bg-blue-50 transition-colors">Copy</button>
-            </div>
-        `).join('');
+
+        if (pagEl) pagEl.classList.remove('hidden');
+
+        const startIndex = (currentSerialPage - 1) * serialPageSize;
+        const endIndex = Math.min(startIndex + serialPageSize, totalItems);
+        const pageItems = filteredViewerSerials.slice(startIndex, endIndex);
+
+        listEl.innerHTML = pageItems.map((sn, idx) => {
+            const overallNumber = startIndex + idx + 1;
+            return `
+                <div class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors group">
+                    <span class="font-bold text-slate-800 select-all flex items-center">
+                        <span class="text-slate-400 font-semibold mr-2.5 text-[11px] w-6 text-right">${overallNumber}.</span>
+                        <span>${sn}</span>
+                    </span>
+                    <button type="button" onclick="navigator.clipboard.writeText('${sn}'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy', 1200);" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 px-2.5 py-1 rounded hover:bg-blue-50 transition-colors cursor-pointer">Copy</button>
+                </div>
+            `;
+        }).join('');
+
+        if (pageInfoEl) {
+            pageInfoEl.textContent = `Showing ${startIndex + 1}–${endIndex} of ${totalItems}`;
+        }
+        if (pageNumEl) {
+            pageNumEl.textContent = `Page ${currentSerialPage} of ${totalPages}`;
+        }
+        if (prevBtn) {
+            prevBtn.disabled = (currentSerialPage <= 1);
+        }
+        if (nextBtn) {
+            nextBtn.disabled = (currentSerialPage >= totalPages);
+        }
+    }
+
+    function prevSerialViewerPage() {
+        if (currentSerialPage > 1) {
+            currentSerialPage--;
+            renderViewerSerials();
+        }
+    }
+
+    function nextSerialViewerPage() {
+        const totalPages = Math.ceil(filteredViewerSerials.length / serialPageSize);
+        if (currentSerialPage < totalPages) {
+            currentSerialPage++;
+            renderViewerSerials();
+        }
     }
 
     function filterViewerSerials() {
         const q = (document.getElementById('serialSearchInput')?.value || '').toLowerCase().trim();
         if (!q) {
-            renderViewerSerials(currentViewerSerials);
+            filteredViewerSerials = [...currentViewerSerials];
         } else {
-            const filtered = currentViewerSerials.filter(s => s.toLowerCase().includes(q));
-            renderViewerSerials(filtered);
+            filteredViewerSerials = currentViewerSerials.filter(s => s.toLowerCase().includes(q));
         }
+        currentSerialPage = 1;
+        renderViewerSerials();
     }
 
     function copyAllViewerSerials() {
-        if (currentViewerSerials.length === 0) return;
-        navigator.clipboard.writeText(currentViewerSerials.join('\n')).then(() => {
-            alert(`Copied ${currentViewerSerials.length} serial numbers to clipboard!`);
+        if (filteredViewerSerials.length === 0) return;
+        navigator.clipboard.writeText(filteredViewerSerials.join('\n')).then(() => {
+            alert(`Copied ${filteredViewerSerials.length} serial numbers to clipboard!`);
         });
     }
 
@@ -4503,9 +4571,39 @@
                 <span>Copy All</span>
             </button>
         </div>
-        <!-- Serials List -->
-        <div id="serialViewerList" class="p-5 overflow-y-auto max-h-[50vh] space-y-1.5 font-mono-code text-xs">
+        <!-- Serials List (5 per page) -->
+        <div id="serialViewerList" class="p-5 space-y-2 font-mono-code text-xs min-h-[260px] overflow-y-auto">
             <!-- Dynamically populated serials -->
+        </div>
+
+        <!-- Pagination Controls (5 per page) -->
+        <div id="serialViewerPagination" class="px-5 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs select-none">
+            <span id="serialViewerPageInfo" class="text-slate-500 font-semibold text-[11px]">
+                Showing 1–5 of 0
+            </span>
+            <div class="flex items-center gap-2">
+                <button 
+                    type="button" 
+                    id="serialViewerPrevBtn" 
+                    onclick="prevSerialViewerPage()" 
+                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs transition-all cursor-pointer"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    <span>Prev</span>
+                </button>
+                <span id="serialViewerPageNumber" class="px-2.5 py-1 rounded-md bg-white border border-slate-200 font-mono-code font-bold text-slate-800 text-[11px] shadow-2xs">
+                    Page 1 / 1
+                </span>
+                <button 
+                    type="button" 
+                    id="serialViewerNextBtn" 
+                    onclick="nextSerialViewerPage()" 
+                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-all cursor-pointer"
+                >
+                    <span>Next</span>
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </div>
         </div>
     </div>
 </div>
