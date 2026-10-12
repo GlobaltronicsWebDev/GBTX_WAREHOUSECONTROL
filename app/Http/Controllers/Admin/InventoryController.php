@@ -1353,12 +1353,14 @@ class InventoryController extends Controller
                         $rowHistoryProject = $cleanStr($row[11] ?? '');
                         $rowRemarks = $cleanStr($row[12] ?? '');
 
-                        // Extract all serials present in $rowSerial (handles newlines, commas, semicolons, pipes)
+                        // Extract all serials present in $rowSerial (handles newlines, commas, semicolons, pipes, and tabs)
                         $subSerials = [];
                         if (!empty($rowSerial)) {
                             $parts = preg_split('/[\r\n,;|]+/', $rowSerial, -1, PREG_SPLIT_NO_EMPTY);
                             foreach ($parts as $p) {
                                 $cleanP = trim($p);
+                                // Strip any trailing tab or whitespace with quantity indicator (e.g. "AU0B1521000146\t1" -> "AU0B1521000146")
+                                $cleanP = trim(preg_replace('/[\t\s]+(\d+)$/', '', $cleanP));
                                 if (!empty($cleanP)) {
                                     $subSerials[] = $cleanP;
                                 }
@@ -1446,10 +1448,11 @@ class InventoryController extends Controller
 
                         // Insert each serial number as its own separate row
                         foreach ($serialsList as $snIndex => $sn) {
-                            if ($serialCount > 1) {
-                                $itemQty = 1; // When multiple serial numbers are in one cell, each serial gets QTY = 1
+                            // When serial number is present (or multiple serial numbers), each individual serial unit has QTY = 1
+                            if ($sn !== '' && $sn !== null) {
+                                $itemQty = 1;
                             } else {
-                                $itemQty = $cItem['explicit_qty'] > 0 ? $cItem['explicit_qty'] : ($sn !== '' ? 1 : 0);
+                                $itemQty = $cItem['explicit_qty'] > 0 ? $cItem['explicit_qty'] : 1;
                             }
 
                             $itemData = [
@@ -1466,10 +1469,10 @@ class InventoryController extends Controller
                             ];
 
                             if ($hasColumn('acu_quantity')) {
-                                $itemData['acu_quantity'] = $actQty !== null ? $actQty : $itemQty;
+                                $itemData['acu_quantity'] = ($sn !== '' && $sn !== null) ? 1 : ($actQty !== null ? $actQty : $itemQty);
                             }
                             if ($hasColumn('forecasted_quantity')) {
-                                $itemData['forecasted_quantity'] = $forecastQty !== null ? $forecastQty : $itemQty;
+                                $itemData['forecasted_quantity'] = ($sn !== '' && $sn !== null) ? 1 : ($forecastQty !== null ? $forecastQty : $itemQty);
                             }
                             if ($hasColumn('original_quantity')) {
                                 $itemData['original_quantity'] = $itemQty;
