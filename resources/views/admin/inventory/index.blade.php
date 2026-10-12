@@ -1006,8 +1006,8 @@
                             <th colspan="2" class="py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">ITEM DESCRIPTION</th>
                             <th colspan="2" class="py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">INVENTORY</th>
                             <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[110px] whitespace-nowrap bg-white font-extrabold">FORECASTED QTY</th>
-                            <th colspan="2" class="py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">HISTORY</th>
-                            <th rowspan="2" class="py-1.5 px-3 text-left text-slate-800 select-none min-w-[160px] whitespace-nowrap bg-white font-extrabold">REMARKS</th>
+                            <th colspan="2" class="col-service-ext py-1 px-2.5 text-center text-slate-800 select-none border-b border-slate-200 whitespace-nowrap bg-white font-extrabold">HISTORY</th>
+                            <th rowspan="2" class="col-service-ext py-1.5 px-3 text-left text-slate-800 select-none min-w-[160px] whitespace-nowrap bg-white font-extrabold">REMARKS</th>
                             <th rowspan="2" class="col-actions-sticky py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[90px] whitespace-nowrap bg-white font-extrabold uppercase">ACTIONS</th>
                         </tr>
                         <tr class="h-8 bg-white text-slate-700 font-bold uppercase text-[10px] tracking-wider divide-x divide-slate-200 border-b border-slate-200">
@@ -1020,8 +1020,8 @@
                             <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[70px] whitespace-nowrap bg-white font-bold">ACU. QTY</th>
 
                             <!-- HISTORY SUBHEADERS -->
-                            <th class="py-1 px-2 text-center text-slate-700 select-none min-w-[65px] whitespace-nowrap bg-white font-bold">QTY</th>
-                            <th class="py-1 px-2.5 text-left text-slate-700 select-none min-w-[200px] bg-white font-bold">PROJECT</th>
+                            <th class="col-service-ext py-1 px-2 text-center text-slate-700 select-none min-w-[65px] whitespace-nowrap bg-white font-bold">QTY</th>
+                            <th class="col-service-ext py-1 px-2.5 text-left text-slate-700 select-none min-w-[200px] bg-white font-bold">PROJECT</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-xs sm:text-sm font-medium">
