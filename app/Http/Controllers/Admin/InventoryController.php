@@ -798,66 +798,39 @@ class InventoryController extends Controller
                 'Philips Service demo unit',
             ];
         } elseif ($isLedService) {
-            $headers = [
-                'CDX',
-                'LOCATION',
-                'MANUFACTURER',
-                'CHECK IN DATE',
-                'MODEL',
-                'PO / SKU No.',
-                'ITEM DESCRIPTION',
-                'QTY',
-                'ACU. QTY',
-                'PER PANEL SQM',
-                'TOTAL AVAILABLE SQM',
-                'FORECASTED QTY',
-                'FORECASTED SQM',
-                'RESERVATION QTY',
-                'RESERVATION PROJECT',
-                'HISTORY QTY',
-                'HISTORY PROJECT',
-                'ORIGINAL QTY',
-                'STATUS QTY',
-                'STATUS PARTICULAR',
-                'REMARKS',
+            $header1 = ['CDX', 'LOCATION', 'MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'PO / SKU No.', 'ITEM DESCRIPTION', 'INVENTORY', '', '', '', 'FORECASTED QTY', '', 'RESERVATION', '', 'HISTORY', '', 'ORIGINAL QTY', 'STATUS', '', 'REMARKS'];
+            $header2 = ['', '', '', '', '', '', '', 'QTY', 'ACT. QTY', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM', 'QTY', 'SQM', 'QTY', 'PROJECT DETAILS', 'QTY', 'PROJECT', '', 'QTY', 'PARTICULAR', ''];
+            $sampleRows = [
+                ['CDX-201', 'WAREHOUSE A', 'UNILUMIN', date('Y-m-d'), 'UPAD IV', 'PO-991', 'Indoor P2.6 Rental Display', 100, 100, 0.25, 25.00, 10, 2.50, 20, 'Concert Tour', 0, 'None', 100, 0, 'Ready', 'All calibrated'],
+                ['CDX-202', 'WAREHOUSE B', 'ABSEN', date('Y-m-d'), 'PL2.5', 'PO-992', 'Tour LED Screen', 50, 48, 0.50, 24.00, 0, 0.00, 10, 'Convention', 5, 'Mall Event', 50, 2, 'Service Required', 'Checked'],
             ];
-            $sampleRow = [
-                'CDX-01',
-                'GLOBALTRONICS',
-                'UNILUMIN',
-                date('Y-m-d'),
-                'Upad IV P2.6',
-                'PO-2026-081',
-                'UNILUMIN UPAD IV P2.6 INDOOR 500X500MM DIE CAST CABINET',
-                150,
-                150,
-                0.25,
-                37.5,
-                150,
-                37.5,
-                0,
-                '',
-                0,
-                '',
-                150,
-                0,
-                'OK',
-                'Service demo panel',
-            ];
+
+            return response()->streamDownload(function () use ($header1, $header2, $sampleRows) {
+                $handle = fopen('php://output', 'w');
+                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+                fputcsv($handle, $header1);
+                fputcsv($handle, $header2);
+                foreach ($sampleRows as $row) {
+                    fputcsv($handle, $row);
+                }
+                fclose($handle);
+            }, $filename, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+            ]);
         } else {
             $headers = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'CATEGORY', 'MANUFACTURER', 'MODEL', 'ITEM DESCRIPTION', 'LOCATION', 'QTY', 'STATUS', 'REMARKS'];
             $sampleRow = ['TAG-SU-001', date('Y-m-d'), 'PO-2026-015', $category, 'NOVASTAR', 'VX1000', 'NOVASTAR ALL-IN-ONE VIDEO PROCESSOR CONTROLLER', 'Globaltronics', 5, 'in_stock', 'Event demo unit'];
-        }
 
-        return response()->streamDownload(function () use ($headers, $sampleRow) {
-            $handle = fopen('php://output', 'w');
-            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($handle, $headers);
-            fputcsv($handle, $sampleRow);
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-        ]);
+            return response()->streamDownload(function () use ($headers, $sampleRow) {
+                $handle = fopen('php://output', 'w');
+                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+                fputcsv($handle, $headers);
+                fputcsv($handle, $sampleRow);
+                fclose($handle);
+            }, $filename, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+            ]);
+        }
     }
 
     /**
@@ -939,6 +912,202 @@ class InventoryController extends Controller
                 return trim(preg_replace('/\s+/', ' ', $val));
             };
 
+            // Detect LED Service Units Category or CDX Header
+            $normCat = strtoupper(trim($category));
+            $isLedServiceCat = in_array($normCat, [
+                'LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT'
+            ], true) || stripos($category, 'LED Service') !== false || stripos($category, 'LED SERVICES') !== false;
+
+            $firstJoined = '';
+            foreach ($rows as $r) {
+                if (!empty(array_filter($r, fn($v) => trim((string)$v) !== ''))) {
+                    $firstJoined = strtoupper(implode(' ', $r));
+                    break;
+                }
+            }
+            $hasCdxHeader = str_contains($firstJoined, 'CDX');
+
+            // Dedicated Importer for LED Service Units matching exact 21-column schema
+            if ($isLedServiceCat || $hasCdxHeader) {
+                $startIndex = 0;
+                for ($i = 0; $i < min(4, count($rows)); $i++) {
+                    $line = strtoupper(implode(' ', $rows[$i]));
+                    if (
+                        str_contains($line, 'CDX') ||
+                        str_contains($line, 'LOCATION') ||
+                        str_contains($line, 'MANUFACTURER') ||
+                        str_contains($line, 'INVENTORY') ||
+                        str_contains($line, 'ACT. QTY') ||
+                        str_contains($line, 'PER PANEL')
+                    ) {
+                        $startIndex = $i + 1;
+                    }
+                }
+
+                $cleanNum = fn($v) => (int) preg_replace('/[^\d-]/', '', (string)($v ?? 0));
+                $cleanFloat = fn($v) => (float) preg_replace('/[^\d.-]/', '', (string)($v ?? 0));
+
+                $importedCount = 0;
+                $updatedCount = 0;
+                $categoryVariants = $this->getCategoryVariants('LED Service Units');
+
+                DB::beginTransaction();
+                try {
+                    for ($i = $startIndex; $i < count($rows); $i++) {
+                        $row = $rows[$i];
+                        if (empty(array_filter($row, fn($v) => trim((string)$v) !== ''))) {
+                            continue;
+                        }
+
+                        $rowJoined = strtolower(implode(' ', $row));
+                        if (str_contains($rowJoined, 'total count') || str_contains($rowJoined, 'total inventory') || str_contains($rowJoined, 'total summaries')) {
+                            continue;
+                        }
+
+                        $cdx = $cleanStr($row[0] ?? '');
+                        $location = $cleanStr($row[1] ?? 'GLOBALTRONICS');
+                        $mfg = $cleanStr($row[2] ?? 'UNILUMIN');
+                        $rawDate = $cleanStr($row[3] ?? '');
+                        $checkInDate = !empty($rawDate) && strtotime($rawDate) ? date('Y-m-d', strtotime($rawDate)) : now()->toDateString();
+                        $model = $cleanStr($row[4] ?? '');
+                        $poSkuNo = $cleanStr($row[5] ?? '');
+                        $itemDesc = $cleanStr($row[6] ?? '');
+
+                        if (empty($model) && empty($itemDesc)) {
+                            continue;
+                        }
+                        if (empty($model)) {
+                            $model = mb_substr($itemDesc, 0, 50);
+                        }
+                        if (empty($itemDesc)) {
+                            $itemDesc = $model;
+                        }
+
+                        $qty = $cleanNum($row[7] ?? 0);
+                        $actQty = isset($row[8]) && trim((string)$row[8]) !== '' ? $cleanNum($row[8]) : $qty;
+                        $perPanelSqm = isset($row[9]) ? $cleanFloat($row[9]) : 0;
+                        $totalAvailableSqm = isset($row[10]) ? $cleanFloat($row[10]) : 0;
+                        $forecastQty = isset($row[11]) && trim((string)$row[11]) !== '' ? $cleanNum($row[11]) : null;
+                        $forecastSqm = isset($row[12]) ? $cleanFloat($row[12]) : 0;
+                        $reservationQty = isset($row[13]) && trim((string)$row[13]) !== '' ? $cleanNum($row[13]) : 0;
+                        $projectDetails = $cleanStr($row[14] ?? '');
+                        $historyQty = isset($row[15]) && trim((string)$row[15]) !== '' ? $cleanNum($row[15]) : 0;
+                        $historyProject = $cleanStr($row[16] ?? '');
+                        $originalQty = isset($row[17]) && trim((string)$row[17]) !== '' ? $cleanNum($row[17]) : ($actQty ?: $qty);
+                        $statusQty = isset($row[18]) && trim((string)$row[18]) !== '' ? $cleanNum($row[18]) : 0;
+                        $statusParticular = $cleanStr($row[19] ?? 'OK');
+                        $remarks = $cleanStr($row[20] ?? '');
+
+                        $itemData = [
+                            'category' => 'LED Service Units',
+                            'tag_number' => $cdx,
+                            'location' => mb_substr($location ?: 'GLOBALTRONICS', 0, 100),
+                            'manufacturer' => mb_substr($mfg ?: 'UNILUMIN', 0, 100),
+                            'check_in_date' => $checkInDate,
+                            'model' => mb_substr($model, 0, 100),
+                            'po_number' => mb_substr($poSkuNo, 0, 100),
+                            'item_description' => $itemDesc,
+                            'quantity' => $qty,
+                            'status' => 'in_stock',
+                        ];
+
+                        if ($hasColumn('acu_quantity')) {
+                            $itemData['acu_quantity'] = $actQty;
+                        }
+                        if ($hasColumn('sqm')) {
+                            $itemData['sqm'] = $totalAvailableSqm;
+                        }
+                        if ($hasColumn('forecasted_quantity')) {
+                            $itemData['forecasted_quantity'] = $forecastQty !== null ? $forecastQty : max(0, $qty - $reservationQty);
+                        }
+                        if ($hasColumn('original_quantity')) {
+                            $itemData['original_quantity'] = $originalQty;
+                        }
+                        if ($hasColumn('reservation_qty')) {
+                            $itemData['reservation_qty'] = $reservationQty;
+                        }
+                        if ($hasColumn('reservation_project')) {
+                            $itemData['reservation_project'] = $isTextCol ? $projectDetails : mb_substr($projectDetails, 0, 240);
+                        }
+                        if ($hasColumn('history_qty')) {
+                            $itemData['history_qty'] = $historyQty;
+                        }
+                        if ($hasColumn('history_project')) {
+                            $itemData['history_project'] = $isTextCol ? $historyProject : mb_substr($historyProject, 0, 240);
+                        }
+                        if ($hasColumn('status_qty')) {
+                            $itemData['status_qty'] = $statusQty;
+                        }
+                        if ($hasColumn('status_particular')) {
+                            $itemData['status_particular'] = $statusParticular ?: 'OK';
+                        }
+                        if ($hasColumn('remarks')) {
+                            $itemData['remarks'] = $remarks;
+                        }
+                        if ($hasColumn('created_by')) {
+                            $itemData['created_by'] = $creatorId;
+                        }
+
+                        // Detailed Movement History
+                        if ($hasColumn('movement_history')) {
+                            $itemData['movement_history'] = [
+                                'reservations' => ($reservationQty > 0 || !empty($projectDetails)) ? [
+                                    ['qty' => $reservationQty, 'project' => $projectDetails, 'remarks' => '']
+                                ] : [],
+                                'history' => ($historyQty > 0 || !empty($historyProject)) ? [
+                                    ['qty' => $historyQty, 'project' => $historyProject]
+                                ] : [],
+                                'locations' => [
+                                    ['location' => $itemData['location'], 'qty' => $qty]
+                                ],
+                            ];
+                        }
+
+                        $existing = null;
+                        if (!empty($itemData['tag_number'])) {
+                            $existing = InventoryItem::whereIn('category', $categoryVariants)
+                                ->where('tag_number', $itemData['tag_number'])
+                                ->first();
+                        }
+
+                        if (!$existing && !empty($itemData['model'])) {
+                            $mQuery = InventoryItem::whereIn('category', $categoryVariants)
+                                ->where('model', $itemData['model']);
+                            if (!empty($location)) {
+                                $mQuery->where('location', $itemData['location']);
+                            }
+                            if (!empty($poSkuNo)) {
+                                $mQuery->where('po_number', $poSkuNo);
+                            }
+                            $existing = $mQuery->first();
+
+                            if (!$existing) {
+                                $existing = InventoryItem::whereIn('category', $categoryVariants)
+                                    ->where('model', $itemData['model'])
+                                    ->first();
+                            }
+                        }
+
+                        $safeData = array_intersect_key($itemData, array_flip($tableColumns));
+
+                        if ($existing) {
+                            $existing->update($safeData);
+                            $updatedCount++;
+                        } else {
+                            InventoryItem::create($safeData);
+                            $importedCount++;
+                        }
+                    }
+
+                    DB::commit();
+
+                    return back()->with('success', "LED Service Units import completed! {$importedCount} new items created, {$updatedCount} items updated.");
+                } catch (\Throwable $e) {
+                    DB::rollBack();
+                    return back()->withErrors(['file' => 'LED Service Units import failed: ' . $e->getMessage()]);
+                }
+            }
+
             // 1. Detect Header Row 1 (skips any pre-header titles or blank rows)
             $headerRow1Idx = null;
             $headerRow2Idx = null;
@@ -987,11 +1156,12 @@ class InventoryController extends Controller
                 $colKey = null;
 
                 // 1. Tag / Serial Number
-                if (in_array($colClean, ['tag', 'tagno', 'tagnumber', 'tagid', 'serial', 'serialno', 'serialnumber', 'sn', 'serials'])
+                if (in_array($colClean, ['cdx', 'tag', 'tagno', 'tagnumber', 'tagid', 'serial', 'serialno', 'serialnumber', 'sn', 'serials'])
                     || str_starts_with($colClean, 'tag')
                     || str_starts_with($colClean, 'serial')
                     || str_contains($subVal, 'serial')
                     || str_contains($subVal, 'tagno')
+                    || str_contains($colClean, 'cdx')
                 ) {
                     $colKey = 'tag_number';
 
@@ -1035,14 +1205,16 @@ class InventoryController extends Controller
                         $colKey = 'sqm';
                     }
 
-                // 9. Acu. Quantity / Accumulated / Total On-Hand
+                // 9. Acu. Quantity / Accumulated / Total On-Hand / Act. Qty
                 } elseif (str_contains($colClean, 'acu')
                     || str_contains($subVal, 'acu')
+                    || str_contains($colClean, 'act')
+                    || str_contains($subVal, 'act')
                     || str_contains($colClean, 'accumulat')
                     || str_contains($subVal, 'accumulat')
                     || str_contains($colClean, 'totalonhand')
                     || str_contains($subVal, 'totalonhand')
-                    || (str_contains($currentParent, 'inventory') && (str_contains($subVal, 'total') || str_contains($subVal, 'acu')))
+                    || (str_contains($currentParent, 'inventory') && (str_contains($subVal, 'total') || str_contains($subVal, 'acu') || str_contains($subVal, 'act')))
                 ) {
                     $colKey = 'acu_quantity';
 
