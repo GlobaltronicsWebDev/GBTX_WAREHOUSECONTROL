@@ -2512,6 +2512,7 @@
                             <option value="MARIKINA">MARIKINA</option>
                             <option value="2ND FLR OCAP">2ND FLR OCAP</option>
                             <option value="4TH FLR OCAP">4TH FLR OCAP</option>
+                            <option value="2ND FLR MAIN WHR">2ND FLR MAIN WHR</option>
                             <option value="AJUAN - 1ST FLR">AJUAN - 1ST FLR</option>
                             <option value="A JUAN MAIN 1ST FLOOR">A JUAN MAIN 1ST FLOOR</option>
                             <option value="Globaltronics">Globaltronics (Legacy)</option>
@@ -2846,6 +2847,7 @@
                             <option value="MARIKINA">MARIKINA</option>
                             <option value="2ND FLR OCAP">2ND FLR OCAP</option>
                             <option value="4TH FLR OCAP">4TH FLR OCAP</option>
+                            <option value="2ND FLR MAIN WHR">2ND FLR MAIN WHR</option>
                             <option value="AJUAN - 1ST FLR">AJUAN - 1ST FLR</option>
                             <option value="A JUAN MAIN 1ST FLOOR">A JUAN MAIN 1ST FLOOR</option>
                             <option value="Globaltronics">Globaltronics (Legacy)</option>

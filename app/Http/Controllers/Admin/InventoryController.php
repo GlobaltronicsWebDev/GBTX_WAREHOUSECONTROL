@@ -192,6 +192,7 @@ class InventoryController extends Controller
             'A JUAN MAIN 1ST FLOOR',
             '2ND FLR OCAP',
             '4TH FLR OCAP',
+            '2ND FLR MAIN WHR',
         ];
         $availableLocations = collect($standardLocations)
             ->merge(InventoryItem::select('location')->distinct()->pluck('location'))
@@ -337,6 +338,8 @@ class InventoryController extends Controller
             '2ND FLOOR OCAP',
             '4TH FLR OCAP',
             '4TH FLOOR OCAP',
+            '2ND FLR MAIN WHR',
+            '2ND FLOOR MAIN WHR',
             'CLARK OFFICE',
             'DEFECTIVE',
             'Globaltronics',
@@ -498,6 +501,8 @@ class InventoryController extends Controller
             '2ND FLOOR OCAP',
             '4TH FLR OCAP',
             '4TH FLOOR OCAP',
+            '2ND FLR MAIN WHR',
+            '2ND FLOOR MAIN WHR',
             'CLARK OFFICE',
             'DEFECTIVE',
             'Globaltronics',
