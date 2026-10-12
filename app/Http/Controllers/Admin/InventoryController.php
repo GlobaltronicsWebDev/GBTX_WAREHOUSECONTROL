@@ -1702,8 +1702,9 @@ class InventoryController extends Controller
                             }
                         }
 
-                        // For Philips Service Units: Set QTY to 1 per model/row item as requested, while ACU. QTY preserves accumulated units
-                        $rowQtyToSave = ($isPhilipsTarget || str_contains(strtoupper($assignedCategory), 'PHILIPS')) ? 1 : $finalQty;
+                        // For 13-column monitor layouts (Philips Service Units, DeadPixel Units, Defective Units):
+                        // Set QTY to 1 per model/row item as requested, while ACU. QTY preserves accumulated units
+                        $rowQtyToSave = 1;
 
                         $itemData = [
                             'category' => $assignedCategory,
@@ -1749,7 +1750,7 @@ class InventoryController extends Controller
                                 'reservations' => [],
                                 'history' => $histRecords,
                                 'locations' => [
-                                    ['location' => $itemData['location'], 'qty' => $finalQty]
+                                    ['location' => $itemData['location'], 'qty' => 1]
                                 ],
                             ];
                         }
@@ -1761,20 +1762,16 @@ class InventoryController extends Controller
 
                     DB::commit();
 
-                    $philipsCleanUnits = (int) InventoryItem::whereIn('category', ['Philips Service Units', 'PHILIPS SERVICE UNITS'])->sum('quantity');
-                    $defectiveUnits = (int) InventoryItem::whereIn('category', ['Defective Units', 'DEFECTIVE UNITS'])->sum('quantity');
-                    $deadPixelUnits = (int) InventoryItem::whereIn('category', ['DeadPixel Units', 'DEADPIXEL UNITS'])->sum('quantity');
-
-                    $msg = "Philips Service Units import completed! Total {$philipsCleanUnits} clean units in Philips Service Units";
-                    if ($defectiveUnits > 0) {
-                        $msg .= ", {$defectiveUnits} units separated into Defective Units";
+                    $displayCategory = $category;
+                    if (in_array($targetCatUpper, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL'])) {
+                        $displayCategory = 'DeadPixel Units';
+                    } elseif (in_array($targetCatUpper, ['DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE'])) {
+                        $displayCategory = 'Defective Units';
+                    } elseif ($isPhilipsTarget) {
+                        $displayCategory = 'Philips Service Units';
                     }
-                    if ($deadPixelUnits > 0) {
-                        $msg .= ", {$deadPixelUnits} units separated into DeadPixel Units";
-                    }
-                    $msg .= ".";
 
-                    return back()->with('success', $msg);
+                    return back()->with('success', "{$displayCategory} import completed! {$importedCount} items successfully imported.");
                 } catch (\Throwable $e) {
                     DB::rollBack();
                     return back()->withErrors(['file' => 'Philips Service Units import failed: ' . $e->getMessage()]);
