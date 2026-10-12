@@ -306,6 +306,8 @@
                             $serviceUnitSubCategories = [
                                 'LED Service Units',
                                 'Philips Service Units',
+                                'DeadPixel Units',
+                                'Defective Units',
                                 'Video Controllers / Processors',
                                 'Shuttle',
                                 'Aver',
@@ -315,7 +317,9 @@
                             $sidebarServiceUnitsCount = \App\Models\InventoryItem::where(function($q) use ($serviceUnitSubCategories) {
                                 $q->whereIn('category', array_merge($serviceUnitSubCategories, ['Service Units (Events, Demo)', 'SERVICE UNITS (EVENTS, DEMO)', 'Service Units', 'SERVICE UNITS']))
                                   ->orWhere('category', 'like', '%Service Unit%')
-                                  ->orWhere('category', 'like', '%SERVICE UNIT%');
+                                  ->orWhere('category', 'like', '%SERVICE UNIT%')
+                                  ->orWhere('category', 'like', '%DeadPixel%')
+                                  ->orWhere('category', 'like', '%Defective%');
                             })->count();
 
                             $sidebarTotalCount = \App\Models\InventoryItem::count();
@@ -324,6 +328,8 @@
                             $isServiceUnitsActive = $isInventoryActive && (
                                 in_array($activeCategory, array_merge($serviceUnitSubCategories, ['Service Units (Events, Demo)', 'SERVICE UNITS (EVENTS, DEMO)', 'Service Units', 'SERVICE UNITS']))
                                 || str_contains(strtolower((string)$activeCategory), 'service')
+                                || str_contains(strtolower((string)$activeCategory), 'deadpixel')
+                                || str_contains(strtolower((string)$activeCategory), 'defective')
                                 || str_contains(strtolower((string)$activeCategory), 'kiosk')
                                 || str_contains(strtolower((string)$activeCategory), 'shuttle')
                                 || str_contains(strtolower((string)$activeCategory), 'aver')

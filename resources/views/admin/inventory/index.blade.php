@@ -20,7 +20,9 @@
                     $isCentralLedCat = ($normSelectedCat === 'CENTRALIZED LED INVENTORY');
                     $isEolPhilipsCat = in_array($normSelectedCat, ['EOL PHILIPS UNITS', 'EOL PHILIPS UNIT', 'EOL PHILIPS']);
                     $isLedServiceCat = in_array($normSelectedCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT']);
-                    $isPhilipsServiceCat = in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT']);
+                    $isPhilipsServiceCat = in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT'])
+                        || in_array($normSelectedCat, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL'])
+                        || in_array($normSelectedCat, ['DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE UNIT', 'DEFECTIVE']);
                     $isServiceUnitsTabActive = in_array($normSelectedCat, ['SERVICE UNITS (EVENTS, DEMO)', 'SERVICE UNITS', 'SERVICE UNIT'])
                         || $isLedServiceCat
                         || $isPhilipsServiceCat
@@ -180,6 +182,7 @@
                     $isServiceUnitsTabActive = in_array($normCat, ['SERVICE UNITS (EVENTS, DEMO)', 'SERVICE UNITS', 'SERVICE UNIT'])
                         || in_array($normCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT'])
                         || in_array($normCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT'])
+                        || in_array($normCat, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS'])
                         || in_array($normCat, ['VIDEO CONTROLLERS / PROCESSORS', 'VIDEO CONTROLLERS', 'SHUTTLE', 'AVER', 'DIGITAL IPOSTER', 'KIOSKS']);
                 @endphp
 
@@ -270,7 +273,9 @@
                         $subDisplay = $subQty > 0 ? $subQty : $subRows;
                         $isSubActive = (strtolower(trim($selectedCategory)) === strtolower(trim($sub)))
                             || ($sub === 'LED Service Units' && in_array($normCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT']))
-                            || ($sub === 'Philips Service Units' && in_array($normCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT']));
+                            || ($sub === 'Philips Service Units' && in_array($normCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT']))
+                            || ($sub === 'DeadPixel Units' && in_array($normCat, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS']))
+                            || ($sub === 'Defective Units' && in_array($normCat, ['DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS']));
                     @endphp
                     <a 
                         href="{{ route('admin.inventory.index', ['category' => $sub, 'location' => $selectedLocation]) }}"
@@ -2272,6 +2277,8 @@
                         <optgroup label="Service Units (Events, Demo)">
                             <option value="LED Service Units" selected>LED Service Units</option>
                             <option value="Philips Service Units">Philips Service Units</option>
+                            <option value="DeadPixel Units">DeadPixel Units</option>
+                            <option value="Defective Units">Defective Units</option>
                             <option value="Video Controllers / Processors">Video Controllers / Processors</option>
                             <option value="Shuttle">Shuttle</option>
                             <option value="Aver">Aver</option>
@@ -2602,6 +2609,8 @@
                         <optgroup label="Service Units (Events, Demo)">
                             <option value="LED Service Units">LED Service Units</option>
                             <option value="Philips Service Units">Philips Service Units</option>
+                            <option value="DeadPixel Units">DeadPixel Units</option>
+                            <option value="Defective Units">Defective Units</option>
                             <option value="Video Controllers / Processors">Video Controllers / Processors</option>
                             <option value="Shuttle">Shuttle</option>
                             <option value="Aver">Aver</option>
@@ -3832,7 +3841,7 @@
 
         const isLedService = (cat === 'LED Service Units' || cat === 'LED SERVICES UNITS');
         const isCentralLed = (cat === 'CENTRALIZED LED INVENTORY');
-        const isPhilipsService = (cat === 'Philips Service Units' || cat === 'PHILIPS SERVICE UNITS');
+        const isPhilipsService = (cat === 'Philips Service Units' || cat === 'PHILIPS SERVICE UNITS' || cat === 'DeadPixel Units' || cat === 'Defective Units');
         const isEolPhilips = (cat === 'EOL PHILIPS UNITS');
         const breakdownCard = document.getElementById(mode === 'create' ? 'createInventoryBreakdown' : 'editInventoryBreakdown');
 
@@ -4207,6 +4216,8 @@
                     <optgroup label="Service Units (Events, Demo)">
                         <option value="LED Service Units">LED Service Units</option>
                         <option value="Philips Service Units">Philips Service Units</option>
+                        <option value="DeadPixel Units">DeadPixel Units</option>
+                        <option value="Defective Units">Defective Units</option>
                         <option value="Video Controllers / Processors">Video Controllers / Processors</option>
                         <option value="Shuttle">Shuttle</option>
                         <option value="Aver">Aver</option>

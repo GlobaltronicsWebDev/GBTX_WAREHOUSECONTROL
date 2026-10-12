@@ -35,6 +35,8 @@ class InventoryController extends Controller
         $serviceUnitSubCategories = [
             'LED Service Units',
             'Philips Service Units',
+            'DeadPixel Units',
+            'Defective Units',
             'Video Controllers / Processors',
             'Shuttle',
             'Aver',
@@ -59,6 +61,8 @@ class InventoryController extends Controller
                         ->orWhereIn('category', [
                             'LED Service Units', 'LED SERVICES UNITS', 'LED SERVICE UNITS', 'LED Service Unit',
                             'Philips Service Units', 'PHILIPS SERVICE UNITS', 'Philips Service Unit', 'PHILIPS SERVICE UNIT',
+                            'DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS',
+                            'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS',
                             'Video Controllers / Processors', 'VIDEO CONTROLLERS / PROCESSORS', 'Video Controllers', 'Video Processors',
                             'Shuttle', 'SHUTTLE',
                             'Aver', 'AVER',
@@ -165,6 +169,8 @@ class InventoryController extends Controller
             'Service Units (Events, Demo)',
             'LED Service Units',
             'Philips Service Units',
+            'DeadPixel Units',
+            'Defective Units',
             'Video Controllers / Processors',
             'Shuttle',
             'Aver',
@@ -221,6 +227,8 @@ class InventoryController extends Controller
                 ->orWhereIn('category', [
                     'LED Service Units', 'LED SERVICES UNITS', 'LED SERVICE UNITS', 'LED Service Unit',
                     'Philips Service Units', 'PHILIPS SERVICE UNITS', 'Philips Service Unit', 'PHILIPS SERVICE UNIT',
+                    'DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS',
+                    'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS',
                     'Video Controllers / Processors', 'VIDEO CONTROLLERS / PROCESSORS', 'Video Controllers', 'Video Processors',
                     'Shuttle', 'SHUTTLE',
                     'Aver', 'AVER',
@@ -765,7 +773,7 @@ class InventoryController extends Controller
 
         $isCentralLed = in_array(strtoupper(trim($category)), ['CENTRALIZED LED INVENTORY', 'CENTRALIZED LED', 'CENTRAL LED INVENTORY', 'CENTRAL LED'], true) || stripos($category, 'Central') !== false;
         $isPhilipsEol = in_array($category, ['EOL PHILIPS UNITS', 'EOL Philips Units'], true);
-        $isPhilipsService = in_array($category, ['Philips Service Units', 'PHILIPS SERVICE UNITS'], true);
+        $isPhilipsService = in_array($category, ['Philips Service Units', 'PHILIPS SERVICE UNITS', 'DeadPixel Units', 'DEADPIXEL UNITS', 'Defective Units', 'DEFECTIVE UNITS'], true);
         $isLedService = in_array($category, ['LED Service Units', 'LED SERVICE UNITS'], true);
 
         if ($isCentralLed) {
@@ -1289,8 +1297,11 @@ class InventoryController extends Controller
 
             // Dedicated Importer for Philips Service Units matching exact 13-column layout
             $isPhilipsServiceCat = in_array($normCat, [
-                'PHILIPS SERVICE UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICES UNIT'
-            ], true) || (stripos($category, 'Philips') !== false && stripos($category, 'Service') !== false);
+                'PHILIPS SERVICE UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICES UNIT',
+                'DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL',
+                'DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE'
+            ], true) || (stripos($category, 'Philips') !== false && stripos($category, 'Service') !== false)
+              || stripos($category, 'DeadPixel') !== false || stripos($category, 'Dead Pixel') !== false || stripos($category, 'Defective') !== false;
 
             if ($isPhilipsServiceCat) {
                 // Detect 2-tier header rows accurately
@@ -1388,9 +1399,11 @@ class InventoryController extends Controller
 
                 DB::beginTransaction();
                 try {
-                    // Refresh existing records in Philips Service Units so duplicate fragments are removed and total matches exactly 239
+                    // Refresh existing records in Philips Service Units and separated Defective/DeadPixel categories
                     InventoryItem::whereIn('category', [
-                        'Philips Service Units', 'PHILIPS SERVICE UNITS', 'Philips Service Unit', 'PHILIPS SERVICE UNIT'
+                        'Philips Service Units', 'PHILIPS SERVICE UNITS', 'Philips Service Unit', 'PHILIPS SERVICE UNIT',
+                        'DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS',
+                        'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS'
                     ])->delete();
 
                     // Accumulate items to handle both multiline cells and Excel continuation rows
@@ -1595,8 +1608,36 @@ class InventoryController extends Controller
                             $screenSize = $sm[1] . '"';
                         }
 
+                        // Determine destination category and item status based on remarks and description
+                        $checkRemarks = strtoupper(trim(($cItem['remarks'] ?? '') . ' ' . ($cItem['item_description'] ?? '')));
+                        $assignedCategory = 'Philips Service Units';
+                        $itemStatus = 'in_stock';
+
+                        $targetCatUpper = strtoupper(trim($category));
+                        if (in_array($targetCatUpper, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL'])) {
+                            $assignedCategory = 'DeadPixel Units';
+                            $itemStatus = 'defective';
+                        } elseif (in_array($targetCatUpper, ['DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE'])) {
+                            $assignedCategory = 'Defective Units';
+                            $itemStatus = 'defective';
+                        } else {
+                            if (str_contains($checkRemarks, 'DEAD PIXEL') || str_contains($checkRemarks, 'DEADPIXEL') || str_contains($checkRemarks, 'DEAD-PIXEL')) {
+                                $assignedCategory = 'DeadPixel Units';
+                                $itemStatus = 'defective';
+                            } elseif (
+                                str_contains($checkRemarks, 'DEFECTIVE') || 
+                                str_contains($checkRemarks, 'DEF POLARIZER') || 
+                                str_contains($checkRemarks, 'DEFECT') ||
+                                str_contains($checkRemarks, 'DEF.') ||
+                                preg_match('/\bDEF\b/i', $checkRemarks)
+                            ) {
+                                $assignedCategory = 'Defective Units';
+                                $itemStatus = 'defective';
+                            }
+                        }
+
                         $itemData = [
-                            'category' => 'Philips Service Units',
+                            'category' => $assignedCategory,
                             'tag_number' => $allSerialsText,
                             'location' => mb_substr($cItem['location'] ?: 'MARIKINA', 0, 100),
                             'manufacturer' => mb_substr($cItem['manufacturer'] ?: 'PHILIPS', 0, 100),
@@ -1605,7 +1646,7 @@ class InventoryController extends Controller
                             'po_number' => mb_substr($cItem['po_number'], 0, 100),
                             'item_description' => $cItem['item_description'],
                             'quantity' => $finalQty,
-                            'status' => 'in_stock',
+                            'status' => $itemStatus,
                         ];
 
                         if ($hasColumn('acu_quantity')) {
@@ -1651,7 +1692,20 @@ class InventoryController extends Controller
 
                     DB::commit();
 
-                    return back()->with('success', "Philips Service Units import completed! {$importedCount} items imported.");
+                    $philipsCleanUnits = (int) InventoryItem::whereIn('category', ['Philips Service Units', 'PHILIPS SERVICE UNITS'])->sum('quantity');
+                    $defectiveUnits = (int) InventoryItem::whereIn('category', ['Defective Units', 'DEFECTIVE UNITS'])->sum('quantity');
+                    $deadPixelUnits = (int) InventoryItem::whereIn('category', ['DeadPixel Units', 'DEADPIXEL UNITS'])->sum('quantity');
+
+                    $msg = "Philips Service Units import completed! Total {$philipsCleanUnits} clean units in Philips Service Units";
+                    if ($defectiveUnits > 0) {
+                        $msg .= ", {$defectiveUnits} units separated into Defective Units";
+                    }
+                    if ($deadPixelUnits > 0) {
+                        $msg .= ", {$deadPixelUnits} units separated into DeadPixel Units";
+                    }
+                    $msg .= ".";
+
+                    return back()->with('success', $msg);
                 } catch (\Throwable $e) {
                     DB::rollBack();
                     return back()->withErrors(['file' => 'Philips Service Units import failed: ' . $e->getMessage()]);
@@ -2256,6 +2310,26 @@ class InventoryController extends Controller
                 'PHILIPS SERVICE UNITS',
                 'Philips Service Unit',
                 'PHILIPS SERVICE UNIT',
+            ]);
+        } elseif (stripos($c, 'DeadPixel') !== false || stripos($c, 'Dead Pixel') !== false) {
+            $variants = array_merge($variants, [
+                'DeadPixel Units',
+                'DEADPIXEL UNITS',
+                'Dead Pixel Units',
+                'DEAD PIXEL UNITS',
+                'DeadPixel Unit',
+                'DEADPIXEL UNIT',
+                'Dead Pixel Unit',
+                'DEAD PIXEL UNIT',
+            ]);
+        } elseif (stripos($c, 'Defective') !== false) {
+            $variants = array_merge($variants, [
+                'Defective Units',
+                'DEFECTIVE UNITS',
+                'Defective Unit',
+                'DEFECTIVE UNIT',
+                'Defective Service Units',
+                'DEFECTIVE SERVICE UNITS',
             ]);
         } elseif (stripos($c, 'Centralized LED') !== false) {
             $variants = array_merge($variants, [
