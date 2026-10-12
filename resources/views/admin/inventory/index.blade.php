@@ -238,12 +238,13 @@
                 @endphp
                 <a 
                     href="{{ route('admin.inventory.index', ['category' => 'Defective Units', 'location' => $selectedLocation]) }}" 
-                    class="px-3.5 py-2 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shrink-0 flex items-center gap-2 {{ $isDefectiveTabActive ? 'bg-rose-900 text-white shadow-sm' : 'bg-rose-50 text-rose-800 hover:bg-rose-100 border border-rose-200' }}"
+                    class="px-3.5 py-2 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shrink-0 flex items-center gap-2 {{ $isDefectiveTabActive ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}"
+                    style="{{ $isDefectiveTabActive ? 'background-color: #0f172a !important; color: #ffffff !important;' : 'background-color: #f1f5f9 !important; color: #334155 !important;' }}"
                     title="DEFECTIVE UNITS: {{ number_format($defectiveOverallUnits) }} total units ({{ $defectiveOverallModels }} models)"
                 >
-                    <span class="w-2 h-2 rounded-full {{ $isDefectiveTabActive ? 'bg-rose-400' : 'bg-rose-500' }}"></span>
-                    <span>DEFECTIVE UNITS</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono-code {{ $isDefectiveTabActive ? 'bg-rose-800 text-rose-100' : 'bg-rose-200 text-rose-900 font-bold' }}">
+                    <span class="w-2 h-2 rounded-full shrink-0" style="background-color: #ef4444 !important;"></span>
+                    <span style="color: inherit !important;">DEFECTIVE UNITS</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono-code font-bold" style="{{ $isDefectiveTabActive ? 'background-color: #334155 !important; color: #f8fafc !important;' : 'background-color: #e2e8f0 !important; color: #0f172a !important;' }}">
                         {{ number_format($defectiveOverallUnits) }}
                     </span>
                 </a>
