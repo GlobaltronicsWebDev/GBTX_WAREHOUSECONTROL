@@ -423,6 +423,22 @@
                     <span id="badgeTogglePhilipsDetails" class="px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-slate-100 text-slate-600">HIDDEN</span>
                 </button>
             </div>
+            @elseif ($isServiceUnitsTabActive || $isLedServiceCat || $isPhilipsServiceCat)
+            <!-- Service Units & All Sub-Categories: Button Icon Only Toggle for Extended Columns -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+                <button 
+                    type="button" 
+                    onclick="toggleServiceColumns()" 
+                    id="btnToggleServiceDetails" 
+                    class="inline-flex items-center justify-center p-2 rounded-xl text-xs font-bold transition-all shadow-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 focus:outline-none cursor-pointer"
+                    title="Open Extended (Reservation, History, Status, Remarks) [HIDDEN]"
+                    aria-label="Toggle Extended Columns"
+                >
+                    <svg id="iconToggleServiceDetails" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                    </svg>
+                </button>
+            </div>
             @else
             <!-- Column View Mode Selectors (LuminaSpec Reference) -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="columnViewButtonsGroup">
@@ -441,6 +457,13 @@
                 display: none !important;
             }
             .hide-philips-ext .col-philips-ext {
+                display: none !important;
+            }
+            .hide-service-ext .col-service-ext {
+                display: none !important;
+            }
+            .hide-service-ext .col-group-reservation,
+            .hide-service-ext .col-group-history {
                 display: none !important;
             }
 
