@@ -306,8 +306,6 @@
                             $serviceUnitSubCategories = [
                                 'LED Service Units',
                                 'Philips Service Units',
-                                'DeadPixel Units',
-                                'Defective Units',
                                 'Video Controllers / Processors',
                                 'Shuttle',
                                 'Aver',
@@ -317,19 +315,26 @@
                             $sidebarServiceUnitsCount = \App\Models\InventoryItem::where(function($q) use ($serviceUnitSubCategories) {
                                 $q->whereIn('category', array_merge($serviceUnitSubCategories, ['Service Units (Events, Demo)', 'SERVICE UNITS (EVENTS, DEMO)', 'Service Units', 'SERVICE UNITS']))
                                   ->orWhere('category', 'like', '%Service Unit%')
-                                  ->orWhere('category', 'like', '%SERVICE UNIT%')
-                                  ->orWhere('category', 'like', '%DeadPixel%')
-                                  ->orWhere('category', 'like', '%Defective%');
-                            })->count();
+                                  ->orWhere('category', 'like', '%SERVICE UNIT%');
+                            })->whereNotIn('category', [
+                                'DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS',
+                                'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS'
+                            ])->count();
+
+                            $sidebarDeadPixelCount = \App\Models\InventoryItem::whereIn('category', ['DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS'])->count();
+                            $sidebarDefectiveCount = \App\Models\InventoryItem::whereIn('category', ['Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS'])->count();
+                            $sidebarTotalDefectiveCount = $sidebarDeadPixelCount + $sidebarDefectiveCount;
 
                             $sidebarTotalCount = \App\Models\InventoryItem::count();
                             $activeCategory = request('category', request()->routeIs('admin.inventory.*') ? 'CENTRALIZED LED INVENTORY' : null);
-                            $isInventoryActive = request()->routeIs('admin.inventory.*');
+                            $isDeadPixelActive = request()->routeIs('admin.inventory.*') && in_array($activeCategory, ['DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS']);
+                            $isDefectiveActive = request()->routeIs('admin.inventory.*') && in_array($activeCategory, ['Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS']);
+                            $isDefectiveGroupActive = $isDeadPixelActive || $isDefectiveActive;
+
+                            $isInventoryActive = request()->routeIs('admin.inventory.*') && !$isDefectiveGroupActive;
                             $isServiceUnitsActive = $isInventoryActive && (
                                 in_array($activeCategory, array_merge($serviceUnitSubCategories, ['Service Units (Events, Demo)', 'SERVICE UNITS (EVENTS, DEMO)', 'Service Units', 'SERVICE UNITS']))
                                 || str_contains(strtolower((string)$activeCategory), 'service')
-                                || str_contains(strtolower((string)$activeCategory), 'deadpixel')
-                                || str_contains(strtolower((string)$activeCategory), 'defective')
                                 || str_contains(strtolower((string)$activeCategory), 'kiosk')
                                 || str_contains(strtolower((string)$activeCategory), 'shuttle')
                                 || str_contains(strtolower((string)$activeCategory), 'aver')
@@ -449,6 +454,62 @@
                                         </span>
                                     </a>
 
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Defective & DeadPixel Units Menu (Separated Outside Inventory) -->
+                        <div class="space-y-1">
+                            <button type="button" 
+                                    id="defectiveDropdownBtn"
+                                    onclick="toggleDefectiveSubmenu()" 
+                                    class="sidebar-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all {{ $isDefectiveGroupActive ? 'bg-rose-50 text-rose-800 border border-rose-200 shadow-sm font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}"
+                                    title="Click to view Defective & DeadPixel Units"
+                                    aria-expanded="{{ $isDefectiveGroupActive ? 'true' : 'false' }}">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <svg class="sidebar-icon w-5 h-5 shrink-0 {{ $isDefectiveGroupActive ? 'text-rose-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span class="sidebar-text truncate">Defective Units</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <span class="sidebar-badge text-[11px] font-mono-code px-2 py-0.5 rounded-full {{ $isDefectiveGroupActive ? 'bg-rose-200 text-rose-950 font-bold' : 'bg-rose-100 text-rose-800 border border-rose-200' }}">
+                                        {{ $sidebarTotalDefectiveCount }}
+                                    </span>
+                                    <svg id="defectiveChevron" class="sidebar-chevron w-4 h-4 text-slate-400 transition-transform duration-200 {{ $isDefectiveGroupActive ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </button>
+
+                            <!-- Sub-Menu for DeadPixel Units & Defective Units -->
+                            <div id="defectiveSubmenu" class="sidebar-submenu {{ $isDefectiveGroupActive ? '' : 'hidden' }} pl-3 pr-1 pt-1 space-y-1">
+                                <div class="pl-2 border-l-2 border-rose-200 space-y-1 py-1">
+                                    <!-- DeadPixel Units -->
+                                    <a href="{{ route('admin.inventory.index', ['category' => 'DeadPixel Units']) }}"
+                                       class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $isDeadPixelActive ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
+                                       title="DeadPixel Units">
+                                        <div class="flex items-center gap-2 truncate">
+                                            <span class="w-2 h-2 rounded-full {{ $isDeadPixelActive ? 'bg-amber-400' : 'bg-slate-400' }} shrink-0"></span>
+                                            <span class="truncate">DeadPixel Units</span>
+                                        </div>
+                                        <span class="text-[10px] font-mono-code px-1.5 py-0.2 rounded-full {{ $isDeadPixelActive ? 'bg-slate-800 text-slate-200 font-bold' : 'bg-slate-100 text-slate-600' }}">
+                                            {{ $sidebarDeadPixelCount }}
+                                        </span>
+                                    </a>
+
+                                    <!-- Defective Units -->
+                                    <a href="{{ route('admin.inventory.index', ['category' => 'Defective Units']) }}"
+                                       class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $isDefectiveActive ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
+                                       title="Defective Units">
+                                        <div class="flex items-center gap-2 truncate">
+                                            <span class="w-2 h-2 rounded-full {{ $isDefectiveActive ? 'bg-rose-400' : 'bg-slate-400' }} shrink-0"></span>
+                                            <span class="truncate">Defective Units</span>
+                                        </div>
+                                        <span class="text-[10px] font-mono-code px-1.5 py-0.2 rounded-full {{ $isDefectiveActive ? 'bg-slate-800 text-slate-200 font-bold' : 'bg-slate-100 text-slate-600' }}">
+                                            {{ $sidebarDefectiveCount }}
+                                        </span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -626,6 +687,29 @@
                 const isOpen = !submenu.classList.contains('hidden');
                 if (chevron) {
                     chevron.classList.toggle('rotate-180', isOpen);
+                }
+            }
+        }
+
+        function toggleDefectiveSubmenu() {
+            const submenu = document.getElementById('defectiveSubmenu');
+            const chevron = document.getElementById('defectiveChevron');
+            const btn = document.getElementById('defectiveDropdownBtn');
+            const sidebar = document.getElementById('sidebarMenu');
+
+            if (sidebar && sidebar.classList.contains('collapsed')) {
+                updateSidebarState(false);
+                localStorage.setItem('admin_sidebar_collapsed', '0');
+            }
+
+            if (submenu) {
+                submenu.classList.toggle('hidden');
+                const isOpen = !submenu.classList.contains('hidden');
+                if (chevron) {
+                    chevron.classList.toggle('rotate-180', isOpen);
+                }
+                if (btn) {
+                    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
                 }
             }
         }

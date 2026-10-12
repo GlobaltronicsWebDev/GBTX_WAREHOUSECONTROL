@@ -20,16 +20,17 @@
                     $isCentralLedCat = ($normSelectedCat === 'CENTRALIZED LED INVENTORY');
                     $isEolPhilipsCat = in_array($normSelectedCat, ['EOL PHILIPS UNITS', 'EOL PHILIPS UNIT', 'EOL PHILIPS']);
                     $isLedServiceCat = in_array($normSelectedCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT']);
+                    $isDefectiveCat = in_array($normSelectedCat, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL', 'DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE UNIT', 'DEFECTIVE']);
                     $isPhilipsServiceCat = in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT'])
-                        || in_array($normSelectedCat, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL'])
-                        || in_array($normSelectedCat, ['DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE UNIT', 'DEFECTIVE']);
-                    $isServiceUnitsTabActive = in_array($normSelectedCat, ['SERVICE UNITS (EVENTS, DEMO)', 'SERVICE UNITS', 'SERVICE UNIT'])
+                        || $isDefectiveCat;
+                    $isServiceUnitsTabActive = (in_array($normSelectedCat, ['SERVICE UNITS (EVENTS, DEMO)', 'SERVICE UNITS', 'SERVICE UNIT'])
                         || $isLedServiceCat
-                        || $isPhilipsServiceCat
-                        || in_array($normSelectedCat, ['VIDEO CONTROLLERS / PROCESSORS', 'VIDEO CONTROLLERS', 'SHUTTLE', 'AVER', 'DIGITAL IPOSTER', 'KIOSKS']);
+                        || (in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT']))
+                        || in_array($normSelectedCat, ['VIDEO CONTROLLERS / PROCESSORS', 'VIDEO CONTROLLERS', 'SHUTTLE', 'AVER', 'DIGITAL IPOSTER', 'KIOSKS']))
+                        && !$isDefectiveCat;
                 @endphp
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono-code font-bold {{ $isCentralLedCat ? 'bg-amber-100 text-amber-900 border border-amber-300' : ($isEolPhilipsCat ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' : ($isServiceUnitsTabActive ? 'bg-purple-100 text-purple-900 border border-purple-300' : 'bg-blue-100 text-blue-900 border border-blue-300')) }}">
-                    {{ $isCentralLedCat ? 'LED Inventory' : ($isEolPhilipsCat ? 'Philips Units' : ($isServiceUnitsTabActive ? 'Service Units: ' . $selectedCategory : 'All Inventory')) }}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono-code font-bold {{ $isCentralLedCat ? 'bg-amber-100 text-amber-900 border border-amber-300' : ($isEolPhilipsCat ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' : ($isDefectiveCat ? 'bg-rose-100 text-rose-900 border border-rose-300' : ($isServiceUnitsTabActive ? 'bg-purple-100 text-purple-900 border border-purple-300' : 'bg-blue-100 text-blue-900 border border-blue-300'))) }}">
+                    {{ $isCentralLedCat ? 'LED Inventory' : ($isEolPhilipsCat ? 'Philips Units' : ($isDefectiveCat ? 'Defective Units: ' . $selectedCategory : ($isServiceUnitsTabActive ? 'Service Units: ' . $selectedCategory : 'All Inventory'))) }}
                 </span>
             </h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-1">
@@ -179,11 +180,14 @@
                     $normCat = strtoupper(trim($selectedCategory));
                     $isCentralActive = ($normCat === 'CENTRALIZED LED INVENTORY');
                     $isEolPhilipsActive = in_array($normCat, ['EOL PHILIPS UNITS', 'EOL PHILIPS UNIT', 'EOL PHILIPS']);
-                    $isServiceUnitsTabActive = in_array($normCat, ['SERVICE UNITS (EVENTS, DEMO)', 'SERVICE UNITS', 'SERVICE UNIT'])
+                    $isDeadPixelActive = in_array($normCat, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL']);
+                    $isDefectiveActive = in_array($normCat, ['DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE UNIT', 'DEFECTIVE']);
+                    $isDefectiveTabActive = $isDeadPixelActive || $isDefectiveActive;
+                    $isServiceUnitsTabActive = (in_array($normCat, ['SERVICE UNITS (EVENTS, DEMO)', 'SERVICE UNITS', 'SERVICE UNIT'])
                         || in_array($normCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT'])
                         || in_array($normCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT'])
-                        || in_array($normCat, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS'])
-                        || in_array($normCat, ['VIDEO CONTROLLERS / PROCESSORS', 'VIDEO CONTROLLERS', 'SHUTTLE', 'AVER', 'DIGITAL IPOSTER', 'KIOSKS']);
+                        || in_array($normCat, ['VIDEO CONTROLLERS / PROCESSORS', 'VIDEO CONTROLLERS', 'SHUTTLE', 'AVER', 'DIGITAL IPOSTER', 'KIOSKS']))
+                        && !$isDefectiveTabActive;
                 @endphp
 
                 <!-- Centralized LED Tab -->
@@ -225,6 +229,23 @@
                     </span>
                 </a>
 
+                <!-- Defective & DeadPixel Units Tab (Separated from Inventory / Service Units) -->
+                @php
+                    $defectiveOverallUnits = ($deadPixelTotalUnits ?? 0) + ($defectiveTotalUnits ?? 0);
+                    $defectiveOverallModels = ($deadPixelCount ?? 0) + ($defectiveCount ?? 0);
+                @endphp
+                <a 
+                    href="{{ route('admin.inventory.index', ['category' => 'Defective Units', 'location' => $selectedLocation]) }}" 
+                    class="px-3.5 py-2 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shrink-0 flex items-center gap-2 {{ $isDefectiveTabActive ? 'bg-rose-900 text-white shadow-sm' : 'bg-rose-50 text-rose-800 hover:bg-rose-100 border border-rose-200' }}"
+                    title="DEFECTIVE UNITS: {{ number_format($defectiveOverallUnits) }} total units ({{ $defectiveOverallModels }} models)"
+                >
+                    <span class="w-2 h-2 rounded-full {{ $isDefectiveTabActive ? 'bg-rose-400' : 'bg-rose-500' }}"></span>
+                    <span>DEFECTIVE UNITS</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono-code {{ $isDefectiveTabActive ? 'bg-rose-800 text-rose-100' : 'bg-rose-200 text-rose-900 font-bold' }}">
+                        {{ number_format($defectiveOverallUnits) }}
+                    </span>
+                </a>
+
                 <!-- All Categories -->
                 <a 
                     href="{{ route('admin.inventory.index', ['category' => 'all', 'location' => $selectedLocation]) }}" 
@@ -252,6 +273,27 @@
             </div>
         </div>
 
+        @if ($isDefectiveTabActive)
+            <!-- Defective & DeadPixel Units Sub-Categories Strip -->
+            <div class="flex flex-wrap items-center gap-1.5 pt-2 pb-1 border-t border-rose-100 text-xs bg-rose-50/70 p-2.5 rounded-xl">
+                <span class="text-[11px] font-bold text-rose-800 uppercase tracking-wider mr-1">Defective Categories:</span>
+                <a 
+                    href="{{ route('admin.inventory.index', ['category' => 'DeadPixel Units', 'location' => $selectedLocation]) }}"
+                    class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all {{ $isDeadPixelActive ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-rose-200 hover:bg-rose-100' }}"
+                    title="DeadPixel Units: {{ number_format($deadPixelTotalUnits ?? 0) }} total units"
+                >
+                    DeadPixel Units ({{ number_format($deadPixelTotalUnits ?? 0) }})
+                </a>
+                <a 
+                    href="{{ route('admin.inventory.index', ['category' => 'Defective Units', 'location' => $selectedLocation]) }}"
+                    class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all {{ $isDefectiveActive ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-rose-200 hover:bg-rose-100' }}"
+                    title="Defective Units: {{ number_format($defectiveTotalUnits ?? 0) }} total units"
+                >
+                    Defective Units ({{ number_format($defectiveTotalUnits ?? 0) }})
+                </a>
+            </div>
+        @endif
+
         @if ($isServiceUnitsTabActive)
             <!-- Service Units Sub-Categories Filter Strip -->
             <div class="flex flex-wrap items-center gap-1.5 pt-2 pb-1 border-t border-slate-200 text-xs bg-slate-50/70 p-2.5 rounded-xl">
@@ -273,9 +315,7 @@
                         $subDisplay = $subQty > 0 ? $subQty : $subRows;
                         $isSubActive = (strtolower(trim($selectedCategory)) === strtolower(trim($sub)))
                             || ($sub === 'LED Service Units' && in_array($normCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT']))
-                            || ($sub === 'Philips Service Units' && in_array($normCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT']))
-                            || ($sub === 'DeadPixel Units' && in_array($normCat, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS']))
-                            || ($sub === 'Defective Units' && in_array($normCat, ['DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS']));
+                            || ($sub === 'Philips Service Units' && in_array($normCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT']));
                     @endphp
                     <a 
                         href="{{ route('admin.inventory.index', ['category' => $sub, 'location' => $selectedLocation]) }}"
@@ -1436,13 +1476,14 @@
                                 <td class="py-1 px-2 text-slate-800 border-r border-slate-200 min-w-[260px] max-w-sm align-top">
                                     <div class="relative group/edit">
                                         <textarea 
-                                            rows="2"
+                                            rows="1"
                                             data-item-id="{{ $item->id }}" 
                                             data-field="item_description" 
                                             data-original-val="{{ $item->item_description }}"
                                             onblur="handleInlineSave(this)" 
                                             onkeydown="handleInlineKey(event, this)" 
-                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-y leading-tight"
+                                            oninput="autoResizeTextarea(this)"
+                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-none overflow-hidden leading-snug [field-sizing:content]"
                                             title="Click to edit item description (auto-saves on blur or Ctrl+Enter)"
                                         >{{ $item->item_description }}</textarea>
                                     </div>
@@ -1847,13 +1888,14 @@
                                 <td class="py-1 px-2 text-slate-800 uppercase font-medium leading-snug border-r border-slate-200 min-w-[320px] align-top text-xs">
                                     <div class="relative group/edit">
                                         <textarea 
-                                            rows="2"
+                                            rows="1"
                                             data-item-id="{{ $item->id }}" 
                                             data-field="item_description" 
                                             data-original-val="{{ $item->item_description }}"
                                             onblur="handleInlineSave(this)" 
                                             onkeydown="handleInlineKey(event, this)" 
-                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-y leading-tight"
+                                            oninput="autoResizeTextarea(this)"
+                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-none overflow-hidden leading-snug [field-sizing:content]"
                                             title="Click to edit item description (auto-saves on blur or Ctrl+Enter)"
                                         >{{ $item->item_description }}</textarea>
                                     </div>
@@ -2054,13 +2096,14 @@
                                 <td class="py-1 px-2 text-slate-800 uppercase font-medium leading-snug border-r border-slate-200 min-w-[260px] align-top text-xs">
                                     <div class="relative group/edit">
                                         <textarea 
-                                            rows="2"
+                                            rows="1"
                                             data-item-id="{{ $item->id }}" 
                                             data-field="item_description" 
                                             data-original-val="{{ $item->item_description }}"
                                             onblur="handleInlineSave(this)" 
                                             onkeydown="handleInlineKey(event, this)" 
-                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-y leading-tight"
+                                            oninput="autoResizeTextarea(this)"
+                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-none overflow-hidden leading-snug [field-sizing:content]"
                                             title="Click to edit item description (auto-saves on blur or Ctrl+Enter)"
                                         >{{ $item->item_description }}</textarea>
                                     </div>
@@ -3248,6 +3291,21 @@
     let activeDrawerItemId = null;
     let currentDrawerItem = null;
 
+    // Auto-resize description textareas to prevent vertical scrollbars and clipping
+    function autoResizeTextarea(element) {
+        if (!element) return;
+        element.style.height = 'auto';
+        element.style.height = Math.max(element.scrollHeight, 28) + 'px';
+    }
+
+    function autoResizeAllTextareas() {
+        requestAnimationFrame(() => {
+            document.querySelectorAll('textarea.inline-edit-input').forEach(el => {
+                autoResizeTextarea(el);
+            });
+        });
+    }
+
     // =========================================================
     // INLINE SPREADSHEET EDITING & LIVE TOTALS SUMMING
     // =========================================================
@@ -4013,6 +4071,7 @@
         toggleCategoryFields('create');
         // Initial setup for default column view
         setColumnView('all');
+        autoResizeAllTextareas();
     });
 
     // Edit Modal

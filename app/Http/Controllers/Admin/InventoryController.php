@@ -226,17 +226,39 @@ class InventoryController extends Controller
                 ->orWhereIn('category', [
                     'LED Service Units', 'LED SERVICES UNITS', 'LED SERVICE UNITS', 'LED Service Unit',
                     'Philips Service Units', 'PHILIPS SERVICE UNITS', 'Philips Service Unit', 'PHILIPS SERVICE UNIT',
-                    'DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS',
-                    'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS',
                     'Video Controllers / Processors', 'VIDEO CONTROLLERS / PROCESSORS', 'Video Controllers', 'Video Processors',
                     'Shuttle', 'SHUTTLE',
                     'Aver', 'AVER',
                     'Digital iPoster', 'DIGITAL IPOSTER', 'iPoster', 'IPoster',
                     'Kiosks', 'KIOSKS', 'Kiosk', 'KIOSK',
                 ]);
-        });
+        })->whereNotIn('category', [
+            'DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS',
+            'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS',
+        ]);
         $serviceUnitsCount = (clone $serviceUnitsQuery)->count();
         $serviceUnitsTotalUnits = (int) (clone $serviceUnitsQuery)->sum('quantity');
+
+        // DeadPixel & Defective Units Counts (Separated outside Inventory / Service Units)
+        $deadPixelVariants = $this->getCategoryVariants('DeadPixel Units');
+        $deadPixelCount = InventoryItem::where(function ($q) use ($deadPixelVariants) {
+            $q->whereIn('category', $deadPixelVariants)
+                ->orWhereRaw('LOWER(category) = ?', ['deadpixel units']);
+        })->count();
+        $deadPixelTotalUnits = (int) InventoryItem::where(function ($q) use ($deadPixelVariants) {
+            $q->whereIn('category', $deadPixelVariants)
+                ->orWhereRaw('LOWER(category) = ?', ['deadpixel units']);
+        })->sum('quantity');
+
+        $defectiveVariants = $this->getCategoryVariants('Defective Units');
+        $defectiveCount = InventoryItem::where(function ($q) use ($defectiveVariants) {
+            $q->whereIn('category', $defectiveVariants)
+                ->orWhereRaw('LOWER(category) = ?', ['defective units']);
+        })->count();
+        $defectiveTotalUnits = (int) InventoryItem::where(function ($q) use ($defectiveVariants) {
+            $q->whereIn('category', $defectiveVariants)
+                ->orWhereRaw('LOWER(category) = ?', ['defective units']);
+        })->sum('quantity');
 
         $subCategoryCounts = [];
         $subCategoryQuantities = [];
@@ -278,6 +300,10 @@ class InventoryController extends Controller
             'serviceUnitsCount' => $serviceUnitsCount,
             'serviceUnitsTotalUnits' => $serviceUnitsTotalUnits,
             'serviceUnitSubCategories' => $serviceUnitSubCategories,
+            'deadPixelCount' => $deadPixelCount,
+            'deadPixelTotalUnits' => $deadPixelTotalUnits,
+            'defectiveCount' => $defectiveCount,
+            'defectiveTotalUnits' => $defectiveTotalUnits,
             'subCategoryCounts' => $subCategoryCounts,
             'subCategoryQuantities' => $subCategoryQuantities,
             'categoryTotalQty' => $categoryTotalQty,
