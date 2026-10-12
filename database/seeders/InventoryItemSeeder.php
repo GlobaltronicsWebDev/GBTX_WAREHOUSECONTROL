@@ -438,6 +438,22 @@ class InventoryItemSeeder extends Seeder
                 'status' => 'in_stock',
                 'created_by' => $creator?->id,
             ],
+            [
+                'category' => 'LED Service Units',
+                'tag_number' => '7',
+                'location' => 'GLOBALTRONICS',
+                'manufacturer' => 'LEDTOP',
+                'check_in_date' => '2026-07-08',
+                'model' => 'LEDTOP-P3.91',
+                'po_number' => 'PO-2026-0722',
+                'item_description' => '500x500mm LEDTOP Outdoor & Indoor Rental Cabinet, High Refresh Rate Event Panel',
+                'quantity' => 50,
+                'acu_quantity' => 50,
+                'sqm' => 12.50,
+                'forecasted_quantity' => 50,
+                'status' => 'in_stock',
+                'created_by' => $creator?->id,
+            ],
         ];
 
         foreach ($ledServiceItems as $item) {

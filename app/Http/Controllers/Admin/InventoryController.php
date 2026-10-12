@@ -788,6 +788,7 @@ class InventoryController extends Controller
             $sampleRows = [
                 ['CDX-201', 'WAREHOUSE A', 'UNILUMIN', date('Y-m-d'), 'UPAD IV', 'PO-991', 'Indoor P2.6 Rental Display', 100, 100, 0.25, 25.00, 10, 2.50, 20, 'Concert Tour', 0, 'None', 100, 0, 'Ready', 'All calibrated'],
                 ['CDX-202', 'WAREHOUSE B', 'ABSEN', date('Y-m-d'), 'PL2.5', 'PO-992', 'Tour LED Screen', 50, 48, 0.50, 24.00, 0, 0.00, 10, 'Convention', 5, 'Mall Event', 50, 2, 'Service Required', 'Checked'],
+                ['CDX-203', 'GLOBALTRONICS', 'LEDTOP', date('Y-m-d'), 'LT-P3.91', 'PO-993', '500x500mm LEDTOP Rental Display Cabinet', 50, 50, 0.25, 12.50, 50, 12.50, 0, '', 0, '', 50, 0, 'Ready', 'LEDTOP panel batch'],
             ];
 
             return response()->streamDownload(function () use ($header1, $header2, $sampleRows) {
