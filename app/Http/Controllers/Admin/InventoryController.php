@@ -335,6 +335,8 @@ class InventoryController extends Controller
             'A JUAN MAIN 3RD FLOOR',
             '2ND FLR OCAP',
             '2ND FLOOR OCAP',
+            '4TH FLR OCAP',
+            '4TH FLOOR OCAP',
             'CLARK OFFICE',
             'DEFECTIVE',
             'Globaltronics',
