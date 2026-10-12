@@ -1063,48 +1063,165 @@ class InventoryController extends Controller
                             ];
                         }
 
-                        $existing = null;
-                        if (!empty($itemData['tag_number'])) {
-                            $existing = InventoryItem::whereIn('category', $categoryVariants)
-                                ->where('tag_number', $itemData['tag_number'])
-                                ->first();
-                        }
-
-                        if (!$existing && !empty($itemData['model'])) {
-                            $mQuery = InventoryItem::whereIn('category', $categoryVariants)
-                                ->where('model', $itemData['model']);
-                            if (!empty($location)) {
-                                $mQuery->where('location', $itemData['location']);
-                            }
-                            if (!empty($poSkuNo)) {
-                                $mQuery->where('po_number', $poSkuNo);
-                            }
-                            $existing = $mQuery->first();
-
-                            if (!$existing) {
-                                $existing = InventoryItem::whereIn('category', $categoryVariants)
-                                    ->where('model', $itemData['model'])
-                                    ->first();
-                            }
-                        }
-
                         $safeData = array_intersect_key($itemData, array_flip($tableColumns));
-
-                        if ($existing) {
-                            $existing->update($safeData);
-                            $updatedCount++;
-                        } else {
-                            InventoryItem::create($safeData);
-                            $importedCount++;
-                        }
+                        InventoryItem::create($safeData);
+                        $importedCount++;
                     }
 
                     DB::commit();
 
-                    return back()->with('success', "LED Service Units import completed! {$importedCount} new items created, {$updatedCount} items updated.");
+                    return back()->with('success', "LED Service Units import completed! {$importedCount} items imported.");
                 } catch (\Throwable $e) {
                     DB::rollBack();
                     return back()->withErrors(['file' => 'LED Service Units import failed: ' . $e->getMessage()]);
+                }
+            }
+
+            // Dedicated Importer for Philips Service Units matching exact 13-column layout
+            $isPhilipsServiceCat = in_array($normCat, [
+                'PHILIPS SERVICE UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICES UNIT'
+            ], true) || (stripos($category, 'Philips') !== false && stripos($category, 'Service') !== false);
+
+            if ($isPhilipsServiceCat) {
+                // Skips up to 3 header rows
+                $startIndex = 0;
+                for ($i = 0; $i < min(4, count($rows)); $i++) {
+                    $line = strtoupper(implode(' ', $rows[$i]));
+                    if (
+                        str_contains($line, 'LOCATION') ||
+                        str_contains($line, 'MANUFACTURER') ||
+                        str_contains($line, 'SERIAL') ||
+                        str_contains($line, 'MODEL') ||
+                        str_contains($line, 'ITEM DESCRIPTION')
+                    ) {
+                        $startIndex = $i + 1;
+                    }
+                }
+
+                $cleanNum = fn($v) => (int) preg_replace('/[^\d-]/', '', (string)($v ?? 0));
+                $cleanFloat = fn($v) => (float) preg_replace('/[^\d.-]/', '', (string)($v ?? 0));
+
+                $importedCount = 0;
+
+                DB::beginTransaction();
+                try {
+                    for ($i = $startIndex; $i < count($rows); $i++) {
+                        $row = $rows[$i];
+                        if (empty(array_filter($row, fn($v) => trim((string)$v) !== ''))) {
+                            continue;
+                        }
+
+                        $rowJoined = strtolower(implode(' ', $row));
+                        if (str_contains($rowJoined, 'total count') || str_contains($rowJoined, 'total inventory') || str_contains($rowJoined, 'total summaries')) {
+                            continue;
+                        }
+
+                        // Exact 13 Columns:
+                        // 0: LOCATION, 1: MANUFACTURER, 2: CHECK IN DATE, 3: MODEL, 4: PO / SKU No.,
+                        // 5: ITEM DESCRIPTION, 6: SERIAL NO., 7: QTY, 8: ACU. QTY, 9: FORECASTED QTY,
+                        // 10: HISTORY QTY, 11: HISTORY PROJECT, 12: REMARKS
+                        $location = $cleanStr($row[0] ?? 'MARIKINA');
+                        $mfg = $cleanStr($row[1] ?? 'PHILIPS');
+                        $rawDate = $cleanStr($row[2] ?? '');
+                        $checkInDate = !empty($rawDate) && strtotime($rawDate) ? date('Y-m-d', strtotime($rawDate)) : now()->toDateString();
+                        $model = $cleanStr($row[3] ?? '');
+                        $poSkuNo = $cleanStr($row[4] ?? '');
+                        $itemDesc = $cleanStr($row[5] ?? '');
+                        $serialNo = $cleanStr($row[6] ?? '');
+
+                        if (empty($model) && empty($itemDesc)) {
+                            continue;
+                        }
+                        if (empty($model)) {
+                            $model = mb_substr($itemDesc, 0, 50);
+                        }
+                        if (empty($itemDesc)) {
+                            $itemDesc = $model;
+                        }
+
+                        $qty = $cleanNum($row[7] ?? 0);
+                        // If qty is 0 but serials exist, count serials
+                        if ($qty <= 0 && !empty($serialNo)) {
+                            $serials = preg_split('/[\r\n,;|]+/', $serialNo, -1, PREG_SPLIT_NO_EMPTY);
+                            if (count($serials) > 0) {
+                                $qty = count($serials);
+                            }
+                        }
+
+                        $actQty = isset($row[8]) && trim((string)$row[8]) !== '' ? $cleanNum($row[8]) : $qty;
+                        $forecastQty = isset($row[9]) && trim((string)$row[9]) !== '' ? $cleanNum($row[9]) : $qty;
+                        $historyQty = isset($row[10]) && trim((string)$row[10]) !== '' ? $cleanNum($row[10]) : 0;
+                        $historyProject = $cleanStr($row[11] ?? '');
+                        $remarks = $cleanStr($row[12] ?? '');
+
+                        // Extract screen size (e.g., 55" from '55" PHILIPS FLAT WIDE MONITOR')
+                        $screenSize = null;
+                        if (preg_match('/(\d+(?:\.\d+)?)\s*"/i', $itemDesc, $sm)) {
+                            $screenSize = $sm[1] . '"';
+                        }
+
+                        $itemData = [
+                            'category' => 'Philips Service Units',
+                            'tag_number' => $serialNo,
+                            'location' => mb_substr($location ?: 'MARIKINA', 0, 100),
+                            'manufacturer' => mb_substr($mfg ?: 'PHILIPS', 0, 100),
+                            'check_in_date' => $checkInDate,
+                            'model' => mb_substr($model, 0, 100),
+                            'po_number' => mb_substr($poSkuNo, 0, 100),
+                            'item_description' => $itemDesc,
+                            'quantity' => $qty,
+                            'status' => 'in_stock',
+                        ];
+
+                        if ($hasColumn('acu_quantity')) {
+                            $itemData['acu_quantity'] = $actQty;
+                        }
+                        if ($hasColumn('forecasted_quantity')) {
+                            $itemData['forecasted_quantity'] = $forecastQty;
+                        }
+                        if ($hasColumn('original_quantity')) {
+                            $itemData['original_quantity'] = $actQty ?: $qty;
+                        }
+                        if ($hasColumn('history_qty')) {
+                            $itemData['history_qty'] = $historyQty;
+                        }
+                        if ($hasColumn('history_project')) {
+                            $itemData['history_project'] = $isTextCol ? $historyProject : mb_substr($historyProject, 0, 240);
+                        }
+                        if ($hasColumn('screen_size') && $screenSize) {
+                            $itemData['screen_size'] = $screenSize;
+                        }
+                        if ($hasColumn('remarks')) {
+                            $itemData['remarks'] = $remarks;
+                        }
+                        if ($hasColumn('created_by')) {
+                            $itemData['created_by'] = $creatorId;
+                        }
+
+                        // Movement history for SKU details drawer
+                        if ($hasColumn('movement_history')) {
+                            $itemData['movement_history'] = [
+                                'reservations' => [],
+                                'history' => ($historyQty > 0 || !empty($historyProject)) ? [
+                                    ['qty' => $historyQty, 'project' => $historyProject]
+                                ] : [],
+                                'locations' => [
+                                    ['location' => $itemData['location'], 'qty' => $qty]
+                                ],
+                            ];
+                        }
+
+                        $safeData = array_intersect_key($itemData, array_flip($tableColumns));
+                        InventoryItem::create($safeData);
+                        $importedCount++;
+                    }
+
+                    DB::commit();
+
+                    return back()->with('success', "Philips Service Units import completed! {$importedCount} items imported.");
+                } catch (\Throwable $e) {
+                    DB::rollBack();
+                    return back()->withErrors(['file' => 'Philips Service Units import failed: ' . $e->getMessage()]);
                 }
             }
 
