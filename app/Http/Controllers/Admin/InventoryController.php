@@ -35,8 +35,6 @@ class InventoryController extends Controller
         $serviceUnitSubCategories = [
             'LED Service Units',
             'Philips Service Units',
-            'DeadPixel Units',
-            'Defective Units',
             'Video Controllers / Processors',
             'Shuttle',
             'Aver',
@@ -61,15 +59,16 @@ class InventoryController extends Controller
                         ->orWhereIn('category', [
                             'LED Service Units', 'LED SERVICES UNITS', 'LED SERVICE UNITS', 'LED Service Unit',
                             'Philips Service Units', 'PHILIPS SERVICE UNITS', 'Philips Service Unit', 'PHILIPS SERVICE UNIT',
-                            'DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS',
-                            'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS',
                             'Video Controllers / Processors', 'VIDEO CONTROLLERS / PROCESSORS', 'Video Controllers', 'Video Processors',
                             'Shuttle', 'SHUTTLE',
                             'Aver', 'AVER',
                             'Digital iPoster', 'DIGITAL IPOSTER', 'iPoster', 'IPoster',
                             'Kiosks', 'KIOSKS', 'Kiosk', 'KIOSK',
                         ]);
-                });
+                })->whereNotIn('category', [
+                    'DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS',
+                    'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS',
+                ]);
             } else {
                 $variants = $this->getCategoryVariants($targetCategory);
                 $q->where(function ($sq) use ($targetCategory, $variants) {
