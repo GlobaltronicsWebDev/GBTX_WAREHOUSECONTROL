@@ -739,7 +739,7 @@
                                 </td>
 
                                 <!-- RESERVATION: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     @if (($item->reservation_qty ?? 0) > 0)
                                         <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                             {{ number_format($item->reservation_qty) }}
@@ -750,7 +750,7 @@
                                 </td>
 
                                 <!-- RESERVATION: PROJECT DETAILS -->
-                                <td class="py-2 px-2.5 border-r border-slate-200 min-w-[200px] text-xs text-slate-800 align-top">
+                                <td class="col-service-ext py-2 px-2.5 border-r border-slate-200 min-w-[200px] text-xs text-slate-800 align-top">
                                     @if (!empty($item->movement_history['reservations']) && count($item->movement_history['reservations']) > 0)
                                         <div class="space-y-1.5 max-h-24 overflow-y-auto pr-1">
                                             @foreach ($item->movement_history['reservations'] as $res)
@@ -777,7 +777,7 @@
                                 </td>
 
                                 <!-- HISTORY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     @if ($item->history_qty)
                                         <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
                                             {{ number_format($item->history_qty) }}
@@ -788,7 +788,7 @@
                                 </td>
 
                                 <!-- HISTORY: PROJECT -->
-                                <td class="py-2 px-2.5 border-r border-slate-200 min-w-[200px] text-xs text-slate-800 align-top">
+                                <td class="col-service-ext py-2 px-2.5 border-r border-slate-200 min-w-[200px] text-xs text-slate-800 align-top">
                                     @if (!empty($item->movement_history['history']) && count($item->movement_history['history']) > 0)
                                         <div class="space-y-1.5 max-h-24 overflow-y-auto pr-1">
                                             @foreach ($item->movement_history['history'] as $hist)
@@ -817,14 +817,14 @@
                                 </td>
 
                                 <!-- STATUS: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
                                     <span class="text-xs font-semibold text-slate-700">
                                         {{ $item->status_qty !== null ? number_format($item->status_qty) : '0' }}
                                     </span>
                                 </td>
 
                                 <!-- STATUS: PARTICULAR -->
-                                <td class="py-2 px-2 text-center border-r border-slate-200 whitespace-nowrap align-top">
+                                <td class="col-service-ext py-2 px-2 text-center border-r border-slate-200 whitespace-nowrap align-top">
                                     @php
                                         $part = strtoupper(trim((string)($item->status_particular ?? $item->status ?? 'OK')));
                                     @endphp
@@ -840,7 +840,7 @@
                                 </td>
 
                                 <!-- REMARKS -->
-                                <td class="py-2 px-2.5 border-r border-slate-200 min-w-[160px] text-xs text-slate-600 align-top">
+                                <td class="col-service-ext py-2 px-2.5 border-r border-slate-200 min-w-[160px] text-xs text-slate-600 align-top">
                                     @if ($item->remarks)
                                         <div class="line-clamp-2 font-medium text-slate-700" title="{{ $item->remarks }}">{{ $item->remarks }}</div>
                                     @else
@@ -947,22 +947,22 @@
                                 </td>
 
                                 <!-- RESERVATION: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalReservedQty) }}
                                 </td>
 
                                 <!-- RESERVATION: PROJECT DETAILS -->
-                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                <td class="col-service-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
 
                                 <!-- HISTORY: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalHistoryQty) }}
                                 </td>
 
                                 <!-- HISTORY: PROJECT -->
-                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                <td class="col-service-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
 
@@ -972,17 +972,17 @@
                                 </td>
 
                                 <!-- STATUS: QTY -->
-                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
                                     {{ number_format($ledTotalStatusQty) }}
                                 </td>
 
                                 <!-- STATUS: PARTICULAR -->
-                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                <td class="col-service-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
 
                                 <!-- REMARKS -->
-                                <td class="py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
+                                <td class="col-service-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
 
