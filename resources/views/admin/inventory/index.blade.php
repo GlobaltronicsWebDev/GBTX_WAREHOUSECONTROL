@@ -20,7 +20,9 @@
                     $isCentralLedCat = ($normSelectedCat === 'CENTRALIZED LED INVENTORY');
                     $isEolPhilipsCat = in_array($normSelectedCat, ['EOL PHILIPS UNITS', 'EOL PHILIPS UNIT', 'EOL PHILIPS']);
                     $isLedServiceCat = in_array($normSelectedCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT']);
-                    $isDefectiveCat = in_array($normSelectedCat, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL', 'DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE UNIT', 'DEFECTIVE']);
+                    $isDeadPixelCat = in_array($normSelectedCat, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL']);
+                    $isDefectiveOnlyCat = in_array($normSelectedCat, ['DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE UNIT', 'DEFECTIVE']);
+                    $isDefectiveCat = $isDeadPixelCat || $isDefectiveOnlyCat;
                     $isPhilipsServiceCat = in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT'])
                         || $isDefectiveCat;
                     $isServiceUnitsTabActive = (in_array($normSelectedCat, ['SERVICE UNITS (EVENTS, DEMO)', 'SERVICE UNITS', 'SERVICE UNIT'])
@@ -30,7 +32,7 @@
                         && !$isDefectiveCat;
                 @endphp
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-mono-code font-bold {{ $isCentralLedCat ? 'bg-amber-100 text-amber-900 border border-amber-300' : ($isEolPhilipsCat ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' : ($isDefectiveCat ? 'bg-rose-100 text-rose-900 border border-rose-300' : ($isServiceUnitsTabActive ? 'bg-purple-100 text-purple-900 border border-purple-300' : 'bg-blue-100 text-blue-900 border border-blue-300'))) }}">
-                    {{ $isCentralLedCat ? 'LED Inventory' : ($isEolPhilipsCat ? 'Philips Units' : ($isDefectiveCat ? 'Defective Units: ' . $selectedCategory : ($isServiceUnitsTabActive ? 'Service Units: ' . $selectedCategory : 'All Inventory'))) }}
+                    {{ $isCentralLedCat ? 'LED Inventory' : ($isEolPhilipsCat ? 'Philips Units' : ($isDeadPixelCat ? 'DeadPixel Units' : ($isDefectiveOnlyCat ? 'Defective Units' : ($isServiceUnitsTabActive ? 'Service Units: ' . $selectedCategory : 'All Inventory')))) }}
                 </span>
             </h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-1">
@@ -407,12 +409,20 @@
                 <h2 class="text-lg sm:text-xl font-bold tracking-wide text-slate-900 uppercase select-none">
                     @php
                         $normSelectedCat = strtoupper(trim($selectedCategory));
+                        $isDeadPixelCat = in_array($normSelectedCat, ['DEADPIXEL UNITS', 'DEAD PIXEL UNITS', 'DEADPIXEL', 'DEAD PIXEL']);
+                        $isDefectiveOnlyCat = in_array($normSelectedCat, ['DEFECTIVE UNITS', 'DEFECTIVE SERVICE UNITS', 'DEFECTIVE UNIT', 'DEFECTIVE']);
+                        $isDefectiveCat = $isDeadPixelCat || $isDefectiveOnlyCat;
                         $isLedServiceCat = in_array($normSelectedCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT']);
-                        $isPhilipsServiceCat = in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT']);
+                        $isPhilipsServiceCat = in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT'])
+                            || $isDefectiveCat;
                         $isCentralLedCat = ($normSelectedCat === 'CENTRALIZED LED INVENTORY');
                         $isEolPhilipsCat = in_array($normSelectedCat, ['EOL PHILIPS UNITS', 'EOL PHILIPS UNIT', 'EOL PHILIPS']);
                     @endphp
-                    @if ($isLedServiceCat)
+                    @if ($isDeadPixelCat)
+                        DEADPIXEL UNITS
+                    @elseif ($isDefectiveOnlyCat)
+                        DEFECTIVE UNITS
+                    @elseif ($isLedServiceCat)
                         LED SERVICE UNITS
                     @elseif ($isPhilipsServiceCat)
                         PHILIPS SERVICE UNITS
@@ -461,6 +471,24 @@
                     </svg>
                     <span id="lblTogglePhilipsDetails">Open Extended (Reservation, History, Unfound, Status)</span>
                     <span id="badgeTogglePhilipsDetails" class="px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-slate-100 text-slate-600">HIDDEN</span>
+                </button>
+            </div>
+            @elseif ($isDefectiveCat)
+            <!-- Defective & DeadPixel Units Toggle with Extended and Open Button -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+                <button 
+                    type="button" 
+                    onclick="toggleServiceColumns()" 
+                    id="btnToggleServiceDetails" 
+                    class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer"
+                    title="Toggle Extended Columns (History, Remarks)"
+                >
+                    <svg class="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span id="lblToggleServiceDetails">Open Extended (History, Remarks)</span>
+                    <span id="badgeToggleServiceDetails" class="px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-slate-100 text-slate-600">HIDDEN</span>
                 </button>
             </div>
             @elseif ($isServiceUnitsTabActive || $isLedServiceCat || $isPhilipsServiceCat)
@@ -1302,8 +1330,8 @@
                             <tr>
                                 <td colspan="14" class="py-12 text-center text-slate-500">
                                     <div class="max-w-xs mx-auto space-y-2">
-                                        <p class="font-bold text-slate-700">No Philips service units found</p>
-                                        <p class="text-xs text-slate-400">Add a Philips service unit using the button above to populate this list.</p>
+                                        <p class="font-bold text-slate-700">No {{ $isDefectiveCat ? $selectedCategory : 'Philips service units' }} found</p>
+                                        <p class="text-xs text-slate-400">Add a {{ $isDefectiveCat ? strtolower($selectedCategory) : 'Philips service' }} unit using the button above to populate this list.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -4266,20 +4294,39 @@
             }
         }
         const btn = document.getElementById('btnToggleServiceDetails');
+        const lbl = document.getElementById('lblToggleServiceDetails');
+        const badge = document.getElementById('badgeToggleServiceDetails');
+
         if (btn) {
-            if (show) {
-                btn.className = "inline-flex items-center justify-center p-2 rounded-xl text-xs font-bold transition-all shadow-sm border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-700 focus:outline-none cursor-pointer";
-                btn.title = "Hide Extended (Reservation, History, Status, Remarks) [OPEN]";
-                btn.innerHTML = `<svg id="iconToggleServiceDetails" class="w-4 h-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>`;
+            if (lbl && badge) {
+                // Extended button with label & badge (for Defective & DeadPixel Units)
+                if (show) {
+                    btn.className = "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-900 cursor-pointer";
+                    lbl.textContent = "Hide Extended (History, Remarks)";
+                    badge.textContent = "OPEN";
+                    badge.className = "px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-rose-200 text-rose-900";
+                } else {
+                    btn.className = "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer";
+                    lbl.textContent = "Open Extended (History, Remarks)";
+                    badge.textContent = "HIDDEN";
+                    badge.className = "px-1.5 py-0.5 rounded text-[10px] font-mono-code font-bold bg-slate-100 text-slate-600";
+                }
             } else {
-                btn.className = "inline-flex items-center justify-center p-2 rounded-xl text-xs font-bold transition-all shadow-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 focus:outline-none cursor-pointer";
-                btn.title = "Open Extended (Reservation, History, Status, Remarks) [HIDDEN]";
-                btn.innerHTML = `<svg id="iconToggleServiceDetails" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                </svg>`;
+                // Icon-only button (for Service Units)
+                if (show) {
+                    btn.className = "inline-flex items-center justify-center p-2 rounded-xl text-xs font-bold transition-all shadow-sm border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-700 focus:outline-none cursor-pointer";
+                    btn.title = "Hide Extended (Reservation, History, Status, Remarks) [OPEN]";
+                    btn.innerHTML = `<svg id="iconToggleServiceDetails" class="w-4 h-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>`;
+                } else {
+                    btn.className = "inline-flex items-center justify-center p-2 rounded-xl text-xs font-bold transition-all shadow-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 focus:outline-none cursor-pointer";
+                    btn.title = "Open Extended (Reservation, History, Status, Remarks) [HIDDEN]";
+                    btn.innerHTML = `<svg id="iconToggleServiceDetails" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                    </svg>`;
+                }
             }
         }
     }
