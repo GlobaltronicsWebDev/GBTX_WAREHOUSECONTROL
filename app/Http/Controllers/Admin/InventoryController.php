@@ -179,6 +179,8 @@ class InventoryController extends Controller
         $standardLocations = [
             'MARIKINA',
             'GLOBALTRONICS',
+            '3RD FLR WAREHOUSE',
+            '3rd Flr Wrehouse',
             'A-JUAN - 3RD FLR',
             'A JUAN - 2ND FLR',
             'AJUAN - 1ST FLR',
@@ -290,6 +292,9 @@ class InventoryController extends Controller
         $allowedLocations = [
             'MARIKINA',
             'GLOBALTRONICS',
+            '3RD FLR WAREHOUSE',
+            '3rd Flr Wrehouse',
+            '3rd Flr Warehouse',
             'AJUAN - 1ST FLR',
             'A JUAN MAIN 1ST FLOOR',
             'AJUAN MAIN 1ST FLOOR',
@@ -446,6 +451,9 @@ class InventoryController extends Controller
         $allowedLocations = [
             'MARIKINA',
             'GLOBALTRONICS',
+            '3RD FLR WAREHOUSE',
+            '3rd Flr Wrehouse',
+            '3rd Flr Warehouse',
             'AJUAN - 1ST FLR',
             'A JUAN MAIN 1ST FLOOR',
             'AJUAN MAIN 1ST FLOOR',

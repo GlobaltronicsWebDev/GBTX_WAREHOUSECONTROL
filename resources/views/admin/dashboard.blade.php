@@ -1003,6 +1003,8 @@
                         <select name="location" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold">
                             <option value="MARIKINA" selected>MARIKINA</option>
                             <option value="GLOBALTRONICS">GLOBALTRONICS</option>
+                            <option value="3RD FLR WAREHOUSE">3RD FLR WAREHOUSE</option>
+                            <option value="3rd Flr Wrehouse">3rd Flr Wrehouse</option>
                             <option value="A JUAN MAIN 1ST FLOOR">A JUAN MAIN 1ST FLOOR</option>
                             <option value="AJUAN - 1ST FLR">AJUAN - 1ST FLR</option>
                             <option value="A JUAN MAIN 3RD FLOOR">A JUAN MAIN 3RD FLOOR</option>

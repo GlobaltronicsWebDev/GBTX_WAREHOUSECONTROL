@@ -2380,6 +2380,8 @@
                         >
                             <option value="">-- Select Location --</option>
                             <option value="GLOBALTRONICS" selected>GLOBALTRONICS</option>
+                            <option value="3RD FLR WAREHOUSE">3RD FLR WAREHOUSE</option>
+                            <option value="3rd Flr Wrehouse">3rd Flr Wrehouse</option>
                             <option value="A-JUAN - 3RD FLR">A-JUAN - 3RD FLR</option>
                             <option value="A JUAN - 2ND FLR">A JUAN - 2ND FLR</option>
                             <option value="MARIKINA">MARIKINA</option>
@@ -2709,6 +2711,8 @@
                         >
                             <option value="">-- Select Location --</option>
                             <option value="GLOBALTRONICS">GLOBALTRONICS</option>
+                            <option value="3RD FLR WAREHOUSE">3RD FLR WAREHOUSE</option>
+                            <option value="3rd Flr Wrehouse">3rd Flr Wrehouse</option>
                             <option value="A-JUAN - 3RD FLR">A-JUAN - 3RD FLR</option>
                             <option value="A JUAN - 2ND FLR">A JUAN - 2ND FLR</option>
                             <option value="MARIKINA">MARIKINA</option>
