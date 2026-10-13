@@ -128,6 +128,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Determine if user has permission to create, verify, or process SRF workflow actions.
+     * Sales accounts have view-only access to SRF summary and status.
+     */
+    public function canManageSrf(): bool
+    {
+        return !$this->isSales();
+    }
+
+    /**
      * Get the primary role for the user.
      */
     public function getPrimaryRoleAttribute(): ?Role

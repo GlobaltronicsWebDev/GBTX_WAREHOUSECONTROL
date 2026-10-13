@@ -262,6 +262,7 @@
                             <span class="sidebar-text truncate">Dashboard Overview</span>
                         </a>
 
+                        @if (!Auth::user()->isSales())
                         <!-- Launch SRF Menu Item -->
                         <button type="button" 
                            onclick="if (typeof openInstallationSrfModal === 'function') { openInstallationSrfModal(); } else { window.location.href = '{{ route('admin.dashboard') }}?open_srf=1'; }"
@@ -277,6 +278,7 @@
                                 SRF
                             </span>
                         </button>
+                        @endif
 
                         <!-- Approved SRF Menu Item -->
                         @php

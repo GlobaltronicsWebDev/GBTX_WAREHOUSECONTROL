@@ -409,6 +409,10 @@ class DashboardController extends Controller
      */
     public function processInstallationSrf(Request $request): RedirectResponse
     {
+        if ($request->user() && ! $request->user()->canManageSrf()) {
+            abort(403, 'Unauthorized. Sales accounts have view-only access to SRF summary and status.');
+        }
+
         $maxSequence = 956;
         $existingSrfNumbers = SrfRequisition::pluck('srf_number');
         foreach ($existingSrfNumbers as $num) {
@@ -592,6 +596,10 @@ class DashboardController extends Controller
      */
     public function verifyInstallationSrf(Request $request, SrfRequisition $srf): RedirectResponse
     {
+        if ($request->user() && ! $request->user()->canManageSrf()) {
+            abort(403, 'Unauthorized. Sales accounts have view-only access to SRF summary and status.');
+        }
+
         $validated = $request->validate([
             'decision' => ['nullable', 'string', 'in:approved,declined,on_hold'],
             'verification_notes' => ['nullable', 'string', 'max:500'],
