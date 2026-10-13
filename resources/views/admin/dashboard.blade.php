@@ -15,6 +15,10 @@
                 <span>TERMINAL ID: WMS-TECH-01</span>
                 <span>•</span>
                 <span class="text-cyan-600 font-semibold">TECHNICAL &amp; SRF REQUISITIONS</span>
+            @elseif (Auth::user()->isSales())
+                <span>TERMINAL ID: SALES-REP-01</span>
+                <span>•</span>
+                <span class="text-sky-600 font-semibold">SALES &amp; INVENTORY OVERVIEW</span>
             @else
                 <span>TERMINAL ID: WMS-ADM-01</span>
                 <span>•</span>
@@ -22,13 +26,15 @@
             @endif
         </div>
         <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            {{ Auth::user()->isItAdmin() ? 'IT Administration & Account Management' : (Auth::user()->isTechnical() ? 'Technical Operations & SRF Requisitions' : 'Warehouse Operations Dashboard') }}
+            {{ Auth::user()->isItAdmin() ? 'IT Administration & Account Management' : (Auth::user()->isTechnical() ? 'Technical Operations & SRF Requisitions' : (Auth::user()->isSales() ? 'Sales & Inventory Overview' : 'Warehouse Operations Dashboard')) }}
         </h1>
         <p class="text-xs sm:text-sm text-slate-500 mt-1">
             @if (Auth::user()->isItAdmin())
                 Globaltronics Identity &amp; Access Control • Department account directory, security roles, and user clearances.
             @elseif (Auth::user()->isTechnical())
                 Globaltronics Technical Operations • Stock Requisition Forms (SRF), site installation staging, and warehouse inventory requests.
+            @elseif (Auth::user()->isSales())
+                Globaltronics Sales Operations • Real-time warehouse inventory overview, stock availability, and installation requisitions.
             @else
                 Globaltronics Inventory Control System • Facility monitoring, warehouse stock overview, and logistics telemetry.
             @endif
@@ -254,6 +260,83 @@
             </div>
             <p class="mt-2 text-xs text-slate-500">Live units available across warehouse bays</p>
         </a>
+
+    </div>
+@elseif (Auth::user()->isSales())
+    <!-- SALES: INVENTORY & REQUISITIONS METRIC TILES -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Live Inventory Units -->
+        <a href="{{ route('admin.inventory.index') }}" class="glass-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-cyan-400 hover:shadow-md transition-all block">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Inventory In Stock</span>
+                <div class="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-cyan-600 group-hover:bg-cyan-500 group-hover:text-slate-950 transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-3 flex items-baseline gap-2">
+                <span class="text-3xl font-extrabold text-cyan-900 font-mono-code">{{ number_format($totalInventoryUnits) }}</span>
+                <span class="text-xs text-cyan-700 font-semibold group-hover:underline">Browse All →</span>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">{{ $totalInventoryModels }} models available across warehouse storage</p>
+        </a>
+
+        <!-- Centralized LED Panels -->
+        @php
+            $salesLedQty = $inventoryItems->where('category', 'CENTRALIZED LED INVENTORY')->sum('quantity');
+            $salesPhilipsQty = $inventoryItems->where('category', 'EOL PHILIPS UNITS')->sum('quantity');
+        @endphp
+        <a href="{{ route('admin.inventory.index', ['category' => 'CENTRALIZED LED INVENTORY']) }}" class="glass-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-blue-400 hover:shadow-md transition-all block">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Centralized LED</span>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-3 flex items-baseline gap-2">
+                <span class="text-3xl font-extrabold text-blue-900 font-mono-code">{{ number_format($salesLedQty) }}</span>
+                <span class="text-xs text-blue-600 font-semibold group-hover:underline">LED Inventory →</span>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">Indoor &amp; outdoor display panels</p>
+        </a>
+
+        <!-- Philips Displays -->
+        <a href="{{ route('admin.inventory.index', ['category' => 'EOL PHILIPS UNITS']) }}" class="glass-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-purple-400 hover:shadow-md transition-all block">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Philips Displays</span>
+                <div class="w-9 h-9 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-3 flex items-baseline gap-2">
+                <span class="text-3xl font-extrabold text-purple-900 font-mono-code">{{ number_format($salesPhilipsQty) }}</span>
+                <span class="text-xs text-purple-600 font-semibold group-hover:underline">Philips Units →</span>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">Commercial panels &amp; digital signage units</p>
+        </a>
+
+        <!-- My Project SRFs -->
+        <div onclick="openInstallationSrfModal()" class="glass-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-emerald-400 hover:shadow-md transition-all block cursor-pointer">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Project SRFs</span>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-3 flex items-baseline gap-2">
+                <span class="text-3xl font-extrabold text-emerald-700 font-mono-code">{{ $userSrfCount }}</span>
+                <span class="text-xs text-emerald-600 font-semibold group-hover:underline">+ Launch SRF →</span>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">{{ $userSrfPendingCount }} for approval • {{ $userSrfCompletedCount }} cleared</p>
+        </div>
 
     </div>
 @else
