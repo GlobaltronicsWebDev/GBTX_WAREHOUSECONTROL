@@ -479,6 +479,46 @@
             </button>
         </div>
     </div>
+@elseif (Auth::user()->isSales())
+    <div class="p-6 rounded-2xl bg-gradient-to-r from-sky-50/90 via-blue-50/50 to-white border border-sky-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-1.5 max-w-2xl">
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono-code font-bold uppercase tracking-wider bg-sky-100 text-sky-900 border border-sky-200">
+                    Sales Operations Hub
+                </span>
+                <span class="text-xs text-slate-400">•</span>
+                <span class="text-xs font-semibold text-sky-700">Live Inventory Available</span>
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                <span>Warehouse Inventory Overview</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Check available hardware models, panel dimensions, and live warehouse inventory counts. Launch Stock Requisition Forms (SRF) directly to Warehouse Administration for customer installations and project staging.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3 shrink-0">
+            <a 
+                href="{{ route('admin.inventory.index') }}"
+                class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs sm:text-sm shadow-md shadow-sky-500/25 transition-all hover:scale-[1.02]"
+            >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                <span>Browse Full Inventory</span>
+            </a>
+            <button 
+                type="button" 
+                onclick="openInstallationSrfModal()" 
+                class="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white border border-sky-200 hover:bg-sky-50 text-sky-800 font-bold text-xs sm:text-sm shadow-xs transition-colors"
+            >
+                <svg class="w-4 h-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Launch SRF</span>
+            </button>
+        </div>
+    </div>
 @else
     <div class="p-6 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-white border border-emerald-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="space-y-1.5 max-w-2xl">
@@ -3266,7 +3306,7 @@
 @endif
 
 
-@if (!Auth::user()->isTechnical())
+@if (!Auth::user()->isTechnical() && !Auth::user()->isSales())
 <!-- TWO COLUMN SECTION: WAREHOUSE FACILITY OVERVIEW & SYSTEM TELEMETRY -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -3495,6 +3535,166 @@
 
     </div>
 
+</div>
+@elseif (Auth::user()->isSales())
+<!-- SALES INVENTORY OVERVIEW SECTION: REAL-TIME WAREHOUSE STOCK LEDGER -->
+<div class="glass-panel bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <div>
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono-code font-bold uppercase tracking-wider bg-sky-100 text-sky-900 border border-sky-200">
+                    REAL-TIME STOCK LEDGER
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono-code font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    {{ number_format($totalInventoryUnits) }} TOTAL UNITS IN STOCK
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono-code font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+                    {{ $totalInventoryModels }} ACTIVE MODELS
+                </span>
+                <span class="flex items-center gap-1.5 text-xs text-emerald-600 font-bold ml-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    LIVE WAREHOUSE SYNC
+                </span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+                <span>Overview of Inventory</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl leading-relaxed">
+                Live catalog of available LED display panels, Philips screens, and service units. Use this overview to check current bay locations and calculate stock for sales proposals.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5 self-start lg:self-auto shrink-0">
+            <a 
+                href="{{ route('admin.inventory.index') }}" 
+                class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm shadow-sky-500/20"
+                title="Open Complete Warehouse Inventory Spreadsheet"
+            >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Open Full Inventory Sheet →</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Inventory Categories Breakdown Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6">
+        @php
+            $ledItems = $inventoryItems->filter(fn($i) => stripos($i->category, 'LED') !== false);
+            $philipsItems = $inventoryItems->filter(fn($i) => stripos($i->category, 'PHILIPS') !== false);
+            $serviceItems = $inventoryItems->filter(fn($i) => stripos($i->category, 'SERVICE') !== false);
+        @endphp
+        <div class="p-4 rounded-2xl bg-sky-50/60 border border-sky-200">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-sky-900 uppercase font-mono-code">Centralized LED</span>
+                <span class="px-2 py-0.5 rounded text-[11px] font-mono-code font-bold bg-sky-200 text-sky-800">{{ $ledItems->count() }} Models</span>
+            </div>
+            <div class="mt-2 text-2xl font-extrabold text-sky-950 font-mono-code">
+                {{ number_format($ledItems->sum('quantity')) }} <span class="text-xs font-normal text-sky-700">pcs</span>
+            </div>
+            <a href="{{ route('admin.inventory.index', ['category' => 'CENTRALIZED LED INVENTORY']) }}" class="mt-2 inline-flex items-center text-xs font-semibold text-sky-700 hover:text-sky-900 group">
+                <span>View LED Panels</span>
+                <span class="group-hover:translate-x-0.5 transition-transform ml-1">→</span>
+            </a>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-purple-50/60 border border-purple-200">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-purple-900 uppercase font-mono-code">EOL Philips Displays</span>
+                <span class="px-2 py-0.5 rounded text-[11px] font-mono-code font-bold bg-purple-200 text-purple-800">{{ $philipsItems->count() }} Models</span>
+            </div>
+            <div class="mt-2 text-2xl font-extrabold text-purple-950 font-mono-code">
+                {{ number_format($philipsItems->sum('quantity')) }} <span class="text-xs font-normal text-purple-700">pcs</span>
+            </div>
+            <a href="{{ route('admin.inventory.index', ['category' => 'EOL PHILIPS UNITS']) }}" class="mt-2 inline-flex items-center text-xs font-semibold text-purple-700 hover:text-purple-900 group">
+                <span>View Philips Displays</span>
+                <span class="group-hover:translate-x-0.5 transition-transform ml-1">→</span>
+            </a>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-amber-900 uppercase font-mono-code">Service Units (Events/Demo)</span>
+                <span class="px-2 py-0.5 rounded text-[11px] font-mono-code font-bold bg-amber-200 text-amber-800">{{ $serviceItems->count() }} Models</span>
+            </div>
+            <div class="mt-2 text-2xl font-extrabold text-amber-950 font-mono-code">
+                {{ number_format($serviceItems->sum('quantity')) }} <span class="text-xs font-normal text-amber-700">pcs</span>
+            </div>
+            <a href="{{ route('admin.inventory.index', ['category' => 'SERVICE UNITS (EVENTS, DEMO)']) }}" class="mt-2 inline-flex items-center text-xs font-semibold text-amber-700 hover:text-amber-900 group">
+                <span>View Service Units</span>
+                <span class="group-hover:translate-x-0.5 transition-transform ml-1">→</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Live Inventory Table -->
+    <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <table class="w-full text-left text-xs sm:text-sm">
+            <thead>
+                <tr class="text-[11px] font-bold text-slate-600 uppercase tracking-wider border-b border-slate-200 bg-slate-50">
+                    <th class="py-3 pl-4 font-mono-code">Model &amp; Manufacturer</th>
+                    <th class="py-3 px-3 font-mono-code">Category</th>
+                    <th class="py-3 px-3 font-mono-code">Location / Bay</th>
+                    <th class="py-3 px-3 text-center font-mono-code">Available Qty</th>
+                    <th class="py-3 px-3 text-center font-mono-code">Panel SQM</th>
+                    <th class="py-3 text-right pr-4 font-mono-code">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-medium">
+                @forelse ($inventoryItems->take(12) as $inv)
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-3 pl-4">
+                            <div class="font-bold text-slate-900">{{ $inv->model }}</div>
+                            <div class="text-[11px] text-slate-500">{{ $inv->manufacturer ?? 'Globaltronics' }}</div>
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                {{ $inv->category }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-3 font-mono-code text-slate-700">
+                            {{ $inv->location ?? 'MAIN WAREHOUSE' }}
+                        </td>
+                        <td class="py-3 px-3 text-center">
+                            <span class="font-mono-code font-bold px-2 py-0.5 rounded {{ $inv->quantity > 5 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                                {{ $inv->quantity }} pcs
+                            </span>
+                        </td>
+                        <td class="py-3 px-3 text-center font-mono-code text-slate-600">
+                            {{ $inv->sqm ? number_format($inv->sqm, 2) . ' m²' : '—' }}
+                        </td>
+                        <td class="py-3 text-right pr-4">
+                            <button 
+                                type="button" 
+                                onclick="openInstallationSrfModal()"
+                                class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold border border-sky-200 transition-colors"
+                                title="Request hardware via SRF"
+                            >
+                                <span>+ Request SRF</span>
+                            </button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-xs text-slate-400">
+                            No inventory items found.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    @if ($inventoryItems->count() > 12)
+        <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-slate-500 font-mono-code">Showing 12 of {{ $inventoryItems->count() }} models in inventory</span>
+            <a href="{{ route('admin.inventory.index') }}" class="font-bold text-sky-600 hover:text-sky-800 inline-flex items-center gap-1">
+                <span>View all {{ $inventoryItems->count() }} models in inventory spreadsheet</span>
+                <span>→</span>
+            </a>
+        </div>
+    @endif
 </div>
 @endif
 @endsection
