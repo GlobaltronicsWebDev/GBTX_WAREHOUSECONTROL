@@ -54,6 +54,7 @@
                 <span>Export CSV</span>
             </a>
 
+            @if (!Auth::user()->isSales())
             <!-- Import CSV -->
             <button 
                 type="button" 
@@ -78,6 +79,12 @@
                 </svg>
                 <span>Add Inventory Item</span>
             </button>
+            @else
+            <div class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 text-xs font-semibold shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                <span>Sales View-Only Mode</span>
+            </div>
+            @endif
         </div>
     </div>
 
@@ -949,6 +956,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                         </button>
+                                        @if (!Auth::user()->isSales())
                                         <button 
                                             type="button" 
                                             onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
@@ -969,6 +977,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -1306,6 +1315,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                         </button>
+                                        @if (!Auth::user()->isSales())
                                         <button 
                                             type="button" 
                                             onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
@@ -1326,6 +1336,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -1727,6 +1738,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                         </button>
+                                        @if (!Auth::user()->isSales())
                                         <button 
                                             type="button" 
                                             onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
@@ -1747,6 +1759,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -1953,6 +1966,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                         </button>
+                                        @if (!Auth::user()->isSales())
                                         <button 
                                             type="button" 
                                             onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
@@ -1973,6 +1987,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -2247,6 +2262,7 @@
                                             </svg>
                                         </button>
 
+                                        @if (!Auth::user()->isSales())
                                         <!-- Edit Modal -->
                                         <button 
                                             type="button" 
@@ -2270,6 +2286,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -3217,9 +3234,11 @@
         <div>
             <div class="flex justify-between items-center mb-2.5">
                 <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Project Reservations</h3>
+                @if (!Auth::user()->isSales())
                 <button type="button" onclick="openReserveForCurrent()" class="text-xs text-amber-600 hover:text-amber-700 font-bold hover:underline transition-colors">
                     + New Reservation
                 </button>
+                @endif
             </div>
             <div id="drawerReservations" class="space-y-2">
                 <p class="text-xs text-slate-500 italic py-2">No active project allocations.</p>
@@ -3244,13 +3263,15 @@
 
     <!-- Drawer Footer Actions -->
     <div class="p-4 border-t border-slate-200 flex gap-2.5 bg-slate-50">
+        @if (!Auth::user()->isSales())
         <button type="button" onclick="editCurrentRow()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-xs transition flex items-center justify-center gap-1.5">
             <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             Edit Details
         </button>
-        <button type="button" onclick="closeDrawer()" class="px-5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold py-2.5 rounded-xl transition">
+        @endif
+        <button type="button" onclick="closeDrawer()" class="px-5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold py-2.5 rounded-xl transition flex-1">
             Close
         </button>
     </div>

@@ -119,6 +119,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Determine if user has permission to add, edit, or delete inventory.
+     * Sales accounts have view-only access.
+     */
+    public function canManageInventory(): bool
+    {
+        return !$this->isSales();
+    }
+
+    /**
      * Get the primary role for the user.
      */
     public function getPrimaryRoleAttribute(): ?Role

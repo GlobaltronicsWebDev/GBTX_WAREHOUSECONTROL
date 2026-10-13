@@ -324,6 +324,10 @@ class InventoryController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        if ($request->user() && ! $request->user()->canManageInventory()) {
+            abort(403, 'Unauthorized. Sales accounts have view-only access to inventory.');
+        }
+
         $allowedLocations = [
             'MARIKINA',
             'GLOBALTRONICS',
@@ -414,6 +418,10 @@ class InventoryController extends Controller
      */
     public function update(Request $request, InventoryItem $item): RedirectResponse|JsonResponse
     {
+        if ($request->user() && ! $request->user()->canManageInventory()) {
+            abort(403, 'Unauthorized. Sales accounts have view-only access to inventory.');
+        }
+
         // Support inline quick-update of single fields (item_description, acu_quantity, quantity, etc.)
         if ($request->has('field')) {
             $field = $request->input('field');
@@ -607,6 +615,10 @@ class InventoryController extends Controller
      */
     public function destroy(Request $request, $item): RedirectResponse
     {
+        if ($request->user() && ! $request->user()->canManageInventory()) {
+            abort(403, 'Unauthorized. Sales accounts have view-only access to inventory.');
+        }
+
         $inventoryItem = $item instanceof InventoryItem ? $item : InventoryItem::find($item);
         if (! $inventoryItem) {
             return redirect()->route('admin.inventory.index')
@@ -903,6 +915,10 @@ class InventoryController extends Controller
      */
     public function import(Request $request): RedirectResponse
     {
+        if ($request->user() && ! $request->user()->canManageInventory()) {
+            abort(403, 'Unauthorized. Sales accounts have view-only access to inventory.');
+        }
+
         $request->validate([
             'file' => ['required', 'file', 'mimes:csv,txt', 'max:10240'],
             'category' => ['required', 'string'],
