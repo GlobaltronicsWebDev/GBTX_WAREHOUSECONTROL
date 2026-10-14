@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class SalesOrderController extends Controller
@@ -24,6 +25,10 @@ class SalesOrderController extends Controller
      */
     public function index(Request $request): View
     {
+        if (!Schema::hasTable('sales_orders')) {
+            return view('admin.sales-orders.migration-needed');
+        }
+
         $user = Auth::user();
         $tab = $request->query('tab', 'my_queue'); // 'my_queue' or 'all'
         $status = $request->query('status');
