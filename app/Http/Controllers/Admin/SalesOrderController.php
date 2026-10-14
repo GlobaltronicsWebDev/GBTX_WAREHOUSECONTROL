@@ -446,6 +446,10 @@ class SalesOrderController extends Controller
      */
     public function reports(Request $request): View
     {
+        if (!Schema::hasTable('sales_orders')) {
+            return view('admin.sales-orders.migration-needed');
+        }
+
         $this->authorize('viewReports', SalesOrder::class);
 
         // Core metric aggregates

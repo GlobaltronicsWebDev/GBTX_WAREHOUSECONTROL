@@ -9,6 +9,7 @@ use App\Support\Workflow;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class SalesOrderRoleController extends Controller
@@ -18,6 +19,10 @@ class SalesOrderRoleController extends Controller
      */
     public function index(Request $request): View
     {
+        if (!Schema::hasTable('sales_orders')) {
+            return view('admin.sales-orders.migration-needed');
+        }
+
         $currentUser = Auth::user();
         if (!$currentUser || !$currentUser->isAdsAdmin()) {
             abort(403, 'Unauthorized. Only administrators can access ADS workflow role configuration.');
