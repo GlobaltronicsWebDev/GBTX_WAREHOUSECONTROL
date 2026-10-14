@@ -98,6 +98,10 @@ class SalesOrderController extends Controller
      */
     public function create(): View
     {
+        if (!Schema::hasTable('sales_orders')) {
+            return view('admin.sales-orders.migration-needed');
+        }
+
         $this->authorize('create', SalesOrder::class);
 
         $defaultAsoNumber = SalesOrder::generateNextAsoNumber();
