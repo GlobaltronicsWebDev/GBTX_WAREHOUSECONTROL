@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\CredentialController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SalesOrderController;
+use App\Http\Controllers\Admin\SalesOrderRoleController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
@@ -133,6 +135,19 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Notification Actions
     Route::post('/notifications/{notification}/read', [DashboardController::class, 'markNotificationRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [DashboardController::class, 'markAllNotificationsRead'])->name('notifications.markAllRead');
+
+    // ADS Sales Order System (LED Advertising Sales Workflow)
+    Route::get('/sales-orders', [SalesOrderController::class, 'index'])->name('sales-orders.index');
+    Route::get('/sales-orders/create', [SalesOrderController::class, 'create'])->name('sales-orders.create');
+    Route::post('/sales-orders', [SalesOrderController::class, 'store'])->name('sales-orders.store');
+    Route::get('/sales-orders/reports', [SalesOrderController::class, 'reports'])->name('sales-orders.reports');
+    Route::get('/sales-orders/roles', [SalesOrderRoleController::class, 'index'])->name('sales-orders.roles');
+    Route::put('/sales-orders/roles/{user}', [SalesOrderRoleController::class, 'update'])->name('sales-orders.roles.update');
+    Route::get('/sales-orders/{salesOrder}', [SalesOrderController::class, 'show'])->name('sales-orders.show');
+    Route::post('/sales-orders/{salesOrder}/advance', [SalesOrderController::class, 'advance'])->name('sales-orders.advance');
+    Route::post('/sales-orders/{salesOrder}/decline', [SalesOrderController::class, 'decline'])->name('sales-orders.decline');
+    Route::post('/sales-orders/{salesOrder}/send-back', [SalesOrderController::class, 'sendBack'])->name('sales-orders.send-back');
+    Route::post('/sales-orders/{salesOrder}/checks', [SalesOrderController::class, 'updateChecks'])->name('sales-orders.checks');
 
     // Credentials & Access Control (Restricted to IT Administrators)
     Route::middleware('credentials.manage')->group(function () {

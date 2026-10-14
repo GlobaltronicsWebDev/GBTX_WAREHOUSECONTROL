@@ -299,6 +299,73 @@
                             </span>
                         </a>
 
+                        <!-- ADS Sales Order System (LED Advertising Sales Workflow) -->
+                        @php
+                            $isSalesOrdersActive = request()->routeIs('admin.sales-orders.*');
+                            $userActionableOrderCount = 0;
+                            try {
+                                if (Auth::check() && \Illuminate\Support\Facades\Schema::hasTable('sales_orders')) {
+                                    $userActionableOrderCount = \App\Models\SalesOrder::waitingOnUser(Auth::user())->count();
+                                }
+                            } catch (\Throwable $e) {
+                                $userActionableOrderCount = 0;
+                            }
+                        @endphp
+                        <a href="{{ route('admin.sales-orders.index') }}" 
+                           class="sidebar-item flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all {{ $isSalesOrdersActive && !request()->routeIs('admin.sales-orders.reports') && !request()->routeIs('admin.sales-orders.roles') ? 'bg-blue-50 text-blue-800 border border-blue-200 shadow-sm font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}"
+                           title="ADS Sales Order System (ASO / SJO LED Workflow)">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="sidebar-icon w-5 h-5 shrink-0 {{ $isSalesOrdersActive ? 'text-blue-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                <span class="sidebar-text truncate">ADS Sales Orders</span>
+                            </div>
+                            @if ($userActionableOrderCount > 0)
+                                <span class="sidebar-badge text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-rose-500 text-white font-extrabold animate-pulse">
+                                    {{ $userActionableOrderCount }} Action
+                                </span>
+                            @else
+                                <span class="sidebar-badge text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 font-bold">
+                                    ASO
+                                </span>
+                            @endif
+                        </a>
+
+                        @if (Auth::user()->canViewReports())
+                        <!-- ADS Reports -->
+                        <a href="{{ route('admin.sales-orders.reports') }}" 
+                           class="sidebar-item flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.sales-orders.reports') ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}"
+                           title="ADS Amortization, Milestones & BDS Reports">
+                            <div class="flex items-center gap-3 min-w-0 pl-1">
+                                <svg class="sidebar-icon w-4 h-4 shrink-0 {{ request()->routeIs('admin.sales-orders.reports') ? 'text-emerald-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                                </svg>
+                                <span class="sidebar-text truncate">ADS Reports</span>
+                            </div>
+                            <span class="sidebar-badge text-[9px] font-mono-code px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold">
+                                Financial
+                            </span>
+                        </a>
+                        @endif
+
+                        @if (Auth::user()->isAdsAdmin())
+                        <!-- ADS Roles -->
+                        <a href="{{ route('admin.sales-orders.roles') }}" 
+                           class="sidebar-item flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.sales-orders.roles') ? 'bg-purple-50 text-purple-800 border border-purple-200 font-bold' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}"
+                           title="ADS Workflow Role Assignments">
+                            <div class="flex items-center gap-3 min-w-0 pl-1">
+                                <svg class="sidebar-icon w-4 h-4 shrink-0 {{ request()->routeIs('admin.sales-orders.roles') ? 'text-purple-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                <span class="sidebar-text truncate">ADS Roles</span>
+                            </div>
+                            <span class="sidebar-badge text-[9px] font-mono-code px-1.5 py-0.2 rounded-full bg-purple-100 text-purple-800 border border-purple-200 font-bold">
+                                Admin
+                            </span>
+                        </a>
+                        @endif
+
                         <!-- Warehouse Inventory Dropdown with Categories Sub-Menu -->
                         <!-- Warehouse Inventory Dropdown with Categories Sub-Menu -->
                         @php

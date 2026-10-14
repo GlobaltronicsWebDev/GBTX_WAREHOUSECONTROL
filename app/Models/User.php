@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+#[Fillable(['name', 'email', 'password', 'is_admin'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -28,6 +30,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
     }
 
@@ -134,6 +137,50 @@ class User extends Authenticatable
     public function canManageSrf(): bool
     {
         return !$this->isSales();
+    }
+
+    /**
+     * Sales orders filed by this user.
+     *
+     * @return HasMany<SalesOrder, $this>
+     */
+    public function salesOrders(): HasMany
+    {
+        return $this->hasMany(SalesOrder::class);
+    }
+
+    /**
+     * Action logs executed by this user.
+     *
+     * @return HasMany<OrderLog, $this>
+     */
+    public function orderLogs(): HasMany
+    {
+        return $this->hasMany(OrderLog::class);
+    }
+
+    /**
+     * Determine if user has administrator privileges in ADS Sales Order System.
+     */
+    public function isAdsAdmin(): bool
+    {
+        return (bool) $this->is_admin || $this->hasRole(['admin', 'it-admin']);
+    }
+
+    /**
+     * Determine if user can view all orders across all queues.
+     */
+    public function canViewAllOrders(): bool
+    {
+        return $this->isAdsAdmin() || $this->hasRole('accounting');
+    }
+
+    /**
+     * Determine if user can view reports (Admins and Accounting only).
+     */
+    public function canViewReports(): bool
+    {
+        return $this->isAdsAdmin() || $this->hasRole('accounting');
     }
 
     /**
