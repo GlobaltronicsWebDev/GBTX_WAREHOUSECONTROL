@@ -1,6 +1,8 @@
+@use('App\Support\Workflow')
 @extends('layouts.admin')
 
 @section('title', 'ADS Sales & Financial Reports | Globaltronics ICS')
+
 
 @section('content')
 <div class="space-y-6">

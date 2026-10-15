@@ -12,6 +12,7 @@ use App\Support\Workflow;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -20,6 +21,8 @@ use Illuminate\View\View;
 
 class SalesOrderController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Dashboard & Order Queue.
      */
@@ -479,9 +482,16 @@ class SalesOrderController extends Controller
         $totalProgressBillingAmount = round($totalPipelineValue - $totalRetentionAmount, 2);
 
         // Sales by BDS (Orders count and total sales)
-        $salesByBds = SalesOrder::select('bds_name', 'bds_email', DB::raw('count(*) as order_count'), DB::raw('sum(total_amount) as total_sales'))
+        $salesByBds = SalesOrder::select(
+                'bds_name',
+                'bds_email',
+                DB::raw('count(*) as order_count'),
+                DB::raw('COALESCE(sum(total_amount), 0) as total_sales')
+            )
+            ->whereNotNull('bds_name')
+            ->where('bds_name', '!=', '')
             ->groupBy('bds_name', 'bds_email')
-            ->orderByDesc('total_sales')
+            ->orderByRaw('COALESCE(sum(total_amount), 0) DESC')
             ->get();
 
         // Consolidated Monthly Amortization Schedule (spread evenly across active/complete campaigns)
@@ -506,6 +516,15 @@ class SalesOrderController extends Controller
                 $monthlyAmortization[$m]['order_count'] += 1;
             }
         }
+
+        if (!empty($monthlyAmortization)) {
+            uksort($monthlyAmortization, function ($a, $b) {
+                $timeA = strtotime($a) ?: 0;
+                $timeB = strtotime($b) ?: 0;
+                return $timeA <=> $timeB;
+            });
+        }
+
 
         return view('admin.sales-orders.reports', [
             'totalOrders' => $totalOrders,

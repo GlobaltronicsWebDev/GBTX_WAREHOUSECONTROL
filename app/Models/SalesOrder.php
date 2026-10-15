@@ -234,12 +234,17 @@ class SalesOrder extends Model
             return [];
         }
 
-        $start = Carbon::parse($this->start_date)->startOfMonth();
-        $end = Carbon::parse($this->end_date)->startOfMonth();
+        try {
+            $start = Carbon::parse($this->start_date)->startOfMonth();
+            $end = Carbon::parse($this->end_date)->startOfMonth();
+        } catch (\Throwable $e) {
+            return [];
+        }
 
         if ($end->lt($start)) {
             $end = $start->copy();
         }
+
 
         $period = CarbonPeriod::create($start, '1 month', $end);
         $totalMonths = max(1, count($period));
