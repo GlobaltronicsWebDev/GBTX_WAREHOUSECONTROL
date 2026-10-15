@@ -30,7 +30,9 @@ INSERT INTO "users" ("id", "name", "email", "email_verified_at", "password", "re
 (3, 'Warehouse Staff User', 'staff@globaltronics.net', NULL, '$2y$12$Z2XsrlQCHWC4hc6EZu.q.ezd.2wKI9DwG8CMpkkoO9Y9Gw0Kq4Px6', 'R8lQoJMwqcxboUAZobBTeOXqupVUQTo2zpOL6ZGy50EftcDtPhqQqeAaz7gx', '2026-09-25 06:31:10', '2026-10-06 03:49:53'),
 (4, 'Ariel Moro', 'ariel.moro@globaltronics.net', NULL, '$2y$12$2DwBWwV8GBSE//BmxbyYR.FDNR9cfh1ejpJSaxCMYtFB8rdXmRNhm', 'HIVKq0D3E9m37BYx1JIdaoXiExkpnhNTOMjLOHkFxJzz5BL60C9wF2hvk3ZH', '2026-10-06 03:27:48', '2026-10-06 03:49:53'),
 (5, 'Sales Account Executive', 'sales@globaltronics.net', NULL, '$2y$12$nUMhstdH6rMzmEJt6npMpO6GMoQBoI9m1ZOg6MfFp7dTCg.fU8iFW', NULL, '2026-10-06 03:27:48', '2026-10-06 03:49:53'),
-(6, 'Charles Quiachon', 'charles.quiachon@globaltronics.net', NULL, '$2y$12$D/CMTp5fVbH3pVoTeHbcZOrbJ11pqwf/lYcf1SGGJ6LRAGN0XSHES', NULL, '2026-10-06 04:36:48', '2026-10-06 04:36:48');
+(6, 'Charles Quiachon', 'charles.quiachon@globaltronics.net', NULL, '$2y$12$D/CMTp5fVbH3pVoTeHbcZOrbJ11pqwf/lYcf1SGGJ6LRAGN0XSHES', NULL, '2026-10-06 04:36:48', '2026-10-06 04:36:48'),
+(7, 'Anne Liboon', 'anne.liboon@globaltronics.net', NULL, '$2y$12$nUMhstdH6rMzmEJt6npMpO6GMoQBoI9m1ZOg6MfFp7dTCg.fU8iFW', NULL, '2026-10-15 07:45:00', '2026-10-15 07:45:00'),
+(8, 'Sheryl Quilla', 'sheryl.quilla@globaltronics.net', NULL, '$2y$12$nUMhstdH6rMzmEJt6npMpO6GMoQBoI9m1ZOg6MfFp7dTCg.fU8iFW', NULL, '2026-10-15 07:45:00', '2026-10-15 07:45:00');
 
 DROP TABLE IF EXISTS "role_user";
 CREATE TABLE "role_user" ("user_id" integer not null, "role_id" integer not null, "created_at" datetime, "updated_at" datetime, foreign key("user_id") references "users"("id") on delete cascade, foreign key("role_id") references "roles"("id") on delete cascade, primary key ("user_id", "role_id"));
@@ -43,7 +45,10 @@ INSERT INTO "role_user" ("user_id", "role_id", "created_at", "updated_at") VALUE
 (5, 6, '2026-10-06 03:27:48', '2026-10-06 03:27:48'),
 (4, 7, '2026-10-06 03:49:07', '2026-10-06 03:49:07'),
 (6, 2, '2026-10-06 04:36:48', '2026-10-06 04:36:48'),
-(2, 4, '2026-10-06 04:37:00', '2026-10-06 04:37:00');
+(2, 4, '2026-10-06 04:37:00', '2026-10-06 04:37:00'),
+(7, 6, '2026-10-15 07:45:00', '2026-10-15 07:45:00'),
+(8, 6, '2026-10-15 07:45:00', '2026-10-15 07:45:00');
+
 
 DROP TABLE IF EXISTS "inventory_items";
 CREATE TABLE "inventory_items" ("id" integer primary key autoincrement not null, "category" varchar not null default ('EOL PHILIPS UNITS'), "manufacturer" varchar not null, "check_in_date" date not null, "model" varchar not null, "item_description" text not null, "quantity" integer not null default ('1'), "location" varchar, "status" varchar not null default ('in_stock'), "created_by" integer, "created_at" datetime, "updated_at" datetime, "screen_size" varchar, "tag_number" text, "po_number" varchar, "sqm" numeric, "forecasted_quantity" integer, "acu_quantity" integer, foreign key("created_by") references users("id") on delete set null on update no action);

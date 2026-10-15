@@ -61,7 +61,10 @@ INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `re
 (3, 'Warehouse Staff User', 'staff@globaltronics.net', NULL, '$2y$12$Z2XsrlQCHWC4hc6EZu.q.ezd.2wKI9DwG8CMpkkoO9Y9Gw0Kq4Px6', 'R8lQoJMwqcxboUAZobBTeOXqupVUQTo2zpOL6ZGy50EftcDtPhqQqeAaz7gx', '2026-09-25 06:31:10', '2026-10-06 03:49:53'),
 (4, 'Ariel Moro', 'ariel.moro@globaltronics.net', NULL, '$2y$12$2DwBWwV8GBSE//BmxbyYR.FDNR9cfh1ejpJSaxCMYtFB8rdXmRNhm', 'HIVKq0D3E9m37BYx1JIdaoXiExkpnhNTOMjLOHkFxJzz5BL60C9wF2hvk3ZH', '2026-10-06 03:27:48', '2026-10-06 03:49:53'),
 (5, 'Sales Account Executive', 'sales@globaltronics.net', NULL, '$2y$12$nUMhstdH6rMzmEJt6npMpO6GMoQBoI9m1ZOg6MfFp7dTCg.fU8iFW', NULL, '2026-10-06 03:27:48', '2026-10-06 03:49:53'),
-(6, 'Charles Quiachon', 'charles.quiachon@globaltronics.net', NULL, '$2y$12$D/CMTp5fVbH3pVoTeHbcZOrbJ11pqwf/lYcf1SGGJ6LRAGN0XSHES', NULL, '2026-10-06 04:36:48', '2026-10-06 04:36:48');
+(6, 'Charles Quiachon', 'charles.quiachon@globaltronics.net', NULL, '$2y$12$D/CMTp5fVbH3pVoTeHbcZOrbJ11pqwf/lYcf1SGGJ6LRAGN0XSHES', NULL, '2026-10-06 04:36:48', '2026-10-06 04:36:48'),
+(7, 'Anne Liboon', 'anne.liboon@globaltronics.net', NULL, '$2y$12$nUMhstdH6rMzmEJt6npMpO6GMoQBoI9m1ZOg6MfFp7dTCg.fU8iFW', NULL, '2026-10-15 07:45:00', '2026-10-15 07:45:00'),
+(8, 'Sheryl Quilla', 'sheryl.quilla@globaltronics.net', NULL, '$2y$12$nUMhstdH6rMzmEJt6npMpO6GMoQBoI9m1ZOg6MfFp7dTCg.fU8iFW', NULL, '2026-10-15 07:45:00', '2026-10-15 07:45:00');
+
 
 -- --------------------------------------------------------
 -- Table structure for table `role_user`
@@ -86,7 +89,10 @@ INSERT INTO `role_user` (`user_id`, `role_id`, `created_at`, `updated_at`) VALUE
 (5, 6, '2026-10-06 03:27:48', '2026-10-06 03:27:48'),
 (4, 7, '2026-10-06 03:49:07', '2026-10-06 03:49:07'),
 (6, 2, '2026-10-06 04:36:48', '2026-10-06 04:36:48'),
-(2, 4, '2026-10-06 04:37:00', '2026-10-06 04:37:00');
+(2, 4, '2026-10-06 04:37:00', '2026-10-06 04:37:00'),
+(7, 6, '2026-10-15 07:45:00', '2026-10-15 07:45:00'),
+(8, 6, '2026-10-15 07:45:00', '2026-10-15 07:45:00');
+
 
 -- --------------------------------------------------------
 -- Table structure for table `inventory_items`

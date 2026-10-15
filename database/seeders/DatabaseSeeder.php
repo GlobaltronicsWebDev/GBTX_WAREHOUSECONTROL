@@ -71,16 +71,43 @@ class DatabaseSeeder extends Seeder
         }
 
         $salesRole = Role::where('slug', 'sales-executive')->first();
-        $salesAccount = User::updateOrCreate(
-            ['email' => 'sales@globaltronics.net'],
+        $adsSalesRole = Role::where('slug', 'sales')->first();
+
+        $salesStaffMembers = [
             [
                 'name' => 'Sales Account Executive',
+                'email' => 'sales@globaltronics.net',
                 'password' => 'GlobaltronicsSales@2026',
-            ]
-        );
-        if ($salesRole) {
-            $salesAccount->roles()->sync([$salesRole->id]);
+            ],
+            [
+                'name' => 'Anne Liboon',
+                'email' => 'anne.liboon@globaltronics.net',
+                'password' => 'GlobaltronicsSales@2026',
+            ],
+            [
+                'name' => 'Sheryl Quilla',
+                'email' => 'sheryl.quilla@globaltronics.net',
+                'password' => 'GlobaltronicsSales@2026',
+            ],
+        ];
+
+        $roleIdsToSync = collect([$salesRole?->id, $adsSalesRole?->id])->filter()->values()->all();
+
+        foreach ($salesStaffMembers as $staff) {
+            $salesAccount = User::updateOrCreate(
+                ['email' => $staff['email']],
+                [
+                    'name' => $staff['name'],
+                    'password' => $staff['password'],
+                    'is_admin' => false,
+                ]
+            );
+
+            if (!empty($roleIdsToSync)) {
+                $salesAccount->roles()->syncWithoutDetaching($roleIdsToSync);
+            }
         }
+
 
         // Seed Inventory items (EOL Philips Units)
         $this->call(InventoryItemSeeder::class);
