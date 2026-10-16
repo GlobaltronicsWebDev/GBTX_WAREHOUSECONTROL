@@ -95,18 +95,23 @@
                     </svg>
                 </button>
 
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 group shrink-0">
+                <a href="{{ Auth::user()->canOnlyAccessSalesOrders() ? route('admin.sales-orders.index') : route('admin.dashboard') }}" class="flex items-center gap-3 group shrink-0">
                     <div class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 p-1.5 flex items-center justify-center shadow-sm group-hover:border-blue-500/50 transition-colors shrink-0">
                         <img src="{{ asset('assets/images/logo/globaltronics_logo.png') }}" alt="Globaltronics" class="w-full h-full object-contain">
                     </div>
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="font-extrabold tracking-tight text-slate-900 text-sm sm:text-base">GLOBALTRONICS</span>
-                            <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-amber-50 text-amber-700 border border-amber-300">ADMIN</span>
+                            @if (Auth::user()->canOnlyAccessSalesOrders())
+                                <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-blue-50 text-blue-700 border border-blue-300">SALES</span>
+                            @else
+                                <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-amber-50 text-amber-700 border border-amber-300">ADMIN</span>
+                            @endif
                         </div>
-                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Inventory Control System</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">{{ Auth::user()->canOnlyAccessSalesOrders() ? 'ADS Sales Order Portal' : 'Inventory Control System' }}</p>
                     </div>
                 </a>
+
             </div>
 
             <!-- Middle: Facility & Status Pill (Desktop) -->
@@ -253,6 +258,7 @@
                 <div>
                     <p class="sidebar-heading px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest m-0 mb-1 font-mono-code">Navigation</p>
                     <nav class="space-y-1">
+                        @if (!Auth::user()->canOnlyAccessSalesOrders())
                         <a href="{{ route('admin.dashboard') }}" 
                            class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}"
                            title="Dashboard Overview">
@@ -298,6 +304,8 @@
                                 {{ $sidebarApprovedSrfCount }}
                             </span>
                         </a>
+                        @endif
+
 
                         <!-- ADS Sales Order System (LED Advertising Sales Workflow) -->
                         @php
@@ -366,7 +374,9 @@
                         </a>
                         @endif
 
+                        @if (!Auth::user()->canOnlyAccessSalesOrders())
                         <!-- Warehouse Inventory Dropdown with Categories Sub-Menu -->
+
                         <!-- Warehouse Inventory Dropdown with Categories Sub-Menu -->
                         @php
                             $sidebarLedCount = \App\Models\InventoryItem::where('category', 'CENTRALIZED LED INVENTORY')->count();
@@ -606,9 +616,11 @@
                             </svg>
                             <span class="sidebar-text truncate">Front Login Portal</span>
                         </a>
+                        @endif
                     </nav>
                 </div>
 
+                @if (!Auth::user()->canOnlyAccessSalesOrders())
                 <!-- Merged System Info Pill in Sidebar Menu -->
                 <div class="sidebar-footer pt-3 mt-1 border-t border-slate-200">
                     <div class="p-3 rounded-xl bg-slate-50/90 border border-slate-200 text-xs">
@@ -626,6 +638,8 @@
                         </div>
                     </div>
                 </div>
+                @endif
+
             </div>
         </aside>
 

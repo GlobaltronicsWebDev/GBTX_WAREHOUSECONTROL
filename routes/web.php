@@ -17,7 +17,8 @@ use Illuminate\Support\Str;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect()->route('admin.dashboard');
+        $targetRoute = Auth::user()->canOnlyAccessSalesOrders() ? 'admin.sales-orders.index' : 'admin.dashboard';
+        return redirect()->route($targetRoute);
     }
 
     return view('welcome');
@@ -25,7 +26,8 @@ Route::get('/', function () {
 
 Route::get('/login', function () {
     if (Auth::check()) {
-        return redirect()->route('admin.dashboard');
+        $targetRoute = Auth::user()->canOnlyAccessSalesOrders() ? 'admin.sales-orders.index' : 'admin.dashboard';
+        return redirect()->route($targetRoute);
     }
 
     return view('welcome');
@@ -42,8 +44,13 @@ Route::post('/login', function (Request $request) {
     if (Auth::attempt([$loginField => $credentials['username'], 'password' => $credentials['password']], $request->boolean('remember'))) {
         $request->session()->regenerate();
 
-        return redirect()->intended(route('admin.dashboard'))->with('status', 'Authentication successful! Welcome, '.Auth::user()->name);
+        $defaultTarget = Auth::user()->canOnlyAccessSalesOrders()
+            ? route('admin.sales-orders.index')
+            : route('admin.dashboard');
+
+        return redirect()->intended($defaultTarget)->with('status', 'Authentication successful! Welcome, '.Auth::user()->name);
     }
+
 
     return back()->withErrors([
         'username' => 'Authentication error: Invalid credentials provided. Please verify your email and password.',
@@ -103,8 +110,10 @@ Route::post('/reset-password', function (Request $request) {
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
-        return redirect()->route('admin.dashboard');
+        $targetRoute = Auth::user()->canOnlyAccessSalesOrders() ? 'admin.sales-orders.index' : 'admin.dashboard';
+        return redirect()->route($targetRoute);
     });
+
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

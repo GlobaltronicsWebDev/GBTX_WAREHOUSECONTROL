@@ -20,9 +20,14 @@ class DashboardController extends Controller
     /**
      * Display the warehouse admin dashboard overview.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
+        if (Auth::user()?->canOnlyAccessSalesOrders()) {
+            return redirect()->route('admin.sales-orders.index');
+        }
+
         $totalUsers = User::count();
+
         $totalRoles = Role::count();
         $adminCount = User::whereHas('roles', function ($query) {
             $query->whereIn('slug', ['it-admin', 'warehouse-admin']);
@@ -173,9 +178,14 @@ class DashboardController extends Controller
     /**
      * View summary of Approved & Verified SRF requisitions.
      */
-    public function approvedSrf(Request $request): View
+    public function approvedSrf(Request $request): View|RedirectResponse
     {
+        if (Auth::user()?->canOnlyAccessSalesOrders()) {
+            return redirect()->route('admin.sales-orders.index')->with('error', 'Access restricted to ADS Sales Orders only.');
+        }
+
         $query = SrfRequisition::with(['inventoryItem', 'requester', 'verifier'])
+
             ->whereIn('status', ['completed', 'verified', 'approved'])
             ->latest();
 

@@ -21,9 +21,14 @@ class InventoryController extends Controller
     /**
      * Display a listing of inventory items with filters and metrics.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
+        if (Auth::user()?->canOnlyAccessSalesOrders()) {
+            return redirect()->route('admin.sales-orders.index')->with('error', 'Access restricted to ADS Sales Orders only.');
+        }
+
         $search = $request->query('search');
+
         $manufacturer = $request->query('manufacturer');
         $category = $request->query('category', 'CENTRALIZED LED INVENTORY');
         $location = $request->query('location');

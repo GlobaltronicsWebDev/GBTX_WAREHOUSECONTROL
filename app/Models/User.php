@@ -184,6 +184,25 @@ class User extends Authenticatable
     }
 
     /**
+     * Determine if user is strictly restricted to ADS Sales Orders only.
+     * Restricted users cannot view the warehouse floor, inventory catalog, or SRF requisitions.
+     */
+    public function canOnlyAccessSalesOrders(): bool
+    {
+        if ($this->isAdsAdmin() || $this->isAdmin() || $this->isWarehouseStaff() || $this->isTechnical() || $this->hasRole(['accounting', 'inventory-supervisor', 'dispatch-officer'])) {
+            return false;
+        }
+
+        $restrictedEmails = [
+            'anne.liboon@globaltronics.net',
+            'sheryl.quilla@globaltronics.net',
+            'sherly.quilla@globaltronics.net',
+        ];
+
+        return in_array(strtolower((string) $this->email), $restrictedEmails);
+    }
+
+    /**
      * Get the primary role for the user.
      */
     public function getPrimaryRoleAttribute(): ?Role
@@ -191,3 +210,4 @@ class User extends Authenticatable
         return $this->roles->first();
     }
 }
+
