@@ -307,7 +307,7 @@
                                             <textarea name="notes" rows="2" placeholder="Optional notes for this approval step..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:ring-2 focus:ring-blue-500"></textarea>
                                         </div>
 
-                                        <button type="submit" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.01]">
+                                        <button type="submit" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.01]">
                                             Approve &amp; Forward to Next Step ✓
                                         </button>
                                     </form>
