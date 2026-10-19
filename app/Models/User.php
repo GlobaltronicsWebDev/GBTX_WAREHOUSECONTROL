@@ -169,10 +169,22 @@ class User extends Authenticatable
 
     /**
      * Determine if user can view all orders across all queues.
+     * Approvers, Accounting, and Admins can view all orders in the pipeline.
      */
     public function canViewAllOrders(): bool
     {
-        return $this->isAdsAdmin() || $this->hasRole('accounting');
+        return $this->isAdsAdmin() || $this->hasRole([
+            'accounting',
+            \App\Support\Workflow::ROLE_JOVY,
+            \App\Support\Workflow::ROLE_FRED,
+            \App\Support\Workflow::ROLE_OWEN,
+            \App\Support\Workflow::ROLE_MACY,
+            \App\Support\Workflow::ROLE_BADET,
+            \App\Support\Workflow::ROLE_KING,
+            \App\Support\Workflow::ROLE_CONTENT,
+            \App\Support\Workflow::ROLE_IT,
+            \App\Support\Workflow::ROLE_ACCOUNTING,
+        ]);
     }
 
     /**

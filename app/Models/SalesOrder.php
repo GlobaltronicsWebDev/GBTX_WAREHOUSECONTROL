@@ -193,8 +193,8 @@ class SalesOrder extends Model
      */
     public function scopeAccessibleBy(Builder $query, User $user): Builder
     {
-        // Admins and Accounting see all orders
-        if ($user->is_admin || $user->hasRole(['admin', 'it-admin', 'accounting'])) {
+        // Admins, Accounting, and Approvers see all orders in All Orders tab
+        if ($user->is_admin || $user->canViewAllOrders()) {
             return $query;
         }
 

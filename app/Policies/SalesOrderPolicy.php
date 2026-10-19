@@ -21,23 +21,35 @@ class SalesOrderPolicy
      */
     public function view(User $user, SalesOrder $salesOrder): bool
     {
-        // Admins and Accounting see all orders
+        // 1. Admins, Accounting, and all Workflow Approvers see all orders
         if ($user->canViewAllOrders()) {
             return true;
         }
 
-        // Filer can view
-        if ($salesOrder->user_id === $user->id) {
+        // 2. Any user with an ADS workflow role or restricted ADS access
+        if ($user->canOnlyAccessSalesOrders() || $user->isAdsAdmin()) {
             return true;
         }
 
-        // User whose role is required for current step can view
+        // 3. Filer or BDS agent can view
+        if ($salesOrder->user_id === $user->id || ($salesOrder->bds_email && $salesOrder->bds_email === $user->email)) {
+            return true;
+        }
+
+        // 4. User whose role is required for current step can view
         if (Workflow::canUserActOnStep($user, $salesOrder->current_step)) {
             return true;
         }
 
-        // Users who acted on it previously can view
-        return $salesOrder->logs()->where('user_id', $user->id)->exists();
+        // 5. Users who acted on it previously in logs can view
+        if ($salesOrder->logs()->where('user_id', $user->id)->exists()) {
+            return true;
+        }
+
+        // 6. Users who received a notification for this specific order
+        return \App\Models\TransactionNotification::where('user_id', $user->id)
+            ->where('reference_id', (string) $salesOrder->id)
+            ->exists();
     }
 
     /**
