@@ -901,7 +901,7 @@
                     setTimeout(() => toastElem.remove(), 320);
                 }
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                fetch(`/admin/sales-orders/notifications/${id}/dismiss`, {
+                fetch(`{{ url('admin/sales-orders/notifications') }}/${id}/dismiss`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': token,
