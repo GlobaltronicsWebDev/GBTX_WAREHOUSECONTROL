@@ -599,10 +599,12 @@ class SalesOrderController extends Controller
 
         // 4. Always dispatch a notification specifically for Sales on EVERY approver sign-off
         if ($event !== 'created') {
-            $salesUsers = collect([$order->user])
+            $bdsUser = $order->bds_email ? User::where('email', $order->bds_email)->first() : null;
+            $salesUsers = collect([$order->user, $bdsUser])
                 ->merge(User::whereHas('roles', fn ($q) => $q->whereIn('slug', ['sales', 'sales-executive']))->get())
                 ->filter()
-                ->unique('id');
+                ->unique('id')
+                ->reject(fn ($u) => $u->id === Auth::id());
 
             $salesTitle = match ($event) {
                 'completed' => "Final Approval Complete: {$order->aso_number}",
