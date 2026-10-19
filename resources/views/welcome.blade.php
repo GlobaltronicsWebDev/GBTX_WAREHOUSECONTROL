@@ -97,9 +97,9 @@
             <!-- Middle Left: Warehouse Headline, Description & Metrics -->
             <div class="relative z-10 flex-1 flex flex-col justify-center my-6 lg:my-auto py-6 sm:py-8 lg:py-10 max-w-xl">
                 <h1 class="text-3xl sm:text-4xl lg:text-4xl xl:text-5xl font-extrabold text-white tracking-tight leading-[1.15]">
-                    GLOBALTRONICS WAREHOUSE <br class="hidden sm:inline" />
+                    GLOBALTRONICS <br class="hidden sm:inline" />
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-amber-400">
-                        INVENTORY CONTROL SYSTEM
+                        CONTROL SYSTEM
                     </span>
                 </h1>
 
