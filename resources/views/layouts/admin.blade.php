@@ -267,7 +267,7 @@
                 <div>
                     <p class="sidebar-heading px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest m-0 mb-1 font-mono-code">Navigation</p>
                     <nav class="space-y-1">
-                        @if (!Auth::user()->canOnlyAccessSalesOrders())
+                        @if (!Auth::user()->canOnlyAccessSalesOrders() && !request()->routeIs('admin.sales-orders.*'))
                         <a href="{{ route('admin.dashboard') }}" 
                            class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}"
                            title="Dashboard Overview">
@@ -315,6 +315,17 @@
                         </a>
                         @endif
 
+                        @if (request()->routeIs('admin.sales-orders.*') && !Auth::user()->canOnlyAccessSalesOrders())
+                        <!-- Switch back to Warehouse Dashboard for Admins -->
+                        <a href="{{ route('admin.dashboard') }}" 
+                           class="sidebar-item flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors"
+                           title="Return to Main Warehouse Operations Dashboard">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            <span>Warehouse Dashboard</span>
+                        </a>
+                        @endif
 
                         <!-- ADS Sales Order System (LED Advertising Sales Workflow) -->
                         @php
@@ -335,7 +346,7 @@
                                 <svg class="sidebar-icon w-5 h-5 shrink-0 {{ $isSalesOrdersActive ? 'text-blue-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
-                                <span class="sidebar-text truncate">ADS Sales Orders</span>
+                                <span class="sidebar-text truncate">ADS Sales Order Overview</span>
                             </div>
                             @if ($userActionableOrderCount > 0)
                                 <span class="sidebar-badge text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-rose-500 text-white font-extrabold animate-pulse">
@@ -383,7 +394,7 @@
                         </a>
                         @endif
 
-                        @if (!Auth::user()->canOnlyAccessSalesOrders())
+                        @if (!Auth::user()->canOnlyAccessSalesOrders() && !request()->routeIs('admin.sales-orders.*'))
                         <!-- Warehouse Inventory Dropdown with Categories Sub-Menu -->
 
                         <!-- Warehouse Inventory Dropdown with Categories Sub-Menu -->
@@ -853,6 +864,129 @@
                 });
             }
         });
+    </script>
+
+    <!-- Real-Time Approver Sign-off Toast Pop-up System for Sales & Management -->
+    <div id="salesToastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none" aria-live="polite"></div>
+
+    <script>
+        (function() {
+            const container = document.getElementById('salesToastContainer');
+            if (!container) return;
+
+            const seenToastIds = new Set(JSON.parse(sessionStorage.getItem('seen_sales_toasts') || '[]'));
+
+            function playSoftChime() {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.36);
+                } catch (e) {
+                    // Audio blocked until user gesture
+                }
+            }
+
+            function dismissToast(id, toastElem) {
+                if (toastElem) {
+                    toastElem.classList.add('opacity-0', 'translate-x-8', 'transition-all', 'duration-300');
+                    setTimeout(() => toastElem.remove(), 320);
+                }
+                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                fetch(`/admin/sales-orders/notifications/${id}/dismiss`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    }
+                }).catch(() => {});
+            }
+
+            function renderToast(notif) {
+                const toast = document.createElement('div');
+                toast.className = 'pointer-events-auto bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/10 p-4 transition-all duration-300 transform translate-y-3 opacity-0 ring-1 ring-blue-500/20';
+                
+                toast.innerHTML = `
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-[10px] font-mono-code font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                                APPROVER UPDATE
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-mono-code text-slate-400">${notif.time || 'Just now'}</span>
+                            <button type="button" class="text-slate-400 hover:text-slate-700 text-xs p-1" aria-label="Dismiss">✕</button>
+                        </div>
+                    </div>
+                    <div class="mt-2.5">
+                        <h4 class="text-xs font-bold text-slate-900 leading-tight">${notif.title}</h4>
+                        <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">${notif.message}</p>
+                    </div>
+                    <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-[10px] font-mono-code text-slate-400">Actor: <strong class="text-slate-700">${notif.actor_name}</strong></span>
+                        <a href="${notif.url}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition-colors">
+                            <span>View Order</span>
+                            <span>→</span>
+                        </a>
+                    </div>
+                `;
+
+                toast.querySelector('button').addEventListener('click', () => dismissToast(notif.id, toast));
+
+                toast.querySelector('a').addEventListener('click', () => {
+                    dismissToast(notif.id, null);
+                });
+
+                container.appendChild(toast);
+
+                requestAnimationFrame(() => {
+                    toast.classList.remove('translate-y-3', 'opacity-0');
+                    toast.classList.add('translate-y-0', 'opacity-100');
+                });
+
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        dismissToast(notif.id, toast);
+                    }
+                }, 9000);
+            }
+
+            function checkSalesNotifications() {
+                fetch('{{ route('admin.sales-orders.notifications.unread') }}', {
+                    headers: { 'Accept': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.notifications && data.notifications.length > 0) {
+                        let hasNew = false;
+                        data.notifications.forEach(notif => {
+                            if (!seenToastIds.has(notif.id)) {
+                                seenToastIds.add(notif.id);
+                                renderToast(notif);
+                                hasNew = true;
+                            }
+                        });
+                        if (hasNew) {
+                            playSoftChime();
+                            sessionStorage.setItem('seen_sales_toasts', JSON.stringify(Array.from(seenToastIds).slice(-30)));
+                        }
+                    }
+                })
+                .catch(() => {});
+            }
+
+            setTimeout(checkSalesNotifications, 1800);
+            setInterval(checkSalesNotifications, 12000);
+        })();
     </script>
     @stack('scripts')
 </body>

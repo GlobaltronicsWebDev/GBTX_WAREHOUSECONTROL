@@ -189,14 +189,44 @@ class User extends Authenticatable
      */
     public function canOnlyAccessSalesOrders(): bool
     {
-        if ($this->isAdsAdmin() || $this->isAdmin() || $this->isWarehouseStaff() || $this->isTechnical() || $this->hasRole(['accounting', 'inventory-supervisor', 'dispatch-officer'])) {
+        // Full warehouse staff, inventory supervisor, dispatch officer, and technical users have warehouse access
+        if ($this->isWarehouseStaff() || $this->isTechnical() || $this->hasRole(['inventory-supervisor', 'dispatch-officer', 'warehouse-admin'])) {
             return false;
+        }
+
+        // If user is IT Admin / Super Admin, they have full system access unless explicitly in sales orders
+        if ($this->isItAdmin() || (bool) $this->is_admin) {
+            return false;
+        }
+
+        // All ADS workflow approvers & sales filers (Jovy, Fred, Owen, Macy, Badet, King, Sales, Content) only access Sales Orders
+        if ($this->hasRole([
+            \App\Support\Workflow::ROLE_JOVY,
+            \App\Support\Workflow::ROLE_FRED,
+            \App\Support\Workflow::ROLE_OWEN,
+            \App\Support\Workflow::ROLE_MACY,
+            \App\Support\Workflow::ROLE_BADET,
+            \App\Support\Workflow::ROLE_KING,
+            \App\Support\Workflow::ROLE_SALES,
+            \App\Support\Workflow::ROLE_CONTENT,
+            'sales',
+            'sales-executive',
+        ])) {
+            return true;
         }
 
         $restrictedEmails = [
             'anne.liboon@globaltronics.net',
             'sheryl.quilla@globaltronics.net',
             'sherly.quilla@globaltronics.net',
+            'jovy@globaltronics.net',
+            'fred@globaltronics.net',
+            'owen@globaltronics.net',
+            'macy@globaltronics.net',
+            'badet@globaltronics.net',
+            'king@globaltronics.net',
+            'content@globaltronics.net',
+            'sales@globaltronics.net',
         ];
 
         return in_array(strtolower((string) $this->email), $restrictedEmails);

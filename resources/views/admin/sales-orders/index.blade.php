@@ -107,57 +107,67 @@
     </div>
 
     <!-- Filter and Search Bar with Tabs -->
-    <div class="glass-panel bg-white rounded-3xl p-5 shadow-sm border border-slate-200 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+    <div class="glass-panel bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
             
-            <!-- Queue Tabs -->
-            <div class="flex items-center gap-2">
+            <!-- Queue Tabs (Segmented Switcher) -->
+            <div class="p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 inline-flex items-center gap-1.5 self-start">
                 <a href="{{ route('admin.sales-orders.index', array_merge(request()->query(), ['tab' => 'my_queue'])) }}" 
-                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 {{ $tab === 'my_queue' ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-2 {{ $tab === 'my_queue' ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60' }}">
+                    <svg class="w-3.5 h-3.5 {{ $tab === 'my_queue' ? 'text-rose-500' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <span>My Action Queue</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-mono-code {{ $tab === 'my_queue' ? 'bg-rose-500 text-white' : 'bg-slate-200 text-slate-700' }}">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono-code font-bold {{ $myQueueCount > 0 ? 'bg-rose-500 text-white animate-pulse' : 'bg-slate-200 text-slate-600' }}">
                         {{ $myQueueCount }}
                     </span>
                 </a>
 
                 <a href="{{ route('admin.sales-orders.index', array_merge(request()->query(), ['tab' => 'all'])) }}" 
-                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 {{ $tab === 'all' ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-2 {{ $tab === 'all' ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60' }}">
+                    <svg class="w-3.5 h-3.5 {{ $tab === 'all' ? 'text-blue-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
                     <span>{{ Auth::user()->canViewAllOrders() ? 'All System Orders' : 'My Orders & History' }}</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-mono-code {{ $tab === 'all' ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-700' }}">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono-code font-bold {{ $tab === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600' }}">
                         {{ $totalOrders }}
                     </span>
                 </a>
             </div>
 
             <!-- Status Pill Filter Links -->
-            <div class="flex flex-wrap items-center gap-1.5 text-xs">
+            <div class="p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 inline-flex flex-wrap items-center gap-1 self-start lg:self-auto">
                 <a href="{{ route('admin.sales-orders.index', array_merge(request()->except('status'), ['tab' => $tab])) }}" 
-                   class="px-2.5 py-1 rounded-lg font-bold transition-colors {{ empty($status) ? 'bg-blue-100 text-blue-900' : 'text-slate-500 hover:bg-slate-100' }}">
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all {{ empty($status) ? 'bg-white text-blue-700 shadow-xs border border-slate-200/60' : 'text-slate-600 hover:text-slate-900' }}">
                     All Status
                 </a>
                 <a href="{{ route('admin.sales-orders.index', array_merge(request()->query(), ['status' => App\Support\Workflow::STATUS_IN_PROGRESS, 'tab' => $tab])) }}" 
-                   class="px-2.5 py-1 rounded-lg font-bold transition-colors {{ $status === App\Support\Workflow::STATUS_IN_PROGRESS ? 'bg-amber-100 text-amber-900' : 'text-slate-500 hover:bg-slate-100' }}">
-                    In Progress
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 {{ $status === App\Support\Workflow::STATUS_IN_PROGRESS ? 'bg-amber-500 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-white/50' }}">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $status === App\Support\Workflow::STATUS_IN_PROGRESS ? 'bg-white' : 'bg-amber-500' }}"></span>
+                    <span>In Progress</span>
                 </a>
                 <a href="{{ route('admin.sales-orders.index', array_merge(request()->query(), ['status' => App\Support\Workflow::STATUS_COMPLETE, 'tab' => $tab])) }}" 
-                   class="px-2.5 py-1 rounded-lg font-bold transition-colors {{ $status === App\Support\Workflow::STATUS_COMPLETE ? 'bg-emerald-100 text-emerald-900' : 'text-slate-500 hover:bg-slate-100' }}">
-                    Complete
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 {{ $status === App\Support\Workflow::STATUS_COMPLETE ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-white/50' }}">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $status === App\Support\Workflow::STATUS_COMPLETE ? 'bg-white' : 'bg-emerald-500' }}"></span>
+                    <span>Complete</span>
                 </a>
                 <a href="{{ route('admin.sales-orders.index', array_merge(request()->query(), ['status' => App\Support\Workflow::STATUS_DECLINED, 'tab' => $tab])) }}" 
-                   class="px-2.5 py-1 rounded-lg font-bold transition-colors {{ $status === App\Support\Workflow::STATUS_DECLINED ? 'bg-rose-100 text-rose-900' : 'text-slate-500 hover:bg-slate-100' }}">
-                    Declined
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 {{ $status === App\Support\Workflow::STATUS_DECLINED ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-white/50' }}">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $status === App\Support\Workflow::STATUS_DECLINED ? 'bg-white' : 'bg-rose-500' }}"></span>
+                    <span>Declined</span>
                 </a>
             </div>
         </div>
 
-        <!-- Search and Step Select Filter -->
-        <form method="GET" action="{{ route('admin.sales-orders.index') }}" class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+        <!-- Modern Inline Search and Step Select Filter -->
+        <form method="GET" action="{{ route('admin.sales-orders.index') }}" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <input type="hidden" name="tab" value="{{ $tab }}">
             @if ($status)
                 <input type="hidden" name="status" value="{{ $status }}">
             @endif
 
-            <div class="sm:col-span-6 relative">
+            <!-- Search Field (Flexible Width) -->
+            <div class="relative flex-1">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -165,12 +175,13 @@
                 </div>
                 <input type="text" name="search" value="{{ $search }}" 
                        placeholder="Search ASO #, SJO #, Client name, BDS name or email..." 
-                       class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500">
+                       class="w-full h-10 pl-10 pr-4 bg-slate-50/80 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400">
             </div>
 
-            <div class="sm:col-span-4">
-                <select name="step" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500">
-                    <option value="">-- Filter by Workflow Step --</option>
+            <!-- Workflow Step Dropdown -->
+            <div class="w-full sm:w-72 shrink-0">
+                <select name="step" class="w-full h-10 px-3 bg-slate-50/80 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-700">
+                    <option value="">All Workflow Stages</option>
                     @foreach ($workflowSteps as $stepKey => $stepDef)
                         <option value="{{ $stepKey }}" {{ $step === $stepKey ? 'selected' : '' }}>
                             {{ $stepDef['stage'] }} • {{ $stepDef['title'] }}
@@ -179,13 +190,20 @@
                 </select>
             </div>
 
-            <div class="sm:col-span-2 flex items-center gap-2">
-                <button type="submit" class="w-full h-10 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-colors">
-                    Filter
+            <!-- Inline Action Buttons (No giant full-width button) -->
+            <div class="flex items-center gap-2 shrink-0">
+                <button type="submit" 
+                        class="h-10 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs inline-flex items-center justify-center gap-2 shadow-sm transition-all hover:scale-[1.02]">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    <span>Filter Orders</span>
                 </button>
                 @if ($search || $step || $status)
-                    <a href="{{ route('admin.sales-orders.index', ['tab' => $tab]) }}" class="h-10 px-3 inline-flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition-colors">
-                        Clear
+                    <a href="{{ route('admin.sales-orders.index', ['tab' => $tab]) }}" 
+                       class="h-10 px-3.5 inline-flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition-colors"
+                       title="Reset search & filters">
+                        ✕ Clear
                     </a>
                 @endif
             </div>

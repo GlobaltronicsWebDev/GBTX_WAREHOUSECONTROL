@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\OrderStepNotification;
 use App\Support\Workflow;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -596,7 +597,47 @@ class SalesOrderController extends Controller
             }
         }
 
-        // 4. Log broadcast notification for all administrators & system timeline
+        // 4. Always dispatch a notification specifically for Sales on EVERY approver sign-off
+        if ($event !== 'created') {
+            $salesUsers = collect([$order->user])
+                ->merge(User::whereHas('roles', fn ($q) => $q->whereIn('slug', ['sales', 'sales-executive']))->get())
+                ->filter()
+                ->unique('id');
+
+            $salesTitle = match ($event) {
+                'completed' => "Final Approval Complete: {$order->aso_number}",
+                'declined' => "Order Declined by {$actorName}: {$order->aso_number}",
+                'sent_back' => "Revision Requested by {$actorName}: {$order->aso_number}",
+                default => "Approver Sign-off: {$actorName} approved {$order->aso_number}",
+            };
+
+            $salesMessage = match ($event) {
+                'completed' => "Order #{$order->aso_number} for {$order->client_name} has passed all 7 stages and is fully approved & verified!",
+                'declined' => "Order #{$order->aso_number} was declined by {$actorName}. Reason: {$notes}",
+                'sent_back' => "Creative revisions requested by {$actorName}. Reason: {$notes}",
+                default => "{$actorName} signed off! Order for '{$order->client_name}' advanced to: {$stepInfo['title']}.",
+            };
+
+            foreach ($salesUsers as $salesUser) {
+                try {
+                    TransactionNotification::create([
+                        'user_id' => $salesUser->id,
+                        'actor_id' => Auth::id(),
+                        'actor_name' => $actorName ?? Auth::user()?->name ?? 'System',
+                        'actor_role' => Auth::user()?->roles->first()?->name ?? 'Approver',
+                        'title' => $salesTitle,
+                        'message' => $salesMessage,
+                        'type' => 'sales_order',
+                        'reference_id' => (string) $order->id,
+                        'is_read' => false,
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::warning("TransactionNotification sales targeted create error: " . $e->getMessage());
+                }
+            }
+        }
+
+        // 5. Log broadcast notification for all administrators & system timeline
         try {
             TransactionNotification::create([
                 'user_id' => null,
@@ -613,7 +654,7 @@ class SalesOrderController extends Controller
             Log::warning("TransactionNotification broadcast create error: " . $e->getMessage());
         }
 
-        // 5. Send Email Notification safely
+        // 6. Send Email Notification safely
         if ($recipients->isNotEmpty()) {
             try {
                 Notification::send($recipients, new OrderStepNotification($order, $event, $actorName, $notes));
@@ -621,5 +662,52 @@ class SalesOrderController extends Controller
                 Log::warning("OrderStepNotification mail send error: " . $e->getMessage());
             }
         }
+    }
+
+    /**
+     * Real-time notification endpoint for sales & approver pop-ups.
+     */
+    public function unreadSalesNotifications(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['notifications' => []]);
+        }
+
+        $userId = $user->id;
+        $notifications = TransactionNotification::where(function ($q) use ($userId) {
+            $q->where('user_id', $userId)
+              ->orWhere(function ($sub) {
+                  $sub->whereNull('user_id')->where('type', 'sales_order');
+              });
+        })
+        ->where('type', 'sales_order')
+        ->where('is_read', false)
+        ->latest()
+        ->take(4)
+        ->get()
+        ->map(function ($notif) {
+            return [
+                'id' => $notif->id,
+                'title' => $notif->title,
+                'message' => $notif->message,
+                'actor_name' => $notif->actor_name,
+                'actor_role' => $notif->actor_role,
+                'reference_id' => $notif->reference_id,
+                'url' => $notif->reference_id ? route('admin.sales-orders.show', $notif->reference_id) : route('admin.sales-orders.index'),
+                'time' => $notif->created_at->diffForHumans(null, true, true),
+            ];
+        });
+
+        return response()->json(['notifications' => $notifications]);
+    }
+
+    /**
+     * Dismiss a notification via AJAX so it doesn't pop up again.
+     */
+    public function dismissNotification(TransactionNotification $notification): JsonResponse
+    {
+        $notification->update(['is_read' => true]);
+        return response()->json(['success' => true]);
     }
 }

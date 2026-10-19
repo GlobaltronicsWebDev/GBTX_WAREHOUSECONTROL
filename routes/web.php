@@ -152,6 +152,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/sales-orders/reports', [SalesOrderController::class, 'reports'])->name('sales-orders.reports');
     Route::get('/sales-orders/roles', [SalesOrderRoleController::class, 'index'])->name('sales-orders.roles');
     Route::put('/sales-orders/roles/{user}', [SalesOrderRoleController::class, 'update'])->name('sales-orders.roles.update');
+    Route::get('/sales-orders/notifications/unread', [SalesOrderController::class, 'unreadSalesNotifications'])->name('sales-orders.notifications.unread');
+    Route::post('/sales-orders/notifications/{notification}/dismiss', [SalesOrderController::class, 'dismissNotification'])->name('sales-orders.notifications.dismiss');
     Route::get('/sales-orders/{salesOrder}', [SalesOrderController::class, 'show'])->name('sales-orders.show');
     Route::post('/sales-orders/{salesOrder}/advance', [SalesOrderController::class, 'advance'])->name('sales-orders.advance');
     Route::post('/sales-orders/{salesOrder}/decline', [SalesOrderController::class, 'decline'])->name('sales-orders.decline');
