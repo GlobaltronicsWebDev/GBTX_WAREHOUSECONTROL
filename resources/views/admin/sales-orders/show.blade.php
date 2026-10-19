@@ -91,7 +91,7 @@
                 }
             @endphp
 
-            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5">
                 @foreach ($stages as $sIdx => $stg)
                     @php
                         $isCurrentStage = in_array($order->current_step, $stg['steps']);

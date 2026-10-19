@@ -176,7 +176,16 @@
                                 @forelse ($headerNotifications ?? [] as $notif)
                                     <div class="p-3 rounded-xl transition-colors {{ $notif->is_read ? 'hover:bg-slate-50 opacity-80' : 'bg-blue-50/40 hover:bg-blue-50/70 border-l-2 border-blue-500' }}">
                                         <div class="flex items-start justify-between gap-2">
-                                            <span class="font-bold text-xs text-slate-900 leading-snug">{{ $notif->title }}</span>
+                                            @if ($notif->type === 'sales_order' && $notif->reference_id)
+                                                <a href="{{ route('admin.sales-orders.show', $notif->reference_id) }}" class="font-bold text-xs text-blue-700 hover:text-blue-900 hover:underline leading-snug flex items-center gap-1 group">
+                                                    <span>{{ $notif->title }}</span>
+                                                    <svg class="w-3 h-3 text-blue-500 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                    </svg>
+                                                </a>
+                                            @else
+                                                <span class="font-bold text-xs text-slate-900 leading-snug">{{ $notif->title }}</span>
+                                            @endif
                                             <span class="text-[10px] font-mono-code text-slate-400 shrink-0">{{ $notif->created_at->diffForHumans(null, true, true) }}</span>
                                         </div>
                                         <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">{{ $notif->message }}</p>

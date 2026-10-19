@@ -108,6 +108,79 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        // ADS Sales Order Workflow Accounts (Stage 1 through Stage 7)
+        $stageUsers = [
+            [
+                'name' => 'Jovy',
+                'email' => 'jovy@globaltronics.net',
+                'password' => 'GlobaltronicsApprover@2026',
+                'role' => \App\Support\Workflow::ROLE_JOVY,
+            ],
+            [
+                'name' => 'Fred',
+                'email' => 'fred@globaltronics.net',
+                'password' => 'GlobaltronicsApprover@2026',
+                'role' => \App\Support\Workflow::ROLE_FRED,
+            ],
+            [
+                'name' => 'Owen',
+                'email' => 'owen@globaltronics.net',
+                'password' => 'GlobaltronicsApprover@2026',
+                'role' => \App\Support\Workflow::ROLE_OWEN,
+            ],
+            [
+                'name' => 'Macy Guido Lee',
+                'email' => 'macy@globaltronics.net',
+                'password' => 'GlobaltronicsApprover@2026',
+                'role' => \App\Support\Workflow::ROLE_MACY,
+            ],
+            [
+                'name' => 'Badet',
+                'email' => 'badet@globaltronics.net',
+                'password' => 'GlobaltronicsApprover@2026',
+                'role' => \App\Support\Workflow::ROLE_BADET,
+            ],
+            [
+                'name' => 'King',
+                'email' => 'king@globaltronics.net',
+                'password' => 'GlobaltronicsApprover@2026',
+                'role' => \App\Support\Workflow::ROLE_KING,
+            ],
+            [
+                'name' => 'Content Team',
+                'email' => 'content@globaltronics.net',
+                'password' => 'GlobaltronicsContent@2026',
+                'role' => \App\Support\Workflow::ROLE_CONTENT,
+            ],
+            [
+                'name' => 'IT Operations',
+                'email' => 'it@globaltronics.net',
+                'password' => 'GlobaltronicsIt@2026',
+                'role' => \App\Support\Workflow::ROLE_IT,
+            ],
+            [
+                'name' => 'Accounting Team',
+                'email' => 'accounting@globaltronics.net',
+                'password' => 'GlobaltronicsAcct@2026',
+                'role' => \App\Support\Workflow::ROLE_ACCOUNTING,
+            ],
+        ];
+
+        foreach ($stageUsers as $stg) {
+            $user = User::updateOrCreate(
+                ['email' => $stg['email']],
+                [
+                    'name' => $stg['name'],
+                    'password' => $stg['password'],
+                    'is_admin' => false,
+                ]
+            );
+
+            $role = Role::where('slug', $stg['role'])->first();
+            if ($role) {
+                $user->roles()->syncWithoutDetaching([$role->id]);
+            }
+        }
 
         // Seed Inventory items (EOL Philips Units)
         $this->call(InventoryItemSeeder::class);

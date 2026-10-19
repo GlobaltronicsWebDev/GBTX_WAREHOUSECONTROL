@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\OrderLog;
 use App\Models\Role;
 use App\Models\SalesOrder;
+use App\Models\TransactionNotification;
 use App\Models\User;
 use App\Notifications\OrderStepNotification;
 use App\Support\Workflow;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -355,15 +357,8 @@ class SalesOrderController extends Controller
             ]);
         });
 
-        // Send email to the order filer immediately
-        if ($salesOrder->user) {
-            $salesOrder->user->notify(new OrderStepNotification(
-                salesOrder: $salesOrder,
-                event: 'declined',
-                actorName: $user->name,
-                notes: $validated['reason']
-            ));
-        }
+        // Dispatch in-app and email notifications
+        $this->notifyNextStepUsers($salesOrder, 'declined', $user->name, $validated['reason']);
 
         return redirect()->route('admin.sales-orders.show', $salesOrder)
             ->with('status', "Sales order has been marked as DECLINED. Filer ({$salesOrder->bds_name}) has been notified via email.");
@@ -544,30 +539,87 @@ class SalesOrderController extends Controller
     }
 
     /**
-     * Helper to dispatch immediate real emails to all users holding the next step's role.
+     * Helper to dispatch immediate in-app and email notifications to stakeholders.
      */
     protected function notifyNextStepUsers(SalesOrder $order, string $event, ?string $actorName = null, ?string $notes = null): void
     {
         $stepInfo = $order->step_info;
         $requiredRoles = $stepInfo['roles'] ?? [];
 
-        if (empty($requiredRoles)) {
-            // If completed, notify order filer and accounting
-            if ($event === 'completed') {
-                $accountingUsers = User::whereHas('roles', fn ($q) => $q->where('slug', Workflow::ROLE_ACCOUNTING))->get();
-                $recipients = collect([$order->user])->merge($accountingUsers)->filter()->unique('id');
-                Notification::send($recipients, new OrderStepNotification($order, $event, $actorName, $notes));
-            }
-            return;
+        // 1. Prepare dynamic notification title & message
+        $title = match ($event) {
+            'created' => "ASO Filed: {$order->aso_number}",
+            'completed' => "ASO Completed: {$order->aso_number}",
+            'declined' => "ASO Declined: {$order->aso_number}",
+            'sent_back' => "Creative Revision: {$order->aso_number}",
+            default => "ASO Step: {$order->aso_number} → {$stepInfo['title']}",
+        };
+
+        $message = match ($event) {
+            'created' => "Stage 1 ASO filed by {$order->bds_name} for {$order->client_name} (PO: {$order->po_number}). Awaiting Stage 2 1st Approval from Jovy or Fred.",
+            'completed' => "Order #{$order->aso_number} ({$order->client_name}) successfully verified across all 7 stages and completed by {$actorName}!",
+            'declined' => "Order #{$order->aso_number} declined by {$actorName}. Reason: {$notes}",
+            'sent_back' => "Creative revision requested by {$actorName}. Reason: {$notes}",
+            default => "Advanced to {$stepInfo['title']}" . ($actorName ? " by {$actorName}" : "") . ($notes ? ". Notes: {$notes}" : "."),
+        };
+
+        // 2. Determine target recipients
+        $recipients = collect();
+
+        if ($event === 'completed') {
+            $accountingUsers = User::whereHas('roles', fn ($q) => $q->where('slug', Workflow::ROLE_ACCOUNTING))->get();
+            $recipients = collect([$order->user])->merge($accountingUsers)->filter()->unique('id');
+        } elseif ($event === 'declined' || $event === 'sent_back') {
+            $recipients = collect([$order->user])->filter()->unique('id');
+        } elseif (!empty($requiredRoles)) {
+            $recipients = User::whereHas('roles', function ($q) use ($requiredRoles) {
+                $q->whereIn('slug', $requiredRoles);
+            })->get();
         }
 
-        // Get users holding any of the required roles
-        $usersToNotify = User::whereHas('roles', function ($q) use ($requiredRoles) {
-            $q->whereIn('slug', $requiredRoles);
-        })->get();
+        // 3. Log in-app TransactionNotification for each assigned recipient
+        foreach ($recipients as $recipient) {
+            try {
+                TransactionNotification::create([
+                    'user_id' => $recipient->id,
+                    'actor_id' => Auth::id(),
+                    'actor_name' => $actorName ?? Auth::user()?->name ?? 'System',
+                    'actor_role' => Auth::user()?->roles->first()?->name ?? 'System',
+                    'title' => $title,
+                    'message' => $message,
+                    'type' => 'sales_order',
+                    'reference_id' => (string) $order->id,
+                    'is_read' => false,
+                ]);
+            } catch (\Throwable $e) {
+                Log::warning("TransactionNotification targeted create error: " . $e->getMessage());
+            }
+        }
 
-        if ($usersToNotify->isNotEmpty()) {
-            Notification::send($usersToNotify, new OrderStepNotification($order, $event, $actorName, $notes));
+        // 4. Log broadcast notification for all administrators & system timeline
+        try {
+            TransactionNotification::create([
+                'user_id' => null,
+                'actor_id' => Auth::id(),
+                'actor_name' => $actorName ?? Auth::user()?->name ?? 'System',
+                'actor_role' => Auth::user()?->roles->first()?->name ?? 'System',
+                'title' => $title,
+                'message' => $message,
+                'type' => 'sales_order',
+                'reference_id' => (string) $order->id,
+                'is_read' => false,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning("TransactionNotification broadcast create error: " . $e->getMessage());
+        }
+
+        // 5. Send Email Notification safely
+        if ($recipients->isNotEmpty()) {
+            try {
+                Notification::send($recipients, new OrderStepNotification($order, $event, $actorName, $notes));
+            } catch (\Throwable $e) {
+                Log::warning("OrderStepNotification mail send error: " . $e->getMessage());
+            }
         }
     }
 }
