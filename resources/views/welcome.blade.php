@@ -200,7 +200,7 @@
                         <span>GLOBALTRONICS</span>
                     </h2>
                     <p class="text-xs uppercase tracking-[0.28em] text-blue-600 font-bold mt-1">
-                        Warehouse Management System
+                        Control System
                     </p>
                     <p id="portalSubheading" class="text-xs text-slate-500 mt-2">
                         Enter your credentials to access warehouse operations
