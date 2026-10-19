@@ -677,11 +677,13 @@ class SalesOrderController extends Controller
         }
 
         $userId = $user->id;
-        $notifications = TransactionNotification::where(function ($q) use ($userId) {
-            $q->where('user_id', $userId)
-              ->orWhere(function ($sub) {
-                  $sub->whereNull('user_id')->where('type', 'sales_order');
-              });
+        $notifications = TransactionNotification::where(function ($q) use ($userId, $user) {
+            $q->where('user_id', $userId);
+            if ($user->isWarehouseAdmin() || $user->isAdsAdmin()) {
+                $q->orWhere(function ($sub) {
+                    $sub->whereNull('user_id')->where('type', 'sales_order');
+                });
+            }
         })
         ->where('type', 'sales_order')
         ->where('is_read', false)
@@ -707,9 +709,16 @@ class SalesOrderController extends Controller
     /**
      * Dismiss a notification via AJAX so it doesn't pop up again.
      */
-    public function dismissNotification(TransactionNotification $notification): JsonResponse
+    public function dismissNotification(Request $request, $notification): JsonResponse
     {
-        $notification->update(['is_read' => true]);
+        $notif = $notification instanceof TransactionNotification 
+            ? $notification 
+            : TransactionNotification::find($notification);
+
+        if ($notif) {
+            $notif->update(['is_read' => true]);
+        }
+
         return response()->json(['success' => true]);
     }
 }
