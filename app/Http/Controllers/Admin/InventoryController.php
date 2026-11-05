@@ -2073,6 +2073,7 @@ class InventoryController extends Controller
                             'manufacturer'     => mb_substr($cItem['manufacturer'], 0, 100),
                             'model'            => mb_substr($cItem['model'], 0, 100),
                             'item_description' => $cItem['item_description'],
+                            'check_in_date'    => now()->toDateString(),
                             'quantity'         => $finalQty,
                             'status'           => 'in_stock',
                         ];
