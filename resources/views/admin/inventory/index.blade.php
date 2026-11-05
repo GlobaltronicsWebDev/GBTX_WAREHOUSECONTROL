@@ -25,14 +25,15 @@
                     $isDefectiveCat = $isDeadPixelCat || $isDefectiveOnlyCat;
                     $isPhilipsServiceCat = in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT'])
                         || $isDefectiveCat;
+                    $isShuttleCat = in_array($normSelectedCat, ['SHUTTLE', 'SHUTTLES']);
                     $isServiceUnitsTabActive = (in_array($normSelectedCat, ['SERVICE UNITS (EVENTS, DEMO)', 'SERVICE UNITS', 'SERVICE UNIT'])
                         || $isLedServiceCat
                         || (in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT']))
                         || in_array($normSelectedCat, ['VIDEO CONTROLLERS / PROCESSORS', 'VIDEO CONTROLLERS', 'SHUTTLE', 'AVER', 'DIGITAL IPOSTER', 'KIOSKS']))
                         && !$isDefectiveCat;
                 @endphp
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono-code font-bold {{ $isCentralLedCat ? 'bg-amber-100 text-amber-900 border border-amber-300' : ($isEolPhilipsCat ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' : ($isDefectiveCat ? 'bg-rose-100 text-rose-900 border border-rose-300' : ($isServiceUnitsTabActive ? 'bg-purple-100 text-purple-900 border border-purple-300' : 'bg-blue-100 text-blue-900 border border-blue-300'))) }}">
-                    {{ $isCentralLedCat ? 'LED Inventory' : ($isEolPhilipsCat ? 'Philips Units' : ($isDeadPixelCat ? 'DeadPixel Units' : ($isDefectiveOnlyCat ? 'Defective Units' : ($isServiceUnitsTabActive ? 'Service Units: ' . $selectedCategory : 'All Inventory')))) }}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono-code font-bold {{ $isCentralLedCat ? 'bg-amber-100 text-amber-900 border border-amber-300' : ($isEolPhilipsCat ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' : ($isDefectiveCat ? 'bg-rose-100 text-rose-900 border border-rose-300' : ($isShuttleCat ? 'bg-yellow-100 text-yellow-900 border border-yellow-300' : ($isServiceUnitsTabActive ? 'bg-purple-100 text-purple-900 border border-purple-300' : 'bg-blue-100 text-blue-900 border border-blue-300')))) }}">
+                    {{ $isCentralLedCat ? 'LED Inventory' : ($isEolPhilipsCat ? 'Philips Units' : ($isDeadPixelCat ? 'DeadPixel Units' : ($isDefectiveOnlyCat ? 'Defective Units' : ($isShuttleCat ? 'Shuttle Inventory' : ($isServiceUnitsTabActive ? 'Service Units: ' . $selectedCategory : 'All Inventory'))))) }}
                 </span>
             </h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-1">
@@ -425,6 +426,7 @@
                         $isLedServiceCat = in_array($normSelectedCat, ['LED SERVICE UNITS', 'LED SERVICES UNITS', 'LED SERVICE UNIT', 'LED SERVICES UNIT']);
                         $isPhilipsServiceCat = in_array($normSelectedCat, ['PHILIPS SERVICE UNITS', 'PHILIPS SERVICES UNITS', 'PHILIPS SERVICE UNIT', 'PHILIPS SERVICES UNIT'])
                             || $isDefectiveCat;
+                        $isShuttleCat = in_array($normSelectedCat, ['SHUTTLE', 'SHUTTLES']);
                         $isCentralLedCat = ($normSelectedCat === 'CENTRALIZED LED INVENTORY');
                         $isEolPhilipsCat = in_array($normSelectedCat, ['EOL PHILIPS UNITS', 'EOL PHILIPS UNIT', 'EOL PHILIPS']);
                     @endphp
@@ -440,6 +442,8 @@
                         CENTRALIZED LED INVENTORY
                     @elseif ($isEolPhilipsCat)
                         EOL PHILIPS UNITS
+                    @elseif ($isShuttleCat)
+                        SHUTTLE INVENTORY
                     @elseif ($isServiceUnitsTabActive)
                         {{ strtoupper($selectedCategory) }}
                     @else
@@ -597,6 +601,33 @@
             #centralLedTable thead tr th.bg-yellow-300 {
                 background-color: #fde047 !important;
             }
+            #centralLedTable thead tr th.bg-shuttle-yellow,
+            #centralLedTable thead tr th.bg-\[\#ffff00\] {
+                background-color: #ffff00 !important;
+            }
+            #centralLedTable thead tr th.bg-shuttle-tan,
+            #centralLedTable thead tr th.bg-\[\#ffe599\] {
+                background-color: #ffe599 !important;
+            }
+            #centralLedTable thead tr th.bg-shuttle-cream,
+            #centralLedTable thead tr th.bg-\[\#fffbf1\] {
+                background-color: #fffbf1 !important;
+            }
+            #centralLedTable thead tr th.bg-shuttle-orange,
+            #centralLedTable thead tr th.bg-\[\#ff9900\] {
+                background-color: #ff9900 !important;
+            }
+            #centralLedTable thead tr th.bg-shuttle-red,
+            #centralLedTable thead tr th.bg-\[\#ff0000\] {
+                background-color: #ff0000 !important;
+            }
+            #centralLedTable thead tr th.bg-shuttle-green,
+            #centralLedTable thead tr th.bg-\[\#548235\] {
+                background-color: #548235 !important;
+            }
+            #centralLedTable thead tr th.bg-black {
+                background-color: #000000 !important;
+            }
             #centralLedTable thead tr th.bg-sky-200 {
                 background-color: #bae6fd !important;
             }
@@ -644,7 +675,7 @@
 
         <!-- Spreadsheet Grid Table -->
         <div id="tableScrollContainer" class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-200px)] min-h-[480px] relative border-t border-slate-200 bg-white">
-            <table id="centralLedTable" class="w-full min-w-[1300px] text-left hide-central-ext hide-philips-ext hide-service-ext">
+            <table id="centralLedTable" class="w-full min-w-[1300px] text-left hide-central-ext hide-philips-ext {{ $isShuttleCat ? '' : 'hide-service-ext' }}">
                 
                 @if ($isLedServiceCat)
                     <!-- CLEAN 2-TIER SPREADSHEET HEADER FOR LED SERVICE UNITS (NO BACKGROUND COLORS) -->
@@ -1396,6 +1427,398 @@
                                 <td class="col-actions-sticky py-2 px-2.5 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">
                                     —
                                 </td>
+                            </tr>
+                        </tfoot>
+                    @endif
+
+                @elseif ($isShuttleCat)
+                    <!-- SPREADSHEET HEADER FOR SHUTTLE (MATCHING USER'S EXACT COLOR SCHEME & LABELS) -->
+                    <thead>
+                        <tr class="h-8 border-b border-slate-300 text-[11px] sm:text-xs tracking-wider divide-x divide-slate-300">
+                            <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[120px] whitespace-nowrap bg-white font-extrabold">LOCATION</th>
+                            <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[120px] whitespace-nowrap bg-white font-extrabold">MANUFACTURER</th>
+                            <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[110px] whitespace-nowrap bg-white font-extrabold">CHECK IN DATE</th>
+                            <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[130px] whitespace-nowrap bg-white font-extrabold">MODEL</th>
+                            <th rowspan="2" class="py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[120px] whitespace-nowrap bg-white font-extrabold">PO / SKU No.</th>
+
+                            <!-- ITEM DESCRIPTION (YELLOW) -->
+                            <th colspan="2" class="py-1 px-2.5 text-center font-extrabold uppercase select-none border-b border-slate-400 whitespace-nowrap tracking-wider text-black bg-[#ffff00] bg-shuttle-yellow" style="background-color: #ffff00 !important; color: #000000 !important;">ITEM DESCRIPTION</th>
+
+                            <!-- INVENTORY (YELLOW) -->
+                            <th colspan="2" class="py-1 px-2.5 text-center font-extrabold uppercase select-none border-b border-slate-400 whitespace-nowrap tracking-wider text-black bg-[#ffff00] bg-shuttle-yellow" style="background-color: #ffff00 !important; color: #000000 !important;">INVENTORY</th>
+
+                            <!-- FORECASTED QTY (IVORY/CREAM #FFFBF1, ROWSPAN 2) -->
+                            <th rowspan="2" class="py-1.5 px-2.5 text-center font-extrabold uppercase select-none min-w-[105px] whitespace-nowrap tracking-wider text-black bg-[#fffbf1] bg-shuttle-cream" style="background-color: #fffbf1 !important; color: #000000 !important;">FORECASTED QTY</th>
+
+                            <!-- RESERVATION (ORANGE #FF9900) -->
+                            <th colspan="2" class="col-service-ext py-1 px-2.5 text-center font-extrabold uppercase select-none border-b border-amber-600 whitespace-nowrap tracking-wider text-black bg-[#ff9900] bg-shuttle-orange" style="background-color: #ff9900 !important; color: #000000 !important;">RESERVATION</th>
+
+                            <!-- HISTORY (BRIGHT RED #FF0000 WITH WHITE TEXT) -->
+                            <th colspan="2" class="col-service-ext py-1 px-2.5 text-center font-extrabold uppercase select-none border-b border-red-800 whitespace-nowrap tracking-wider text-white bg-[#ff0000] bg-shuttle-red" style="background-color: #ff0000 !important; color: #ffffff !important;">HISTORY</th>
+
+                            <!-- ORIGINAL QTY (OLIVE GREEN #548235 WITH WHITE TEXT, ROWSPAN 2) -->
+                            <th rowspan="2" class="col-service-ext py-1.5 px-2.5 text-center font-extrabold uppercase select-none min-w-[95px] whitespace-nowrap tracking-wider text-white bg-[#548235] bg-shuttle-green" style="background-color: #548235 !important; color: #ffffff !important;">ORIGINAL QTY</th>
+
+                            <!-- STATUS (BLACK #000000 WITH WHITE TEXT) -->
+                            <th colspan="2" class="col-service-ext py-1 px-2.5 text-center font-extrabold uppercase select-none border-b border-slate-700 whitespace-nowrap tracking-wider text-white bg-black" style="background-color: #000000 !important; color: #ffffff !important;">STATUS</th>
+
+                            <!-- REMARKS (WHITE, ROWSPAN 2) -->
+                            <th rowspan="2" class="col-service-ext py-1.5 px-3 text-center font-extrabold uppercase select-none min-w-[160px] whitespace-nowrap tracking-wider text-black bg-white" style="background-color: #ffffff !important; color: #000000 !important;">REMARKS</th>
+
+                            <th rowspan="2" class="col-actions-sticky py-1.5 px-2.5 text-center text-slate-800 select-none min-w-[90px] whitespace-nowrap bg-white font-extrabold uppercase">ACTIONS</th>
+                        </tr>
+                        <tr class="h-8 border-b border-slate-300 text-[10px] tracking-wider divide-x divide-slate-300">
+                            <!-- ITEM DESCRIPTION SUBHEADERS (YELLOW) -->
+                            <th class="py-1 px-3 text-center select-none min-w-[240px] font-bold uppercase text-black bg-[#ffff00] bg-shuttle-yellow" style="background-color: #ffff00 !important; color: #000000 !important;">PARTICULAR</th>
+                            <th class="py-1 px-2.5 text-center select-none min-w-[130px] whitespace-nowrap font-bold uppercase text-black bg-[#ffff00] bg-shuttle-yellow" style="background-color: #ffff00 !important; color: #000000 !important;">SERIAL</th>
+
+                            <!-- INVENTORY SUBHEADERS (LIGHT PEACH/TAN #FFE599) -->
+                            <th class="py-1 px-2 text-center select-none min-w-[60px] whitespace-nowrap font-bold uppercase text-black bg-[#ffe599] bg-shuttle-tan" style="background-color: #ffe599 !important; color: #000000 !important;">QTY</th>
+                            <th class="py-1 px-2 text-center select-none min-w-[70px] whitespace-nowrap font-bold uppercase text-black bg-[#ffe599] bg-shuttle-tan" style="background-color: #ffe599 !important; color: #000000 !important;">ACU. QTY</th>
+
+                            <!-- RESERVATION SUBHEADERS (ORANGE #FF9900) -->
+                            <th class="col-service-ext py-1 px-2 text-center select-none min-w-[65px] whitespace-nowrap font-bold uppercase text-black bg-[#ff9900] bg-shuttle-orange" style="background-color: #ff9900 !important; color: #000000 !important;">QTY</th>
+                            <th class="col-service-ext py-1 px-2.5 text-center select-none min-w-[200px] font-bold uppercase text-black bg-[#ff9900] bg-shuttle-orange" style="background-color: #ff9900 !important; color: #000000 !important;">PROJECT DETAILS</th>
+
+                            <!-- HISTORY SUBHEADERS (RED #FF0000 WITH WHITE TEXT) -->
+                            <th class="col-service-ext py-1 px-2 text-center select-none min-w-[65px] whitespace-nowrap font-bold uppercase text-white bg-[#ff0000] bg-shuttle-red" style="background-color: #ff0000 !important; color: #ffffff !important;">QTY</th>
+                            <th class="col-service-ext py-1 px-2.5 text-center select-none min-w-[200px] font-bold uppercase text-white bg-[#ff0000] bg-shuttle-red" style="background-color: #ff0000 !important; color: #ffffff !important;">PROJECT</th>
+
+                            <!-- STATUS SUBHEADERS (BLACK #000000 WITH WHITE TEXT) -->
+                            <th class="col-service-ext py-1 px-2 text-center select-none min-w-[60px] whitespace-nowrap font-bold uppercase text-white bg-black" style="background-color: #000000 !important; color: #ffffff !important;">QTY</th>
+                            <th class="col-service-ext py-1 px-2 text-center select-none min-w-[85px] whitespace-nowrap font-bold uppercase text-white bg-black" style="background-color: #000000 !important; color: #ffffff !important;">PARTICULAR</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-xs sm:text-sm font-medium">
+                        @forelse ($items as $item)
+                            <tr class="hover:bg-slate-50/80 transition-colors group">
+                                <!-- LOCATION -->
+                                <td class="py-2 px-2.5 text-center border-r border-slate-200 font-mono-code whitespace-nowrap align-top">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                                        {{ $item->location ?: 'MARIKINA' }}
+                                    </span>
+                                </td>
+
+                                <!-- MANUFACTURER -->
+                                <td class="py-2 px-2.5 font-semibold text-slate-800 uppercase font-mono-code border-r border-slate-200 text-center whitespace-nowrap text-xs align-top">
+                                    {{ $item->manufacturer ?: 'SHUTTLE' }}
+                                </td>
+
+                                <!-- CHECK IN DATE -->
+                                <td class="py-2 px-2.5 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap text-xs align-top">
+                                    {{ $item->check_in_date ? $item->check_in_date->format('n/j/Y') : '—' }}
+                                </td>
+
+                                <!-- MODEL -->
+                                <td class="py-2 px-2.5 font-mono-code font-bold text-slate-900 border-r border-slate-200 text-center whitespace-nowrap text-xs align-top">
+                                    <button 
+                                        type="button" 
+                                        onclick="openDrawer({{ json_encode($item) }})" 
+                                        class="font-mono-code font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                                        title="View SKU Details & Movement History"
+                                    >
+                                        {{ $item->model }}
+                                    </button>
+                                </td>
+
+                                <!-- PO / SKU No. -->
+                                <td class="py-2 px-2.5 font-mono-code text-center text-slate-600 border-r border-slate-200 whitespace-nowrap text-xs align-top">
+                                    {{ $item->po_number ?? '—' }}
+                                </td>
+
+                                <!-- ITEM DESCRIPTION: PARTICULAR (INLINE EDITABLE) -->
+                                <td class="py-1 px-2 text-slate-800 border-r border-slate-200 min-w-[240px] align-top">
+                                    <div class="relative group/edit">
+                                        <textarea 
+                                            rows="1"
+                                            data-item-id="{{ $item->id }}" 
+                                            data-field="item_description" 
+                                            data-original-val="{{ $item->item_description }}"
+                                            onblur="handleInlineSave(this)" 
+                                            onkeydown="handleInlineKey(event, this)" 
+                                            oninput="autoResizeTextarea(this)"
+                                            class="inline-edit-input w-full text-xs font-medium text-slate-800 uppercase bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-300 focus:border-blue-500 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-none overflow-hidden leading-snug [field-sizing:content]"
+                                            title="Click to edit particular description (auto-saves on blur or Ctrl+Enter)"
+                                        >{{ $item->item_description }}</textarea>
+                                    </div>
+                                </td>
+
+                                <!-- ITEM DESCRIPTION: SERIAL -->
+                                <td class="py-2 px-2.5 font-mono-code font-bold text-center text-slate-800 border-r border-slate-200 align-top">
+                                    @if ($item->tag_number)
+                                        @php
+                                            $serials = preg_split('/[\r\n,;|]+/', $item->tag_number, -1, PREG_SPLIT_NO_EMPTY);
+                                            $serialCount = count($serials);
+                                            $firstSerial = trim($serials[0] ?? '');
+                                        @endphp
+                                        @if ($serialCount === 1)
+                                            <span class="inline-block px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 text-xs font-bold">{{ $firstSerial }}</span>
+                                        @else
+                                            <div class="relative inline-block text-center">
+                                                <button 
+                                                    type="button" 
+                                                    onclick="openSerialViewer('{{ addslashes($item->model) }}', {{ json_encode($serials) }})" 
+                                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono-code font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-300 transition-colors cursor-pointer shadow-2xs whitespace-nowrap"
+                                                    title="Click to extend and view all {{ $serialCount }} serial numbers">
+                                                    <span>🔢 {{ $serialCount }} Serials</span>
+                                                    <svg class="w-3 h-3 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </button>
+                                                <div class="serial-popover hidden absolute left-1/2 -translate-x-1/2 mt-1.5 w-64 max-h-52 overflow-y-auto bg-white rounded-xl shadow-xl border border-slate-200 p-2.5 z-50 text-left">
+                                                    <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-100">
+                                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono-code">Serials ({{ $serialCount }})</span>
+                                                        <button type="button" onclick="navigator.clipboard.writeText(`{{ implode('\n', array_map('trim', $serials)) }}`); alert('Copied {{ $serialCount }} serial numbers!');" class="text-[10px] font-bold text-blue-600 hover:text-blue-800">Copy All</button>
+                                                    </div>
+                                                    <div class="space-y-1">
+                                                        @foreach ($serials as $sn)
+                                                            <div class="text-[11px] font-mono-code text-slate-800 bg-slate-50 hover:bg-slate-100 px-2 py-0.5 rounded border border-slate-200 font-semibold select-all">
+                                                                {{ trim($sn) }}
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- INVENTORY: QTY -->
+                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
+                                        {{ number_format($item->quantity) }}
+                                    </span>
+                                </td>
+
+                                <!-- INVENTORY: ACU. QTY (INLINE EDITABLE) -->
+                                <td class="py-1 px-1.5 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <input 
+                                        type="number" 
+                                        min="0" 
+                                        value="{{ ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity }}" 
+                                        data-item-id="{{ $item->id }}" 
+                                        data-field="acu_quantity" 
+                                        data-original-val="{{ ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity }}"
+                                        onchange="handleInlineSave(this)" 
+                                        onkeydown="if(event.key==='Enter') this.blur();" 
+                                        class="inline-edit-input editable-acu-qty w-16 text-center font-mono-code font-bold text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 hover:border-slate-300 focus:border-blue-500 rounded-lg py-1 px-1 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-900 transition-all select-all shadow-2xs"
+                                        title="Click to edit Acu. Qty (auto-saves on blur/Enter)"
+                                    />
+                                </td>
+
+                                <!-- FORECASTED QTY -->
+                                @php
+                                    $shuttleAcu = ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity;
+                                    $shuttleAvail = $item->forecasted_quantity !== null ? $item->forecasted_quantity : max(0, $shuttleAcu - ($item->reservation_qty ?? 0));
+                                @endphp
+                                <td class="py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
+                                        {{ number_format(max(0, $shuttleAvail)) }}
+                                    </span>
+                                </td>
+
+                                <!-- RESERVATION: QTY -->
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    @if ($item->reservation_qty)
+                                        <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-amber-50 text-amber-800 border border-amber-200">
+                                            {{ number_format($item->reservation_qty) }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- RESERVATION: PROJECT DETAILS -->
+                                <td class="col-service-ext py-2 px-2.5 border-r border-slate-200 min-w-[200px] text-xs text-slate-800 align-top">
+                                    @if ($item->reservation_project)
+                                        <div class="line-clamp-3 font-medium text-slate-900 text-xs whitespace-pre-line" title="{{ $item->reservation_project }}">{{ $item->reservation_project }}</div>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- HISTORY: QTY -->
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    @if ($item->history_qty)
+                                        <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
+                                            {{ number_format($item->history_qty) }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- HISTORY: PROJECT -->
+                                <td class="col-service-ext py-2 px-2.5 border-r border-slate-200 min-w-[200px] text-xs text-slate-800 align-top">
+                                    @php
+                                        $shuttleHistList = [];
+                                        if (!empty($item->movement_history)) {
+                                            $mh = is_array($item->movement_history) ? $item->movement_history : json_decode((string)$item->movement_history, true);
+                                            if (!empty($mh['history']) && is_array($mh['history'])) {
+                                                $shuttleHistList = $mh['history'];
+                                            }
+                                        }
+                                    @endphp
+                                    @if (!empty($shuttleHistList) && count($shuttleHistList) > 0)
+                                        <div class="space-y-1.5 max-h-28 overflow-y-auto pr-1">
+                                            @foreach ($shuttleHistList as $hist)
+                                                <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs shadow-2xs">
+                                                    @if (!empty($hist['qty']))
+                                                        <span class="inline-flex items-center px-1.5 py-0.2 rounded font-extrabold text-[10px] bg-slate-200 text-slate-800 mb-0.5 font-mono-code">
+                                                            {{ number_format($hist['qty']) }} pcs
+                                                        </span>
+                                                    @endif
+                                                    <div class="font-medium text-slate-900 leading-snug line-clamp-2">{{ $hist['project'] }}</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @elseif ($item->history_project)
+                                        <div class="line-clamp-3 font-medium text-slate-900 text-xs whitespace-pre-line" title="{{ $item->history_project }}">{{ $item->history_project }}</div>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- ORIGINAL QTY -->
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
+                                        {{ number_format($item->original_quantity ?: $item->quantity) }}
+                                    </span>
+                                </td>
+
+                                <!-- STATUS: QTY -->
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code border-r border-slate-200 whitespace-nowrap align-top">
+                                    @if ($item->status_qty)
+                                        <span class="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded font-bold text-xs bg-rose-50 text-rose-800 border border-rose-200">
+                                            {{ number_format($item->status_qty) }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- STATUS: PARTICULAR -->
+                                <td class="col-service-ext py-2 px-2.5 text-center border-r border-slate-200 whitespace-nowrap align-top text-xs">
+                                    @if ($item->status_particular)
+                                        <span class="inline-block px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold">
+                                            {{ $item->status_particular }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- REMARKS -->
+                                <td class="col-service-ext py-2 px-2.5 border-r border-slate-200 min-w-[160px] text-xs text-slate-600 align-top">
+                                    @if ($item->remarks)
+                                        <div class="line-clamp-2 font-medium text-slate-700" title="{{ $item->remarks }}">{{ $item->remarks }}</div>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                <!-- ACTIONS -->
+                                <td class="col-actions-sticky py-2 px-2.5 text-center whitespace-nowrap bg-white align-top">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <button 
+                                            type="button" 
+                                            onclick="openDrawer({{ json_encode($item) }})" 
+                                            class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+                                            title="View SKU Details Drawer"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
+                                        @if (!Auth::user()->isSales())
+                                        <button 
+                                            type="button" 
+                                            onclick="event.stopPropagation(); openEditModal({{ json_encode($item) }})" 
+                                            class="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+                                            title="Edit SKU Details"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onclick="event.stopPropagation(); confirmDelete({{ $item->id }}, '{{ addslashes($item->model) }}')" 
+                                            class="p-1.5 rounded-lg text-slate-600 hover:text-rose-600 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+                                            title="Delete Inventory Item"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="19" class="py-12 text-center text-slate-500">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                        </svg>
+                                        <span class="text-sm font-semibold">No Shuttle inventory units found.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                    @if (count($items) > 0)
+                        @php
+                            $shuttleTotalQty = $items->sum('quantity');
+                            $shuttleTotalAcuQty = $items->sum(fn($i) => ($i->acu_quantity !== null && $i->acu_quantity > 0) ? $i->acu_quantity : $i->quantity);
+                            $shuttleTotalResQty = $items->sum('reservation_qty');
+                            $shuttleTotalHistQty = $items->sum('history_qty');
+                            $shuttleTotalOrigQty = $items->sum(fn($i) => $i->original_quantity ?: $i->quantity);
+                            $shuttleTotalStatusQty = $items->sum('status_qty');
+                            $shuttleTotalAvailQty = $items->sum(fn($i) => $i->forecasted_quantity !== null ? $i->forecasted_quantity : max(0, (($i->acu_quantity !== null && $i->acu_quantity > 0) ? $i->acu_quantity : $i->quantity) - ($i->reservation_qty ?? 0)));
+                        @endphp
+                        <tfoot class="border-t-2 border-slate-300 bg-slate-50 font-bold">
+                            <tr class="h-8 divide-x divide-slate-200">
+                                <td colspan="7" class="py-2 px-3 text-right text-xs uppercase font-extrabold text-slate-800 bg-slate-100">
+                                    TOTALS:
+                                </td>
+                                <!-- QTY -->
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($shuttleTotalQty) }}
+                                </td>
+                                <!-- ACU QTY -->
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($shuttleTotalAcuQty) }}
+                                </td>
+                                <!-- FORECASTED -->
+                                <td class="py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($shuttleTotalAvailQty) }}
+                                </td>
+                                <!-- RES QTY -->
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($shuttleTotalResQty) }}
+                                </td>
+                                <td class="col-service-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">—</td>
+                                <!-- HIST QTY -->
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($shuttleTotalHistQty) }}
+                                </td>
+                                <td class="col-service-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">—</td>
+                                <!-- ORIG QTY -->
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($shuttleTotalOrigQty) }}
+                                </td>
+                                <!-- STATUS QTY -->
+                                <td class="col-service-ext py-2 px-2 text-center font-mono-code font-black text-xs sm:text-sm text-slate-900 bg-slate-100 whitespace-nowrap">
+                                    {{ number_format($shuttleTotalStatusQty) }}
+                                </td>
+                                <td class="col-service-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">—</td>
+                                <td class="col-service-ext py-2 px-2 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">—</td>
+                                <td class="col-actions-sticky py-2 px-2.5 text-center text-xs text-slate-400 bg-slate-100 whitespace-nowrap">—</td>
                             </tr>
                         </tfoot>
                     @endif
@@ -4061,6 +4484,7 @@
         const isCentralLed = (cat === 'CENTRALIZED LED INVENTORY');
         const isPhilipsService = (cat === 'Philips Service Units' || cat === 'PHILIPS SERVICE UNITS' || cat === 'DeadPixel Units' || cat === 'Defective Units');
         const isEolPhilips = (cat === 'EOL PHILIPS UNITS');
+        const isShuttle = (cat === 'Shuttle' || cat === 'SHUTTLE');
         const breakdownCard = document.getElementById(mode === 'create' ? 'createInventoryBreakdown' : 'editInventoryBreakdown');
 
         if (isLedService) {
@@ -4142,6 +4566,25 @@
             const locSelect = document.querySelector('select[name="location"]');
             if (locSelect && (!locSelect.value || locSelect.value === 'GLOBALTRONICS')) {
                 locSelect.value = 'A JUAN - 2ND FLR';
+            }
+        } else if (isShuttle) {
+            if (modalTitle && mode === 'create') modalTitle.textContent = 'Add Shuttle Unit';
+            if (tagLabel) tagLabel.textContent = 'SERIAL';
+            if (tagInput) tagInput.placeholder = 'e.g. SN-SHTL-00101';
+            if (tagHint) tagHint.classList.remove('hidden');
+            if (poInput) poInput.placeholder = 'e.g. PO-2026-0814';
+            if (modelLabel) modelLabel.textContent = 'Model *';
+            if (modelInput) modelInput.placeholder = 'e.g. XH61V';
+            if (descLabel) descLabel.textContent = 'Particular / Item Description *';
+            if (descInput) descInput.placeholder = 'e.g. SHUTTLE SLIM PC MEDIA PLAYER';
+            if (screenSizeGroup) screenSizeGroup.classList.add('hidden');
+            if (acuQtyGroup) acuQtyGroup.classList.remove('hidden');
+            if (forecastedQtyGroup) forecastedQtyGroup.classList.remove('hidden');
+            if (sqmGroup) sqmGroup.classList.add('hidden');
+            if (breakdownCard) breakdownCard.classList.remove('hidden');
+            if (subtitle && mode === 'create') subtitle.textContent = 'Create a new entry for Shuttle Service Units';
+            if (mfg && (!mfg.value || mfg.value === 'PHILIPS')) {
+                mfg.value = 'SHUTTLE';
             }
         } else {
             if (modalTitle && mode === 'create') modalTitle.textContent = 'Add ' + cat;

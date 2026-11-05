@@ -672,6 +672,7 @@ class InventoryController extends Controller
 
         $isCentralLed = ($category === 'CENTRALIZED LED INVENTORY');
         $isPhilips = ($category === 'EOL PHILIPS UNITS');
+        $isShuttle = in_array(strtoupper(trim($category)), ['SHUTTLE', 'SHUTTLES'], true);
 
         if ($isCentralLed) {
             $headers = [
@@ -716,6 +717,27 @@ class InventoryController extends Controller
                 'UNFOUND STATUS',
                 'REMARKS',
             ];
+        } elseif ($isShuttle) {
+            $headers = [
+                'LOCATION',
+                'DATE RECEIVED',
+                'MANUFACTURER',
+                'MODEL',
+                'PO / SKU No.',
+                'PARTICULAR',
+                'SERIAL',
+                'QTY',
+                'ACU. QTY',
+                'FORECASTED QTY',
+                'RESERVATION QTY',
+                'RESERVATION PROJECT',
+                'HISTORY QTY',
+                'HISTORY PROJECT',
+                'ORIGINAL QTY',
+                'STATUS QTY',
+                'STATUS PARTICULAR',
+                'REMARKS',
+            ];
         } else {
             $headers = [
                 'TAG #',
@@ -732,7 +754,7 @@ class InventoryController extends Controller
             ];
         }
 
-        return response()->streamDownload(function () use ($headers, $items, $isCentralLed, $isPhilips) {
+        return response()->streamDownload(function () use ($headers, $items, $isCentralLed, $isPhilips, $isShuttle) {
             $handle = fopen('php://output', 'w');
             // Write UTF-8 BOM for Microsoft Excel compatibility
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
@@ -790,6 +812,29 @@ class InventoryController extends Controller
                         $item->status_particular ?? 'OK',
                         $item->remarks ?? '',
                     ];
+                } elseif ($isShuttle) {
+                    $acuQty = ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity;
+                    $availQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : max(0, (int)$acuQty - (int)($item->reservation_qty ?? 0));
+                    $row = [
+                        $item->location ?? 'MARIKINA',
+                        $dateRec,
+                        $item->manufacturer ?? 'SHUTTLE',
+                        $item->model ?? '',
+                        $item->po_number ?? '',
+                        $item->item_description ?? '',
+                        $item->tag_number ?? '',
+                        $item->quantity ?? 0,
+                        $item->acu_quantity ?? $item->quantity,
+                        $availQty,
+                        $item->reservation_qty ?? 0,
+                        $item->reservation_project ?? '',
+                        $item->history_qty ?? 0,
+                        $item->history_project ?? '',
+                        $item->original_quantity ?? $item->quantity,
+                        $item->status_qty ?? 0,
+                        $item->status_particular ?? 'OK',
+                        $item->remarks ?? '',
+                    ];
                 } else {
                     $row = [
                         $item->tag_number ?? '',
@@ -827,6 +872,7 @@ class InventoryController extends Controller
         $isPhilipsEol = in_array($category, ['EOL PHILIPS UNITS', 'EOL Philips Units'], true);
         $isPhilipsService = in_array($category, ['Philips Service Units', 'PHILIPS SERVICE UNITS', 'DeadPixel Units', 'DEADPIXEL UNITS', 'Defective Units', 'DEFECTIVE UNITS'], true);
         $isLedService = in_array($category, ['LED Service Units', 'LED SERVICE UNITS'], true);
+        $isShuttle = in_array(strtoupper(trim($category)), ['SHUTTLE', 'SHUTTLES'], true);
 
         if ($isCentralLed) {
             $header1 = ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'MANUFACTURER', 'MODEL / PIXEL PITCH', 'ITEM DESCRIPTION', 'LOCATION', 'INVENTORY', '', '', '', 'AVAILABLE QTY', '', 'RESERVATION', '', 'HISTORY', '', 'ORIGINAL QTY', 'STATUS', '', 'REMARKS'];
@@ -880,6 +926,28 @@ class InventoryController extends Controller
                 ['WAREHOUSE A', 'ROE VISUAL', date('Y-m-d'), 'BP2V2', 'PO-88102', 'LED Wall Module 500x500', 'ROE-SN-99014', 100, 98, 20, 5, 'Concert Tour 2026', 'Tested OK'],
                 ['WAREHOUSE B', 'ABSEN', date('Y-m-d'), 'PL2.5 PRO', 'PO-88220', 'Curved Touring Panel', 'ABS-SN-44120', 60, 60, 10, 0, 'None', 'Flight cases ready'],
                 ['MANILA HUB', 'UNILUMIN', date('Y-m-d'), 'UPAD IV', 'PO-88350', 'Indoor High-Res Cabinet', 'UNI-SN-12003', 80, 75, 15, 8, 'Auto Expo 2026', 'Good condition'],
+            ];
+
+            return response()->streamDownload(function () use ($header1, $header2, $sampleRows) {
+                $handle = fopen('php://output', 'w');
+                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+                fputcsv($handle, $header1);
+                fputcsv($handle, $header2);
+                foreach ($sampleRows as $row) {
+                    fputcsv($handle, $row);
+                }
+                fclose($handle);
+            }, $filename, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+            ]);
+        }
+
+        if ($isShuttle) {
+            $header1 = ['LOCATION', 'MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'PO / SKU No.', 'ITEM DESCRIPTION', '', 'INVENTORY', '', 'FORECASTED QTY', 'RESERVATION', '', 'HISTORY', '', 'ORIGINAL QTY', 'STATUS', '', 'REMARKS'];
+            $header2 = ['', '', '', '', '', 'PARTICULAR', 'SERIAL', 'QTY', 'ACU. QTY', '', 'QTY', 'PROJECT DETAILS', 'QTY', 'PROJECT', '', 'QTY', 'PARTICULAR', ''];
+            $sampleRows = [
+                ['MARIKINA', 'SHUTTLE', date('Y-m-d'), 'XH61V', 'PO-2026-901', 'SHUTTLE XH61V SLIM PC MEDIA PLAYER', 'SN-SHTL-00101', 10, 10, 10, 0, '', 0, '', 10, 0, 'OK', 'Working condition'],
+                ['MARIKINA', 'SHUTTLE', date('Y-m-d'), 'DS81', 'PO-2026-902', 'SHUTTLE DS81 CORE I5 MEDIA CONTROLLER', 'SN-SHTL-00201', 5, 5, 3, 2, 'SM Megamall Display', 0, '', 5, 0, 'OK', 'Tested'],
             ];
 
             return response()->streamDownload(function () use ($header1, $header2, $sampleRows) {
