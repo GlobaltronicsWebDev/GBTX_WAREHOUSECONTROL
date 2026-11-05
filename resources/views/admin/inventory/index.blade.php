@@ -1746,7 +1746,7 @@
                                         </button>
                                         <button 
                                             type="button" 
-                                            onclick="event.stopPropagation(); confirmDelete({{ $item->id }}, '{{ addslashes($item->model) }}')" 
+                                            onclick="event.stopPropagation(); openDeleteModal({{ json_encode($item) }})" 
                                             class="p-1.5 rounded-lg text-slate-600 hover:text-rose-600 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
                                             title="Delete Inventory Item"
                                         >
