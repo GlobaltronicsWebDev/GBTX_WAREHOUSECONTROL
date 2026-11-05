@@ -720,10 +720,8 @@ class InventoryController extends Controller
         } elseif ($isShuttle) {
             $headers = [
                 'LOCATION',
-                'DATE RECEIVED',
                 'MANUFACTURER',
                 'MODEL',
-                'PO / SKU No.',
                 'PARTICULAR',
                 'SERIAL',
                 'QTY',
@@ -814,18 +812,15 @@ class InventoryController extends Controller
                     ];
                 } elseif ($isShuttle) {
                     $acuQty = ($item->acu_quantity !== null && $item->acu_quantity > 0) ? $item->acu_quantity : $item->quantity;
-                    $availQty = $item->forecasted_quantity !== null ? $item->forecasted_quantity : max(0, (int)$acuQty - (int)($item->reservation_qty ?? 0));
                     $row = [
                         $item->location ?? 'MARIKINA',
-                        $dateRec,
                         $item->manufacturer ?? 'SHUTTLE',
                         $item->model ?? '',
-                        $item->po_number ?? '',
                         $item->item_description ?? '',
                         $item->tag_number ?? '',
                         $item->quantity ?? 0,
-                        $item->acu_quantity ?? $item->quantity,
-                        $availQty,
+                        $acuQty,
+                        $item->forecasted_quantity ?? '',
                         $item->reservation_qty ?? 0,
                         $item->reservation_project ?? '',
                         $item->history_qty ?? 0,
@@ -943,11 +938,11 @@ class InventoryController extends Controller
         }
 
         if ($isShuttle) {
-            $header1 = ['LOCATION', 'MANUFACTURER', 'CHECK IN DATE', 'MODEL', 'PO / SKU No.', 'ITEM DESCRIPTION', '', 'INVENTORY', '', 'FORECASTED QTY', 'RESERVATION', '', 'HISTORY', '', 'ORIGINAL QTY', 'STATUS', '', 'REMARKS'];
-            $header2 = ['', '', '', '', '', 'PARTICULAR', 'SERIAL', 'QTY', 'ACU. QTY', '', 'QTY', 'PROJECT DETAILS', 'QTY', 'PROJECT', '', 'QTY', 'PARTICULAR', ''];
+            $header1 = ['LOCATION', 'MANUFACTURER', 'MODEL', 'ITEM DESCRIPTION', '', 'INVENTORY', '', "FORECASTED\nQTY", 'RESERVATION', '', 'HISTORY', '', "ORIGINAL\nQTY", 'STATUS', '', 'REMARKS'];
+            $header2 = ['', '', '', 'PARTICULAR', 'SERIAL', 'QTY', 'ACU. QTY', '', 'QTY', 'PROJECT DETAILS', 'QTY', 'PROJECT', '', 'QTY', 'PARTICULAR', ''];
             $sampleRows = [
-                ['MARIKINA', 'SHUTTLE', date('Y-m-d'), 'XH61V', 'PO-2026-901', 'SHUTTLE XH61V SLIM PC MEDIA PLAYER', 'SN-SHTL-00101', 10, 10, 10, 0, '', 0, '', 10, 0, 'OK', 'Working condition'],
-                ['MARIKINA', 'SHUTTLE', date('Y-m-d'), 'DS81', 'PO-2026-902', 'SHUTTLE DS81 CORE I5 MEDIA CONTROLLER', 'SN-SHTL-00201', 5, 5, 3, 2, 'SM Megamall Display', 0, '', 5, 0, 'OK', 'Tested'],
+                ['MARIKINA', 'SHUTTLE', 'XH61V', 'SHUTTLE XH61V SLIM PC MEDIA PLAYER', "SN-SHTL-00101\nSN-SHTL-00102", 10, 10, 10, 0, '', 0, '', 10, 0, 'OK', 'Working condition'],
+                ['MARIKINA', 'SHUTTLE', 'DS81', 'SHUTTLE DS81 CORE I5 MEDIA CONTROLLER', 'SN-SHTL-00201', 5, 5, 3, 2, 'SM Megamall Display', 0, '', 5, 0, 'OK', 'Tested'],
             ];
 
             return response()->streamDownload(function () use ($header1, $header2, $sampleRows) {
