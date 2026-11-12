@@ -1505,7 +1505,7 @@
 <!-- ========================================================================= -->
 <!-- MODAL: INSTALLATION REQUISITION (SSO & SRF)                               -->
 <!-- ========================================================================= -->
-@if (!Auth::user()->isSales())
+@if (Auth::user()->canManageSrf())
 <div id="installationSrfModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
     <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeInstallationSrfModal()"></div>
     <div class="min-h-full flex items-center justify-center p-4">

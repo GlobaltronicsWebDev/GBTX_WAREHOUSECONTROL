@@ -783,7 +783,8 @@ class AdminDashboardTest extends TestCase
             'email' => 'ariel.moro@globaltronics.net',
         ]);
         $techRole = Role::where('slug', 'technical')->first();
-        $tech->roles()->attach($techRole);
+        $salesRole = Role::where('slug', 'sales-executive')->first();
+        $tech->roles()->attach([$techRole->id, $salesRole->id]);
 
         $response = $this->actingAs($tech)->get('/admin/dashboard');
 
@@ -793,6 +794,7 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Technical Operations &amp; SRF Requisitions', false);
         $response->assertSee('Stock Requisition Form (SRF)');
         $response->assertSee('Launch Stock Requisition Form (SRF)');
+        $response->assertSee('id="installationSrfModal"', false);
         $response->assertSee('Stock Requisition Form (SRF) Summary');
         $response->assertSee('Assignators');
 
@@ -817,7 +819,8 @@ class AdminDashboardTest extends TestCase
             'email' => 'ariel.moro@globaltronics.net',
         ]);
         $techRole = Role::where('slug', 'technical')->first();
-        $tech->roles()->attach($techRole);
+        $salesRole = Role::where('slug', 'sales-executive')->first();
+        $tech->roles()->attach([$techRole->id, $salesRole->id]);
 
         $item = InventoryItem::factory()->create([
             'category' => 'OUTDOOR LED PANELS',

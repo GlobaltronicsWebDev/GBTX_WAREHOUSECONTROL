@@ -136,7 +136,7 @@ class User extends Authenticatable
      */
     public function canManageSrf(): bool
     {
-        return !$this->isSales();
+        return !$this->isSales() || $this->isTechnical() || $this->canViewWarehouseOperations();
     }
 
     /**
@@ -252,4 +252,3 @@ class User extends Authenticatable
         return $this->roles->first();
     }
 }
-
