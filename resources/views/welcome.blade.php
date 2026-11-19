@@ -150,7 +150,7 @@
             <div class="absolute bottom-1/4 right-1/3 w-80 h-80 bg-amber-100/40 rounded-full blur-3xl pointer-events-none"></div>
 
             <!-- Top Header & Language / Support Help -->
-            <div class="relative z-10 flex items-center justify-between">
+            <!-- <div class="relative z-10 flex items-center justify-between">
                 <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
                     <span class="inline-block w-2 h-2 rounded-full bg-blue-600"></span>
                     <span>Warehouse Terminal Gateway</span>
@@ -162,7 +162,7 @@
                     </svg>
                     <span>Support</span>
                 </a>
-            </div>
+            </div> -->
 
             <!-- Center Form Container -->
             <div class="relative z-10 my-auto py-8 sm:py-12 w-full max-w-md mx-auto">
@@ -188,11 +188,11 @@
                 <!-- LOGO SECTION -->
                 <div class="text-center mb-8">
                     <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center justify-center gap-2">
-                        <span>GLOBALTRONICS</span>
+                        <span>LOGIN</span>
                     </h2>
-                    <p class="text-xs uppercase tracking-[0.28em] text-blue-600 font-bold mt-1">
+                    <!-- <p class="text-xs uppercase tracking-[0.28em] text-blue-600 font-bold mt-1">
                         Control System
-                    </p>
+                    </p> -->
                     <p id="portalSubheading" class="text-xs text-slate-500 mt-2">
                         Enter your credentials to access warehouse operations
                     </p>
