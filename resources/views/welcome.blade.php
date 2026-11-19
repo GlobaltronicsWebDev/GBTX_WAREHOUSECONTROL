@@ -96,14 +96,14 @@
             <div class="relative z-10 flex-1 flex flex-col justify-center my-6 lg:my-auto py-6 sm:py-8 lg:py-10 max-w-xl">
                 <h1 class="text-3xl sm:text-4xl lg:text-4xl xl:text-5xl font-extrabold text-white tracking-tight leading-[1.15]">
                     GLOBALTRONICS <br class="hidden sm:inline" />
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-amber-400">
+                    <span class="text-white-400">
                         CONTROL SYSTEM
                     </span>
                 </h1>
 
-                <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-lg">
+                <!-- <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-lg">
                     Real-time stock dispatch, barcode tracking, pallet management, and high-velocity fulfillment powered by Globaltronics automation infrastructure.
-                </p>
+                </p> -->
 
                 <!-- Warehouse Live Metrics Cards -->
                 <!-- <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg">
