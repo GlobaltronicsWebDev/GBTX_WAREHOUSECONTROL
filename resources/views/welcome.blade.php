@@ -14,7 +14,47 @@
     @endif
 </head>
 <body class="min-h-screen bg-white text-slate-950 antialiased">
-    <main class="flex min-h-screen items-center justify-center px-6 py-12">
+    <main class="grid min-h-screen grid-cols-1 lg:grid-cols-2">
+        <section aria-labelledby="welcome-title" class="relative isolate flex min-h-[320px] flex-col justify-between overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 px-8 py-8 text-white sm:px-12 sm:py-10 lg:min-h-screen">
+            <img
+                src="{{ asset('assets/images/logo/globaltronics_logo.png') }}"
+                alt=""
+                aria-hidden="true"
+                class="pointer-events-none absolute -bottom-24 -right-24 w-80 opacity-10 sm:-bottom-32 sm:-right-32 sm:w-[28rem]"
+            >
+
+            <div class="relative z-10 flex items-center gap-3">
+                <span class="flex h-12 w-12 items-center justify-center rounded-full bg-white p-1.5 shadow-lg">
+                    <img
+                        src="{{ asset('assets/images/logo/globaltronics_logo.png') }}"
+                        alt=""
+                        class="h-full w-full object-contain"
+                    >
+                </span>
+                <div>
+                    <p class="text-sm font-bold tracking-[0.16em]">GLOBALTRONICS</p>
+                    <p class="text-xs text-blue-100">Warehouse Control System</p>
+                </div>
+            </div>
+
+            <div class="relative z-10 mt-12 max-w-lg lg:mt-0">
+                <h2 id="welcome-title" class="text-4xl font-semibold tracking-tight sm:text-5xl">Welcome!</h2>
+                <p class="mt-3 max-w-md text-sm leading-6 text-blue-100 sm:text-base">
+                    Sign in to manage warehouse operations.
+                </p>
+                <div class="mt-6 flex items-center gap-2 text-sm text-blue-100">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="16" rx="2"/>
+                        <path stroke-linecap="round" d="M16 3v4M8 3v4M3 10h18"/>
+                    </svg>
+                    <span>{{ now()->format('l, F j, Y') }}</span>
+                </div>
+            </div>
+
+            <p class="relative z-10 mt-12 text-xs text-blue-100/80">Globaltronics Inc.</p>
+        </section>
+
+        <section class="flex min-h-[600px] items-center justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-screen">
         <div class="w-full max-w-xs">
             <header class="mb-8 text-center">
                 <svg class="mx-auto mb-10 h-7 w-7 text-amber-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -22,7 +62,7 @@
                     <circle cx="12" cy="12" r="5"/>
                 </svg>
                 <h1 class="text-4xl font-semibold leading-tight tracking-tight">Log in to your account</h1>
-                <p class="mt-2 text-sm text-slate-500">Get your login from MIS</p>
+                <p class="mt-2 text-sm text-slate-500">Login in Warehouse Management System</p>
             </header>
 
             @if (session('status'))
@@ -121,6 +161,7 @@
                 </div>
             @endauth
         </div>
+            </section>
     </main>
 
     <dialog id="forgotPasswordModal" class="w-full max-w-md rounded-xl border border-slate-200 p-0 shadow-xl backdrop:bg-slate-950/40">
