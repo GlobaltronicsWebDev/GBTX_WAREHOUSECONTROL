@@ -48,16 +48,18 @@
             </div>
 
             <div class="relative z-10 mt-12 max-w-lg lg:mt-0">
-                <h2 id="welcome-title" class="text-4xl font-semibold tracking-tight sm:text-5xl">Welcome!</h2>
+                <h2 id="welcome-title" class="text-4xl font-semibold tracking-tight sm:text-5xl">Good Day!</h2>
                 <p class="mt-3 max-w-md text-sm leading-6 text-blue-100 sm:text-base">
                     Sign in to manage warehouse operations.
                 </p>
-                <div class="mt-6 flex items-center gap-2 text-sm text-blue-100">
+                <div class="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-blue-100">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <rect x="3" y="5" width="18" height="16" rx="2"/>
                         <path stroke-linecap="round" d="M16 3v4M8 3v4M3 10h18"/>
                     </svg>
-                    <span>{{ now()->format('l, F j, Y') }}</span>
+                    <time id="currentDate">{{ now()->format('l, F j, Y') }}</time>
+                    <span aria-hidden="true">-</span>
+                    <time id="currentTime">{{ now()->format('h:i:s A') }}</time>
                 </div>
             </div>
 
@@ -263,6 +265,33 @@
             passwordToggle.setAttribute('aria-pressed', String(shouldShowPassword));
             passwordToggle.setAttribute('aria-label', shouldShowPassword ? 'Hide password' : 'Show password');
         });
+
+        const welcomeTitle = document.getElementById('welcome-title');
+        const currentDate = document.getElementById('currentDate');
+        const currentTime = document.getElementById('currentTime');
+        const dateFormatter = new Intl.DateTimeFormat('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+        });
+        const timeFormatter = new Intl.DateTimeFormat('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true,
+        });
+
+        const updateWelcomeClock = () => {
+            const now = new Date();
+
+            welcomeTitle.textContent = now.getHours() < 12 ? 'Good Day!' : 'Good afternoon!';
+            currentDate.textContent = dateFormatter.format(now);
+            currentTime.textContent = timeFormatter.format(now);
+        };
+
+        updateWelcomeClock();
+        window.setInterval(updateWelcomeClock, 1000);
     </script>
 </body>
 </html>
