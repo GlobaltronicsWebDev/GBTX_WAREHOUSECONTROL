@@ -95,20 +95,16 @@
                     </svg>
                 </button>
 
-                <a href="{{ Auth::user()->canOnlyAccessSalesOrders() ? route('admin.sales-orders.index') : route('admin.dashboard') }}" class="flex items-center gap-3 group shrink-0">
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 group shrink-0">
                     <div class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 p-1.5 flex items-center justify-center shadow-sm group-hover:border-blue-500/50 transition-colors shrink-0">
                         <img src="{{ asset('assets/images/logo/globaltronics_logo.png') }}" alt="Globaltronics" class="w-full h-full object-contain">
                     </div>
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="font-extrabold tracking-tight text-slate-900 text-sm sm:text-base">GLOBALTRONICS</span>
-                            @if (Auth::user()->canOnlyAccessSalesOrders())
-                                <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-blue-50 text-blue-700 border border-blue-300">SALES</span>
-                            @else
-                                <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-amber-50 text-amber-700 border border-amber-300">ADMIN</span>
-                            @endif
+                            <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-amber-50 text-amber-700 border border-amber-300">OPERATIONS</span>
                         </div>
-                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">{{ Auth::user()->canOnlyAccessSalesOrders() ? 'ADS Sales Order Portal' : 'Inventory Control System' }}</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Warehouse Management System</p>
                     </div>
                 </a>
 
@@ -176,16 +172,7 @@
                                 @forelse ($headerNotifications ?? [] as $notif)
                                     <div class="p-3 rounded-xl transition-colors {{ $notif->is_read ? 'hover:bg-slate-50 opacity-80' : 'bg-blue-50/40 hover:bg-blue-50/70 border-l-2 border-blue-500' }}">
                                         <div class="flex items-start justify-between gap-2">
-                                            @if ($notif->type === 'sales_order' && $notif->reference_id)
-                                                <a href="{{ route('admin.sales-orders.show', $notif->reference_id) }}" class="font-bold text-xs text-blue-700 hover:text-blue-900 hover:underline leading-snug flex items-center gap-1 group">
-                                                    <span>{{ $notif->title }}</span>
-                                                    <svg class="w-3 h-3 text-blue-500 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                    </svg>
-                                                </a>
-                                            @else
-                                                <span class="font-bold text-xs text-slate-900 leading-snug">{{ $notif->title }}</span>
-                                            @endif
+                                            <span class="font-bold text-xs text-slate-900 leading-snug">{{ $notif->title }}</span>
                                             <span class="text-[10px] font-mono-code text-slate-400 shrink-0">{{ $notif->created_at->diffForHumans(null, true, true) }}</span>
                                         </div>
                                         <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">{{ $notif->message }}</p>
@@ -267,382 +254,28 @@
                 <div>
                     <p class="sidebar-heading px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest m-0 mb-1 font-mono-code">Navigation</p>
                     <nav class="space-y-1">
-                        @if (!Auth::user()->canOnlyAccessSalesOrders() && !request()->routeIs('admin.sales-orders.*'))
-                        <a href="{{ route('admin.dashboard') }}" 
-                           class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}"
-                           title="Dashboard Overview">
-                            <svg class="sidebar-icon w-5 h-5 shrink-0 {{ request()->routeIs('admin.dashboard') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 12a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z" />
-                            </svg>
-                            <span class="sidebar-text truncate">Dashboard Overview</span>
+                        <a href="{{ route('admin.dashboard') }}" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-slate-600 hover:bg-slate-50' }}">
+                            <span class="sidebar-text">Dashboard</span>
                         </a>
-
-                        @if (!Auth::user()->isSales())
-                        <!-- Launch SRF Menu Item -->
-                        <button type="button" 
-                           onclick="if (typeof openInstallationSrfModal === 'function') { openInstallationSrfModal(); } else { window.location.href = '{{ route('admin.dashboard') }}?open_srf=1'; }"
-                           class="sidebar-item w-full text-left flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-all bg-gradient-to-r from-cyan-50 to-blue-50 text-cyan-900 border border-cyan-200 hover:from-cyan-100 hover:to-blue-100 shadow-xs group cursor-pointer"
-                           title="Launch Installation SRF Requisition">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <svg class="sidebar-icon w-5 h-5 shrink-0 text-cyan-600 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <span class="sidebar-text truncate">Launch SRF</span>
-                            </div>
-                            <span class="sidebar-badge text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-cyan-600 text-white font-extrabold uppercase tracking-wider">
-                                SRF
-                            </span>
-                        </button>
-                        @endif
-
-                        <!-- Approved SRF Menu Item -->
-                        @php
-                            $sidebarApprovedSrfCount = \App\Models\SrfRequisition::whereIn('status', ['completed', 'verified'])->distinct('srf_number')->count('srf_number');
-                            $isApprovedSrfActive = request()->routeIs('admin.srf.approved');
-                        @endphp
-                        <a href="{{ route('admin.srf.approved') }}" 
-                           class="sidebar-item flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all {{ $isApprovedSrfActive ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-sm font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}"
-                           title="Summary of Approved SRFs">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <svg class="sidebar-icon w-5 h-5 shrink-0 {{ $isApprovedSrfActive ? 'text-emerald-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span class="sidebar-text truncate">Approved SRF</span>
-                            </div>
-                            <span class="sidebar-badge text-[10px] font-mono-code px-2 py-0.5 rounded-full {{ $isApprovedSrfActive ? 'bg-emerald-600 text-white font-extrabold' : 'bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold' }}">
-                                {{ $sidebarApprovedSrfCount }}
-                            </span>
-                        </a>
-                        @endif
-
-                        @if (request()->routeIs('admin.sales-orders.*') && !Auth::user()->canOnlyAccessSalesOrders())
-                        <!-- Switch back to Warehouse Dashboard for Admins -->
-                        <a href="{{ route('admin.dashboard') }}" 
-                           class="sidebar-item flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors"
-                           title="Return to Main Warehouse Operations Dashboard">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                            <span>Warehouse Dashboard</span>
-                        </a>
-                        @endif
-
-                        @if (strtolower((string) (Auth::user()->email ?? '')) !== 'joshua.labios@globaltronics.net')
-                            <!-- ADS Sales Order System (LED Advertising Sales Workflow) -->
-                            @php
-                                $isSalesOrdersActive = request()->routeIs('admin.sales-orders.*');
-                                $userActionableOrderCount = 0;
-                                try {
-                                    if (Auth::check() && \Illuminate\Support\Facades\Schema::hasTable('sales_orders')) {
-                                        $userActionableOrderCount = \App\Models\SalesOrder::waitingOnUser(Auth::user())->count();
-                                    }
-                                } catch (\Throwable $e) {
-                                    $userActionableOrderCount = 0;
-                                }
-                            @endphp
-                            <a href="{{ route('admin.sales-orders.index') }}" 
-                               class="sidebar-item flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all {{ $isSalesOrdersActive && !request()->routeIs('admin.sales-orders.reports') && !request()->routeIs('admin.sales-orders.roles') ? 'bg-blue-50 text-blue-800 border border-blue-200 shadow-sm font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}"
-                               title="ADS Sales Order System (ASO / SJO LED Workflow)">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <svg class="sidebar-icon w-5 h-5 shrink-0 {{ $isSalesOrdersActive ? 'text-blue-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                    </svg>
-                                    <span class="sidebar-text truncate">ADS Sales Order Overview</span>
-                                </div>
-                                @if ($userActionableOrderCount > 0)
-                                    <span class="sidebar-badge text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-rose-500 text-white font-extrabold animate-pulse">
-                                        {{ $userActionableOrderCount }} Action
-                                    </span>
-                                @else
-                                    <span class="sidebar-badge text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 font-bold">
-                                        ASO
-                                    </span>
-                                @endif
-                            </a>
-                        @endif
-
-                        @if (Auth::user()->canViewReports())
-                        <!-- ADS Reports -->
-                        <a href="{{ route('admin.sales-orders.reports') }}" 
-                           class="sidebar-item flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.sales-orders.reports') ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}"
-                           title="ADS Amortization, Milestones & BDS Reports">
-                            <div class="flex items-center gap-3 min-w-0 pl-1">
-                                <svg class="sidebar-icon w-4 h-4 shrink-0 {{ request()->routeIs('admin.sales-orders.reports') ? 'text-emerald-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                                </svg>
-                                <span class="sidebar-text truncate">ADS Reports</span>
-                            </div>
-                            <span class="sidebar-badge text-[9px] font-mono-code px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold">
-                                Financial
-                            </span>
-                        </a>
-                        @endif
-
-                        @if (Auth::user()->isAdsAdmin())
-                        <!-- ADS Roles -->
-                        <a href="{{ route('admin.sales-orders.roles') }}" 
-                           class="sidebar-item flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.sales-orders.roles') ? 'bg-purple-50 text-purple-800 border border-purple-200 font-bold' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}"
-                           title="ADS Workflow Role Assignments">
-                            <div class="flex items-center gap-3 min-w-0 pl-1">
-                                <svg class="sidebar-icon w-4 h-4 shrink-0 {{ request()->routeIs('admin.sales-orders.roles') ? 'text-purple-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                                <span class="sidebar-text truncate">ADS Roles</span>
-                            </div>
-                            <span class="sidebar-badge text-[9px] font-mono-code px-1.5 py-0.2 rounded-full bg-purple-100 text-purple-800 border border-purple-200 font-bold">
-                                Admin
-                            </span>
-                        </a>
-                        @endif
-
-                        @if (!Auth::user()->canOnlyAccessSalesOrders() && !request()->routeIs('admin.sales-orders.*'))
-                        <!-- Warehouse Inventory Dropdown with Categories Sub-Menu -->
-
-                        <!-- Warehouse Inventory Dropdown with Categories Sub-Menu -->
-                        @php
-                            $sidebarLedCount = \App\Models\InventoryItem::where('category', 'CENTRALIZED LED INVENTORY')->count();
-                            $sidebarPhilipsCount = \App\Models\InventoryItem::where('category', 'EOL PHILIPS UNITS')->count();
-                            
-                            $serviceUnitSubCategories = [
-                                'LED Service Units',
-                                'Philips Service Units',
-                                'Video Controllers / Processors',
-                                'Shuttle',
-                                'Aver',
-                                'Digital iPoster',
-                                'Kiosks'
-                            ];
-                            $sidebarServiceUnitsCount = \App\Models\InventoryItem::where(function($q) use ($serviceUnitSubCategories) {
-                                $q->whereIn('category', array_merge($serviceUnitSubCategories, ['Service Units (Events, Demo)', 'SERVICE UNITS (EVENTS, DEMO)', 'Service Units', 'SERVICE UNITS']))
-                                  ->orWhere('category', 'like', '%Service Unit%')
-                                  ->orWhere('category', 'like', '%SERVICE UNIT%');
-                            })->whereNotIn('category', [
-                                'DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS',
-                                'Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS'
-                            ])->count();
-
-                            $sidebarDeadPixelCount = \App\Models\InventoryItem::whereIn('category', ['DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS'])->count();
-                            $sidebarDefectiveCount = \App\Models\InventoryItem::whereIn('category', ['Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS'])->count();
-                            $sidebarTotalDefectiveCount = $sidebarDeadPixelCount + $sidebarDefectiveCount;
-
-                            $sidebarTotalCount = \App\Models\InventoryItem::count();
-                            $activeCategory = request('category', request()->routeIs('admin.inventory.*') ? 'CENTRALIZED LED INVENTORY' : null);
-                            $isDeadPixelActive = request()->routeIs('admin.inventory.*') && in_array($activeCategory, ['DeadPixel Units', 'DEADPIXEL UNITS', 'Dead Pixel Units', 'DEAD PIXEL UNITS']);
-                            $isDefectiveActive = request()->routeIs('admin.inventory.*') && in_array($activeCategory, ['Defective Units', 'DEFECTIVE UNITS', 'Defective Service Units', 'DEFECTIVE SERVICE UNITS']);
-                            $isDefectiveGroupActive = $isDeadPixelActive || $isDefectiveActive;
-
-                            $isInventoryActive = request()->routeIs('admin.inventory.*') && !$isDefectiveGroupActive;
-                            $isServiceUnitsActive = $isInventoryActive && (
-                                in_array($activeCategory, array_merge($serviceUnitSubCategories, ['Service Units (Events, Demo)', 'SERVICE UNITS (EVENTS, DEMO)', 'Service Units', 'SERVICE UNITS']))
-                                || str_contains(strtolower((string)$activeCategory), 'service')
-                                || str_contains(strtolower((string)$activeCategory), 'kiosk')
-                                || str_contains(strtolower((string)$activeCategory), 'shuttle')
-                                || str_contains(strtolower((string)$activeCategory), 'aver')
-                                || str_contains(strtolower((string)$activeCategory), 'iposter')
-                                || str_contains(strtolower((string)$activeCategory), 'controller')
-                            );
-                        @endphp
-                        <div class="space-y-1">
-                            <button type="button" 
-                                    id="inventoryDropdownBtn"
-                                    onclick="toggleInventorySubmenu()" 
-                                    class="sidebar-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all {{ $isInventoryActive ? 'bg-blue-50 text-blue-800 border border-blue-200 shadow-sm font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}"
-                                    title="Click to view Inventory Categories"
-                                    aria-expanded="{{ $isInventoryActive ? 'true' : 'false' }}">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <svg class="sidebar-icon w-5 h-5 shrink-0 {{ $isInventoryActive ? 'text-blue-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
-                                    <span class="sidebar-text truncate">Inventory</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 shrink-0">
-                                    <span class="sidebar-badge text-[11px] font-mono-code px-2 py-0.5 rounded-full {{ $isInventoryActive ? 'bg-blue-200 text-blue-950 font-bold' : 'bg-slate-100 text-slate-600 border border-slate-200' }}">
-                                        {{ $sidebarTotalCount }}
-                                    </span>
-                                    <svg id="inventoryChevron" class="sidebar-chevron w-4 h-4 text-slate-400 transition-transform duration-200 {{ $isInventoryActive ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
+                        @if (Auth::user()->canManageSrf())
+                            <button type="button" onclick="if (typeof openInstallationSrfModal === 'function') { openInstallationSrfModal(); } else { window.location.href = '{{ route('admin.dashboard') }}?open_srf=1'; }" class="sidebar-item w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50">
+                                <span class="sidebar-text">Create SRF</span>
                             </button>
-
-                            <!-- Sub-Menu Categories Dropdown List -->
-                            <div id="inventorySubmenu" class="sidebar-submenu {{ $isInventoryActive ? '' : 'hidden' }} pl-3 pr-1 pt-1 space-y-1">
-                                <div class="pl-2 border-l-2 border-slate-200 space-y-1 py-1">
-                                    
-                                    <!-- Sub-Menu Category 1: Centralized LED Inventory -->
-                                    <a href="{{ route('admin.inventory.index', ['category' => 'CENTRALIZED LED INVENTORY']) }}"
-                                       class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $isInventoryActive && $activeCategory === 'CENTRALIZED LED INVENTORY' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
-                                       title="Centralized LED Inventory">
-                                        <div class="flex items-center gap-2 truncate">
-                                            <span class="w-2 h-2 rounded-full {{ $isInventoryActive && $activeCategory === 'CENTRALIZED LED INVENTORY' ? 'bg-emerald-400' : 'bg-slate-400' }} shrink-0"></span>
-                                            <span class="truncate">Centralized LED</span>
-                                        </div>
-                                        <span class="text-[10px] font-mono-code px-1.5 py-0.2 rounded-full {{ $isInventoryActive && $activeCategory === 'CENTRALIZED LED INVENTORY' ? 'bg-slate-800 text-slate-200 font-bold' : 'bg-slate-100 text-slate-600' }}">
-                                            {{ $sidebarLedCount }}
-                                        </span>
-                                    </a>
-
-                                    <!-- Sub-Menu Category 2: EOL Philips Units -->
-                                    <a href="{{ route('admin.inventory.index', ['category' => 'EOL PHILIPS UNITS']) }}"
-                                       class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $isInventoryActive && $activeCategory === 'EOL PHILIPS UNITS' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
-                                       title="EOL Philips Units">
-                                        <div class="flex items-center gap-2 truncate">
-                                            <span class="w-2 h-2 rounded-full {{ $isInventoryActive && $activeCategory === 'EOL PHILIPS UNITS' ? 'bg-emerald-400' : 'bg-slate-400' }} shrink-0"></span>
-                                            <span class="truncate">EOL Philips Units</span>
-                                        </div>
-                                        <span class="text-[10px] font-mono-code px-1.5 py-0.2 rounded-full {{ $isInventoryActive && $activeCategory === 'EOL PHILIPS UNITS' ? 'bg-slate-800 text-slate-200 font-bold' : 'bg-slate-100 text-slate-600' }}">
-                                            {{ $sidebarPhilipsCount }}
-                                        </span>
-                                    </a>
-
-                                    <!-- Sub-Menu Category 3: Service Units (Events, Demo) with Sub-Categories Accordion -->
-                                    <div class="space-y-0.5 pt-0.5">
-                                        <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $isServiceUnitsActive && ($activeCategory === 'Service Units (Events, Demo)' || $activeCategory === 'SERVICE UNITS (EVENTS, DEMO)') ? 'bg-slate-900 text-white shadow-sm' : ($isServiceUnitsActive ? 'bg-slate-100 text-slate-900 border border-slate-200' : 'text-slate-700 hover:bg-slate-100') }}">
-                                            <a href="{{ route('admin.inventory.index', ['category' => 'Service Units (Events, Demo)']) }}" 
-                                               class="flex items-center gap-2 min-w-0 flex-1 truncate"
-                                               title="Service Units (Events, Demo) - All">
-                                                <span class="w-2 h-2 rounded-full {{ $isServiceUnitsActive && ($activeCategory === 'Service Units (Events, Demo)' || $activeCategory === 'SERVICE UNITS (EVENTS, DEMO)') ? 'bg-emerald-400' : 'bg-slate-400' }} shrink-0"></span>
-                                                <span class="truncate">Service Units (Events, Demo)</span>
-                                            </a>
-                                            <div class="flex items-center gap-1 shrink-0 ml-1">
-                                                <span class="text-[10px] font-mono-code px-1.5 py-0.2 rounded-full {{ $isServiceUnitsActive && ($activeCategory === 'Service Units (Events, Demo)' || $activeCategory === 'SERVICE UNITS (EVENTS, DEMO)') ? 'bg-slate-800 text-slate-200 font-bold' : 'bg-slate-200 text-slate-700 font-bold' }}">
-                                                    {{ $sidebarServiceUnitsCount }}
-                                                </span>
-                                                <button type="button" 
-                                                        onclick="event.stopPropagation(); toggleServiceUnitsSubmenu();" 
-                                                        class="p-0.5 text-slate-400 hover:text-slate-700 focus:outline-none" 
-                                                        title="Expand / Collapse Service Units Sub-Categories">
-                                                    <svg id="serviceUnitsChevron" class="w-3.5 h-3.5 transition-transform duration-200 {{ $isServiceUnitsActive ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <!-- Nested Service Units Sub-Categories -->
-                                        <div id="serviceUnitsSubmenu" class="{{ $isServiceUnitsActive ? '' : 'hidden' }} pl-3 pt-1 space-y-0.5 border-l-2 border-slate-200 ml-2">
-                                            @foreach ($serviceUnitSubCategories as $subCat)
-                                                @php
-                                                    $subCount = \App\Models\InventoryItem::where('category', $subCat)->count();
-                                                    $isSubActive = $isInventoryActive && $activeCategory === $subCat;
-                                                @endphp
-                                                <a href="{{ route('admin.inventory.index', ['category' => $subCat]) }}"
-                                                   class="flex items-center justify-between px-2 py-1 rounded-md text-[11px] font-semibold transition-all {{ $isSubActive ? 'bg-slate-900 text-white font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
-                                                   title="{{ $subCat }}">
-                                                    <div class="flex items-center gap-1.5 truncate">
-                                                        <span class="w-1.5 h-1.5 rounded-full {{ $isSubActive ? 'bg-emerald-400' : 'bg-slate-400' }} shrink-0"></span>
-                                                        <span class="truncate">{{ $subCat }}</span>
-                                                    </div>
-                                                    <span class="text-[9px] font-mono-code px-1 rounded-full {{ $isSubActive ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-600' }}">
-                                                        {{ $subCount }}
-                                                    </span>
-                                                </a>
-                                            @endforeach
-                                        </div>
-                                    </div>
-
-                                    <!-- Sub-Menu Category 4: All Categories -->
-                                    <a href="{{ route('admin.inventory.index', ['category' => 'all']) }}"
-                                       class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $isInventoryActive && $activeCategory === 'all' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
-                                       title="All Warehouse Categories">
-                                        <div class="flex items-center gap-2 truncate">
-                                            <span class="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
-                                            <span class="truncate">All Categories</span>
-                                        </div>
-                                        <span class="text-[10px] font-mono-code px-1.5 py-0.2 rounded-full {{ $isInventoryActive && $activeCategory === 'all' ? 'bg-blue-800 text-white font-bold' : 'bg-slate-100 text-slate-600' }}">
-                                            {{ $sidebarTotalCount }}
-                                        </span>
-                                    </a>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Defective & DeadPixel Units Menu (Separated Outside Inventory) -->
-                        <div class="space-y-1">
-                            <button type="button" 
-                                    id="defectiveDropdownBtn"
-                                    onclick="toggleDefectiveSubmenu()" 
-                                    class="sidebar-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all {{ $isDefectiveGroupActive ? 'bg-rose-50 text-rose-800 border border-rose-200 shadow-sm font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}"
-                                    title="Click to view Defective & DeadPixel Units"
-                                    aria-expanded="{{ $isDefectiveGroupActive ? 'true' : 'false' }}">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <svg class="sidebar-icon w-5 h-5 shrink-0 {{ $isDefectiveGroupActive ? 'text-rose-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <span class="sidebar-text truncate">Defective Units</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 shrink-0">
-                                    <span class="sidebar-badge text-[11px] font-mono-code px-2 py-0.5 rounded-full {{ $isDefectiveGroupActive ? 'bg-rose-200 text-rose-950 font-bold' : 'bg-rose-100 text-rose-800 border border-rose-200' }}">
-                                        {{ $sidebarTotalDefectiveCount }}
-                                    </span>
-                                    <svg id="defectiveChevron" class="sidebar-chevron w-4 h-4 text-slate-400 transition-transform duration-200 {{ $isDefectiveGroupActive ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </button>
-
-                            <!-- Sub-Menu for DeadPixel Units & Defective Units -->
-                            <div id="defectiveSubmenu" class="sidebar-submenu {{ $isDefectiveGroupActive ? '' : 'hidden' }} pl-3 pr-1 pt-1 space-y-1">
-                                <div class="pl-2 border-l-2 border-rose-200 space-y-1 py-1">
-                                    <!-- DeadPixel Units -->
-                                    <a href="{{ route('admin.inventory.index', ['category' => 'DeadPixel Units']) }}"
-                                       class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $isDeadPixelActive ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
-                                       title="DeadPixel Units">
-                                        <div class="flex items-center gap-2 truncate">
-                                            <span class="w-2 h-2 rounded-full {{ $isDeadPixelActive ? 'bg-amber-400' : 'bg-slate-400' }} shrink-0"></span>
-                                            <span class="truncate">DeadPixel Units</span>
-                                        </div>
-                                        <span class="text-[10px] font-mono-code px-1.5 py-0.2 rounded-full {{ $isDeadPixelActive ? 'bg-slate-800 text-slate-200 font-bold' : 'bg-slate-100 text-slate-600' }}">
-                                            {{ $sidebarDeadPixelCount }}
-                                        </span>
-                                    </a>
-
-                                    <!-- Defective Units -->
-                                    <a href="{{ route('admin.inventory.index', ['category' => 'Defective Units']) }}"
-                                       class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $isDefectiveActive ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
-                                       title="Defective Units">
-                                        <div class="flex items-center gap-2 truncate">
-                                            <span class="w-2 h-2 rounded-full {{ $isDefectiveActive ? 'bg-rose-400' : 'bg-slate-400' }} shrink-0"></span>
-                                            <span class="truncate">Defective Units</span>
-                                        </div>
-                                        <span class="text-[10px] font-mono-code px-1.5 py-0.2 rounded-full {{ $isDefectiveActive ? 'bg-slate-800 text-slate-200 font-bold' : 'bg-slate-100 text-slate-600' }}">
-                                            {{ $sidebarDefectiveCount }}
-                                        </span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Merged Admin Credentials (Users, Roles & Security) - Restricted to IT Admin -->
+                        @endif
+                        <a href="{{ route('admin.srf.approved') }}" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.srf.approved') ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'text-slate-600 hover:bg-slate-50' }}">
+                            <span class="sidebar-text">Approved SRFs</span>
+                        </a>
                         @if (Auth::user()->canAccessAdminCredentials())
-                            <a href="{{ route('admin.settings.credentials') }}" 
-                               class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.settings.*') || request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}"
-                               title="Admin Credentials (Users, Roles & Security)">
-                                <svg class="sidebar-icon w-5 h-5 shrink-0 {{ request()->routeIs('admin.settings.*') || request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                </svg>
-                                <span class="sidebar-text truncate">Admin Credentials</span>
-                                <span class="sidebar-badge ml-auto text-[11px] font-mono-code px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                                    {{ \App\Models\User::count() }}
-                                </span>
+                            <a href="{{ route('admin.settings.credentials') }}" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50">
+                                <span class="sidebar-text">Manage accounts &amp; roles</span>
                             </a>
                         @endif
-
-                        <a href="{{ route('home') }}" target="_blank"
-                           class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                           title="Front Login Portal">
-                            <svg class="sidebar-icon w-5 h-5 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                            <span class="sidebar-text truncate">Front Login Portal</span>
+                        <a href="{{ route('home') }}" target="_blank" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50">
+                            <span class="sidebar-text">Login portal</span>
                         </a>
-                        @endif
                     </nav>
                 </div>
 
-                @if (!Auth::user()->canOnlyAccessSalesOrders())
                 <!-- Merged System Info Pill in Sidebar Menu -->
                 <div class="sidebar-footer pt-3 mt-1 border-t border-slate-200">
                     <div class="p-3 rounded-xl bg-slate-50/90 border border-slate-200 text-xs">
@@ -660,7 +293,6 @@
                         </div>
                     </div>
                 </div>
-                @endif
 
             </div>
         </aside>
@@ -760,65 +392,6 @@
             }
         }
 
-        function toggleInventorySubmenu() {
-            const submenu = document.getElementById('inventorySubmenu');
-            const chevron = document.getElementById('inventoryChevron');
-            const btn = document.getElementById('inventoryDropdownBtn');
-            const sidebar = document.getElementById('sidebarMenu');
-
-            // If sidebar is collapsed on desktop, uncollapse it so submenu is fully visible
-            if (sidebar && sidebar.classList.contains('collapsed')) {
-                updateSidebarState(false);
-                localStorage.setItem('admin_sidebar_collapsed', '0');
-            }
-
-            if (submenu) {
-                submenu.classList.toggle('hidden');
-                const isOpen = !submenu.classList.contains('hidden');
-                if (chevron) {
-                    chevron.classList.toggle('rotate-180', isOpen);
-                }
-                if (btn) {
-                    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                }
-            }
-        }
-
-        function toggleServiceUnitsSubmenu() {
-            const submenu = document.getElementById('serviceUnitsSubmenu');
-            const chevron = document.getElementById('serviceUnitsChevron');
-            if (submenu) {
-                submenu.classList.toggle('hidden');
-                const isOpen = !submenu.classList.contains('hidden');
-                if (chevron) {
-                    chevron.classList.toggle('rotate-180', isOpen);
-                }
-            }
-        }
-
-        function toggleDefectiveSubmenu() {
-            const submenu = document.getElementById('defectiveSubmenu');
-            const chevron = document.getElementById('defectiveChevron');
-            const btn = document.getElementById('defectiveDropdownBtn');
-            const sidebar = document.getElementById('sidebarMenu');
-
-            if (sidebar && sidebar.classList.contains('collapsed')) {
-                updateSidebarState(false);
-                localStorage.setItem('admin_sidebar_collapsed', '0');
-            }
-
-            if (submenu) {
-                submenu.classList.toggle('hidden');
-                const isOpen = !submenu.classList.contains('hidden');
-                if (chevron) {
-                    chevron.classList.toggle('rotate-180', isOpen);
-                }
-                if (btn) {
-                    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                }
-            }
-        }
-
         // Restore saved sidebar collapse preference on desktop
         document.addEventListener('DOMContentLoaded', function() {
             if (window.innerWidth >= 1024 && localStorage.getItem('admin_sidebar_collapsed') === '1') {
@@ -868,128 +441,6 @@
         });
     </script>
 
-    <!-- Real-Time Approver Sign-off Toast Pop-up System for Sales & Management -->
-    <div id="salesToastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none" aria-live="polite"></div>
-
-    <script>
-        (function() {
-            const container = document.getElementById('salesToastContainer');
-            if (!container) return;
-
-            const seenToastIds = new Set(JSON.parse(sessionStorage.getItem('seen_sales_toasts') || '[]'));
-
-            function playSoftChime() {
-                try {
-                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
-                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start();
-                    osc.stop(ctx.currentTime + 0.36);
-                } catch (e) {
-                    // Audio blocked until user gesture
-                }
-            }
-
-            function dismissToast(id, toastElem) {
-                if (toastElem) {
-                    toastElem.classList.add('opacity-0', 'translate-x-8', 'transition-all', 'duration-300');
-                    setTimeout(() => toastElem.remove(), 320);
-                }
-                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                fetch(`{{ url('admin/sales-orders/notifications') }}/${id}/dismiss`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': token,
-                        'Accept': 'application/json',
-                    }
-                }).catch(() => {});
-            }
-
-            function renderToast(notif) {
-                const toast = document.createElement('div');
-                toast.className = 'pointer-events-auto bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/10 p-4 transition-all duration-300 transform translate-y-3 opacity-0 ring-1 ring-blue-500/20';
-                
-                toast.innerHTML = `
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-[10px] font-mono-code font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
-                                APPROVER UPDATE
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-mono-code text-slate-400">${notif.time || 'Just now'}</span>
-                            <button type="button" class="text-slate-400 hover:text-slate-700 text-xs p-1" aria-label="Dismiss">✕</button>
-                        </div>
-                    </div>
-                    <div class="mt-2.5">
-                        <h4 class="text-xs font-bold text-slate-900 leading-tight">${notif.title}</h4>
-                        <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">${notif.message}</p>
-                    </div>
-                    <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] font-mono-code text-slate-400">Actor: <strong class="text-slate-700">${notif.actor_name}</strong></span>
-                        <a href="${notif.url}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition-colors">
-                            <span>View Order</span>
-                            <span>→</span>
-                        </a>
-                    </div>
-                `;
-
-                toast.querySelector('button').addEventListener('click', () => dismissToast(notif.id, toast));
-
-                toast.querySelector('a').addEventListener('click', () => {
-                    dismissToast(notif.id, null);
-                });
-
-                container.appendChild(toast);
-
-                requestAnimationFrame(() => {
-                    toast.classList.remove('translate-y-3', 'opacity-0');
-                    toast.classList.add('translate-y-0', 'opacity-100');
-                });
-
-                setTimeout(() => {
-                    if (document.body.contains(toast)) {
-                        dismissToast(notif.id, toast);
-                    }
-                }, 9000);
-            }
-
-            function checkSalesNotifications() {
-                fetch('{{ route('admin.sales-orders.notifications.unread') }}', {
-                    headers: { 'Accept': 'application/json' }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.notifications && data.notifications.length > 0) {
-                        let hasNew = false;
-                        data.notifications.forEach(notif => {
-                            if (!seenToastIds.has(notif.id)) {
-                                seenToastIds.add(notif.id);
-                                renderToast(notif);
-                                hasNew = true;
-                            }
-                        });
-                        if (hasNew) {
-                            playSoftChime();
-                            sessionStorage.setItem('seen_sales_toasts', JSON.stringify(Array.from(seenToastIds).slice(-30)));
-                        }
-                    }
-                })
-                .catch(() => {});
-            }
-
-            setTimeout(checkSalesNotifications, 1800);
-            setInterval(checkSalesNotifications, 12000);
-        })();
-    </script>
     @stack('scripts')
 </body>
 </html>

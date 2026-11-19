@@ -213,9 +213,12 @@
                                                 <span>{{ $item->quantity }}</span>
                                                 <span class="text-[10px] text-blue-500 font-semibold">{{ $item->uom ?? 'PCS' }}</span>
                                             </span>
-                                            <span class="font-semibold text-slate-800 block truncate flex-1 min-w-0" title="{{ $item->inventoryItem?->model ?? 'Custom Hardware' }}">
-                                                {{ $item->inventoryItem?->model ?? 'Custom Hardware' }}
+                                            <span class="font-semibold text-slate-800 block truncate flex-1 min-w-0" title="{{ $item->item_model ?? 'Hardware item' }}">
+                                                {{ $item->item_model ?? 'Hardware item' }}
                                             </span>
+                                            @if ($item->item_manufacturer)
+                                                <span class="block text-xs text-slate-500">{{ $item->item_manufacturer }}</span>
+                                            @endif
                                         </div>
                                     @endforeach
                                 </div>

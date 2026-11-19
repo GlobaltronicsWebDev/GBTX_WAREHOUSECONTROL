@@ -56,9 +56,6 @@ class CredentialController extends Controller
         $staffCount = User::whereHas('roles', function ($query) {
             $query->where('slug', 'warehouse-staff');
         })->count();
-        $salesCount = User::whereHas('roles', function ($query) {
-            $query->where('slug', 'sales-executive');
-        })->count();
         $technicalCount = User::whereHas('roles', function ($query) {
             $query->whereIn('slug', ['technical', 'technical-staff']);
         })->count();
@@ -78,7 +75,6 @@ class CredentialController extends Controller
             'totalRoles' => $totalRoles,
             'adminCount' => $adminCount,
             'staffCount' => $staffCount,
-            'salesCount' => $salesCount,
             'technicalCount' => $technicalCount,
             'recentUsers' => $recentUsers,
             'search' => $search,

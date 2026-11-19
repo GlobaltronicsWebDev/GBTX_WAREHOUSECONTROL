@@ -23,7 +23,7 @@ class RoleSeeder extends Seeder
             [
                 'name' => 'Warehouse Admin',
                 'slug' => 'warehouse-admin',
-                'description' => 'Oversees warehouse floor operations, storage bays, dispatch queues, and inventory flows.',
+                'description' => 'Oversees warehouse operations and stock requisition approvals.',
                 'badge_color' => 'amber',
                 'is_system' => true,
             ],
@@ -32,27 +32,6 @@ class RoleSeeder extends Seeder
                 'slug' => 'warehouse-staff',
                 'description' => 'Floor operational personnel managing item picking, pallet loading, and barcode registration.',
                 'badge_color' => 'emerald',
-                'is_system' => false,
-            ],
-            [
-                'name' => 'Inventory Supervisor',
-                'slug' => 'inventory-supervisor',
-                'description' => 'Responsible for SKU verification, periodic cycle counts, stock reconciliation, and audits.',
-                'badge_color' => 'sky',
-                'is_system' => false,
-            ],
-            [
-                'name' => 'Dispatch Officer',
-                'slug' => 'dispatch-officer',
-                'description' => 'Handles outbound carrier logistics, shipping documentation, and dispatch clearances.',
-                'badge_color' => 'indigo',
-                'is_system' => false,
-            ],
-            [
-                'name' => 'Sales / Account Executive',
-                'slug' => 'sales-executive',
-                'description' => 'Initiates Sales Service Orders (SSO), client project requests, and stock requisitions.',
-                'badge_color' => 'blue',
                 'is_system' => false,
             ],
             [

@@ -14,7 +14,10 @@ class SrfRequisition extends Model
         'po_number',
         'date_needed',
         'requisition_date',
-        'inventory_item_id',
+        'item_model',
+        'item_manufacturer',
+        'item_category',
+        'item_description',
         'quantity',
         'uom',
         'stock_status',
@@ -41,11 +44,6 @@ class SrfRequisition extends Model
             'requisition_date' => 'date',
             'verified_at' => 'datetime',
         ];
-    }
-
-    public function inventoryItem()
-    {
-        return $this->belongsTo(InventoryItem::class, 'inventory_item_id');
     }
 
     public function requester()

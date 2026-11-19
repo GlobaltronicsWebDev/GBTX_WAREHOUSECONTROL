@@ -35,8 +35,8 @@
     </div>
 </div>
 
-<!-- LIVE METRICS CARDS (Five Tiles including Sales) -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+<!-- LIVE METRICS CARDS -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     
     <!-- Total Users -->
     <div onclick="switchTab('users')" class="glass-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-blue-400 hover:shadow-md transition-all cursor-pointer">
@@ -87,23 +87,6 @@
             <span class="text-xs text-emerald-600 font-semibold">Floor Ops</span>
         </div>
         <p class="mt-2 text-xs text-slate-500">Stock picking, pallet dispatch, and barcode scanning</p>
-    </div>
-
-    <!-- Sales & Accounts -->
-    <div class="glass-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-sky-400 hover:shadow-md transition-all">
-        <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Sales & Requisition</span>
-            <div class="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-            </div>
-        </div>
-        <div class="mt-3 flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-sky-700 font-mono-code">{{ $salesCount ?? 0 }}</span>
-            <span class="text-xs text-sky-600 font-semibold">Accounts</span>
-        </div>
-        <p class="mt-2 text-xs text-slate-500">Initiates Sales Service Orders (SSO) & requisitions</p>
     </div>
 
     <!-- Roles Configured -->
@@ -400,15 +383,8 @@
             @endif
         </form>
 
-        <!-- Create User & Sales Account Buttons -->
+        <!-- Create User Button -->
         <div class="flex flex-wrap items-center gap-2 shrink-0 w-full md:w-auto">
-            <button type="button" onclick="openCreateSalesModal()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-sky-500/20 transition-all hover:scale-[1.01]">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                <span>+ Create Sales Account</span>
-            </button>
-
             <button type="button" onclick="openCreateUserModal()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all hover:scale-[1.01]">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -902,108 +878,6 @@
 <!-- ========================================== -->
 <!-- MODALS: USER ACCOUNTS (CREATE, EDIT, DELETE)-->
 <!-- ========================================== -->
-
-@php
-    $salesRoleObj = $roles->firstWhere('slug', 'sales-executive');
-@endphp
-
-<!-- Modal 0: Dedicated Create Sales Account Modal -->
-<div id="createSalesModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-sky-200 p-6 sm:p-7 animate-fadeIn">
-        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-            <div class="flex items-center gap-2.5">
-                <div class="p-2 rounded-xl bg-sky-50 text-sky-600 border border-sky-200">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-base font-bold text-slate-900">Create Sales & Account Executive</h3>
-                    <p class="text-xs text-slate-500">Initiates Sales Service Orders (SSO) & project requisitions</p>
-                </div>
-            </div>
-            <button type="button" onclick="closeModal('createSalesModal')" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-
-        <div class="mt-3 p-3 rounded-xl bg-sky-50/70 border border-sky-200 text-xs text-sky-900 flex items-start gap-2">
-            <svg class="w-4 h-4 text-sky-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>This account will be assigned the <strong>Sales / Account Executive</strong> role to prepare Sales Service Orders (SSO) and Stock Requisition Forms (SRF) for warehouse installation projects.</span>
-        </div>
-
-        <form method="POST" action="{{ route('admin.users.store') }}" class="mt-4 space-y-4">
-            @csrf
-
-            @if ($salesRoleObj)
-                <input type="hidden" name="roles[]" value="{{ $salesRoleObj->id }}" />
-            @endif
-
-            <div>
-                <label for="create_sales_name" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Sales Representative Name <span class="text-amber-500">*</span>
-                </label>
-                <input 
-                    type="text" 
-                    name="name" 
-                    id="create_sales_name" 
-                    required 
-                    placeholder="e.g. Ariel Moro" 
-                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-sky-500"
-                />
-            </div>
-
-            <div>
-                <label for="create_sales_email" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Sales Work Email <span class="text-amber-500">*</span>
-                </label>
-                <input 
-                    type="email" 
-                    name="email" 
-                    id="create_sales_email" 
-                    required 
-                    placeholder="e.g. ariel.moro@globaltronics.net" 
-                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-sky-500 font-mono-code"
-                />
-            </div>
-
-            <div>
-                <label for="create_sales_password" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Temporary Password <span class="text-amber-500">*</span>
-                </label>
-                <input 
-                    type="password" 
-                    name="password" 
-                    id="create_sales_password" 
-                    required 
-                    minlength="8" 
-                    placeholder="•••••••••••• (min 8 characters)" 
-                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-sky-500 font-mono-code"
-                />
-            </div>
-
-            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-                <span class="text-slate-600 font-medium">Automatic Role Clearance:</span>
-                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200">
-                    Sales / Account Executive
-                </span>
-            </div>
-
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
-                <button type="button" onclick="closeModal('createSalesModal')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
-                    Cancel
-                </button>
-                <button type="submit" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-sky-600 hover:bg-sky-700 shadow-md shadow-sky-500/20 transition-all">
-                    Register Sales Account
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <!-- Modal 1: Create User Modal -->
 <div id="createUserModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">

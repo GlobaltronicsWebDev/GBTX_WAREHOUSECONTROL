@@ -2,13 +2,10 @@
 
 namespace App\Providers;
 
-use App\Models\SalesOrder;
 use App\Models\TransactionNotification;
-use App\Policies\SalesOrderPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,8 +24,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::policy(SalesOrder::class, SalesOrderPolicy::class);
-
         ResetPassword::toMailUsing(function ($notifiable, string $token) {
             $url = url(route('password.reset', [
                 'token' => $token,

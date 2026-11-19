@@ -55,10 +55,6 @@ class UserController extends Controller
         $staffCount = User::whereHas('roles', function ($query) {
             $query->where('slug', 'warehouse-staff');
         })->count();
-        $salesCount = User::whereHas('roles', function ($query) {
-            $query->where('slug', 'sales-executive');
-        })->count();
-
         $recentUsers = User::with('roles')
             ->latest()
             ->take(6)
@@ -72,7 +68,6 @@ class UserController extends Controller
             'totalRoles' => $totalRoles,
             'adminCount' => $adminCount,
             'staffCount' => $staffCount,
-            'salesCount' => $salesCount,
             'recentUsers' => $recentUsers,
             'search' => $search,
             'selectedRole' => $roleFilter,

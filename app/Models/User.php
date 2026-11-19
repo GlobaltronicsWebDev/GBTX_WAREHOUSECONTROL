@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['name', 'email', 'password', 'is_admin'])]
 #[Hidden(['password', 'remember_token'])]
@@ -104,14 +103,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Determine if the user is in Sales.
-     */
-    public function isSales(): bool
-    {
-        return $this->hasRole(['sales-executive', 'sales']);
-    }
-
-    /**
      * Determine if user should see full warehouse operations floor & SOP engine.
      * Only Warehouse Admin and Staff see the 5-stage warehouse operations engine.
      * Technical (Ariel Moro) and IT Admin do NOT see warehouse floor operations.
@@ -122,126 +113,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Determine if user has permission to add, edit, or delete inventory.
-     * Sales accounts have view-only access.
-     */
-    public function canManageInventory(): bool
-    {
-        return !$this->isSales();
-    }
-
-    /**
      * Determine if user has permission to create, verify, or process SRF workflow actions.
-     * Sales accounts have view-only access to SRF summary and status.
      */
     public function canManageSrf(): bool
     {
-        return !$this->isSales() || $this->isTechnical() || $this->canViewWarehouseOperations();
-    }
-
-    /**
-     * Sales orders filed by this user.
-     *
-     * @return HasMany<SalesOrder, $this>
-     */
-    public function salesOrders(): HasMany
-    {
-        return $this->hasMany(SalesOrder::class);
-    }
-
-    /**
-     * Action logs executed by this user.
-     *
-     * @return HasMany<OrderLog, $this>
-     */
-    public function orderLogs(): HasMany
-    {
-        return $this->hasMany(OrderLog::class);
-    }
-
-    /**
-     * Determine if user has administrator privileges in ADS Sales Order System.
-     */
-    public function isAdsAdmin(): bool
-    {
-        return (bool) $this->is_admin || $this->hasRole(['admin', 'it-admin']);
-    }
-
-    /**
-     * Determine if user can view all orders across all queues.
-     * Approvers, Accounting, and Admins can view all orders in the pipeline.
-     */
-    public function canViewAllOrders(): bool
-    {
-        return $this->isAdsAdmin() || $this->hasRole([
-            'accounting',
-            \App\Support\Workflow::ROLE_JOVY,
-            \App\Support\Workflow::ROLE_FRED,
-            \App\Support\Workflow::ROLE_OWEN,
-            \App\Support\Workflow::ROLE_MACY,
-            \App\Support\Workflow::ROLE_BADET,
-            \App\Support\Workflow::ROLE_KING,
-            \App\Support\Workflow::ROLE_CONTENT,
-            \App\Support\Workflow::ROLE_IT,
-            \App\Support\Workflow::ROLE_ACCOUNTING,
-        ]);
-    }
-
-    /**
-     * Determine if user can view reports (Admins and Accounting only).
-     */
-    public function canViewReports(): bool
-    {
-        return $this->isAdsAdmin() || $this->hasRole('accounting');
-    }
-
-    /**
-     * Determine if user is strictly restricted to ADS Sales Orders only.
-     * Restricted users cannot view the warehouse floor, inventory catalog, or SRF requisitions.
-     */
-    public function canOnlyAccessSalesOrders(): bool
-    {
-        // Full warehouse staff, inventory supervisor, dispatch officer, and technical users have warehouse access
-        if ($this->isWarehouseStaff() || $this->isTechnical() || $this->hasRole(['inventory-supervisor', 'dispatch-officer', 'warehouse-admin'])) {
-            return false;
-        }
-
-        // If user is IT Admin / Super Admin, they have full system access unless explicitly in sales orders
-        if ($this->isItAdmin() || (bool) $this->is_admin) {
-            return false;
-        }
-
-        // All ADS workflow approvers & sales filers (Jovy, Fred, Owen, Macy, Badet, King, Sales, Content) only access Sales Orders
-        if ($this->hasRole([
-            \App\Support\Workflow::ROLE_JOVY,
-            \App\Support\Workflow::ROLE_FRED,
-            \App\Support\Workflow::ROLE_OWEN,
-            \App\Support\Workflow::ROLE_MACY,
-            \App\Support\Workflow::ROLE_BADET,
-            \App\Support\Workflow::ROLE_KING,
-            \App\Support\Workflow::ROLE_SALES,
-            \App\Support\Workflow::ROLE_CONTENT,
-            'sales',
-            'sales-executive',
-        ])) {
-            return true;
-        }
-
-        $restrictedEmails = [
-            'anne.liboon@globaltronics.net',
-            'sheryl.quilla@globaltronics.net',
-            'sherly.quilla@globaltronics.net',
-            'jovy@globaltronics.net',
-            'fred@globaltronics.net',
-            'owen@globaltronics.net',
-            'macy@globaltronics.net',
-            'badet@globaltronics.net',
-            'king@globaltronics.net',
-            'content@globaltronics.net',
-            'sales@globaltronics.net',
-        ];
-
-        return in_array(strtolower((string) $this->email), $restrictedEmails);
+        return $this->isItAdmin() || $this->isTechnical() || $this->canViewWarehouseOperations();
     }
 
     /**

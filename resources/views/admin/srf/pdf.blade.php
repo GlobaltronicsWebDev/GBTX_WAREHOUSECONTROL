@@ -484,7 +484,7 @@
                         <th style="width: 8%; text-align: center;">UOM</th>
                         <th style="width: 40%;">HARDWARE MODEL &amp; DESCRIPTION</th>
                         <th style="width: 22%;">REMARKS / PURPOSE</th>
-                        <th style="width: 15%; text-align: center;">STOCK STAGING</th>
+                        <th style="width: 15%; text-align: center;">INVENTORY STATUS</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -494,25 +494,24 @@
                             <td style="text-align: center; font-weight: 700; color: #1d4ed8;" class="font-mono">{{ $it->quantity }}</td>
                             <td style="text-align: center; font-weight: 600;" class="font-mono">{{ $it->uom ?? 'PCS' }}</td>
                             <td>
-                                <strong style="color: #0f172a; display: block;">{{ $it->inventoryItem?->model ?? 'Hardware Item' }}</strong>
+                                <strong style="color: #0f172a; display: block;">{{ $it->item_model ?? 'Hardware Item' }}</strong>
                                 <span style="font-size: 10px; color: #64748b;">
-                                    Cat: {{ $it->inventoryItem?->category ?? 'Display Equipment' }} 
-                                    @if ($it->inventoryItem?->manufacturer)
-                                        • Mfr: {{ $it->inventoryItem->manufacturer }}
+                                    @if ($it->item_category)
+                                        Cat: {{ $it->item_category }}
+                                    @endif
+                                    @if ($it->item_manufacturer)
+                                        • Mfr: {{ $it->item_manufacturer }}
                                     @endif
                                 </span>
+                                @if ($it->item_description)
+                                    <span style="display: block; font-size: 9px; color: #64748b;">{{ $it->item_description }}</span>
+                                @endif
                             </td>
                             <td>
                                 <span>{{ $it->remarks ?? 'Standard site allocation' }}</span>
                             </td>
                             <td style="text-align: center;">
-                                @if ($it->stock_status === 'available_reserved')
-                                    <span style="color: #065f46; font-weight: 700; font-size: 10px;">STAGE-BAY-01</span>
-                                    <span style="display: block; font-size: 9px; color: #059669;">[IN STOCK]</span>
-                                @else
-                                    <span style="color: #92400e; font-weight: 700; font-size: 10px;">RECEIVING-HOLD</span>
-                                    <span style="display: block; font-size: 9px; color: #d97706;">[PR/MRR HOLD]</span>
-                                @endif
+                                <span style="color: #475569; font-weight: 700; font-size: 10px;">NOT TRACKED</span>
                             </td>
                         </tr>
                     @endforeach
