@@ -130,7 +130,7 @@
             </div>
 
             <!-- Bottom Left: Badge and Notice -->
-            <div class="relative z-10 pt-4 border-t border-slate-800/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
+            <!-- <div class="relative z-10 pt-4 border-t border-slate-800/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
                 <div class="flex items-center gap-2">
                     <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
                     <span>Globaltronics Automated Facility Network</span>
@@ -139,7 +139,7 @@
                     ID: WMS-PH-CEB-01
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- RIGHT HALF: Modern Interactive Login Experience -->
         <div class="w-full lg:w-1/2 shrink-0 lg:min-h-screen flex flex-col justify-between p-6 sm:p-10 lg:p-14 bg-white text-slate-800 relative border-l border-slate-200">
