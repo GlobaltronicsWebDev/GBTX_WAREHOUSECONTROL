@@ -51,8 +51,8 @@
                     >
                 </span>
                 <div>
-                    <p class="text-sm font-bold tracking-[0.16em]">GLOBALTRONICS</p>
-                    <p class="text-xs text-blue-100">Warehouse Control System</p>
+                    <p class="text-sm font-bold tracking-[0.16em]">Inventory Control</p>
+                    
                 </div>
             </div>
 
