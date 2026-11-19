@@ -80,9 +80,7 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
-                    <span class="font-mono-code text-[11px] text-emerald-400 font-semibold tracking-wide">SYSTEM ONLINE</span>
-                    <span class="text-slate-600">|</span>
-                    <span class="text-slate-300">WMS v2.6.4</span>
+                   
                 </div>
 
                 <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-900/60 backdrop-blur-md border border-slate-800 text-xs text-slate-400">
@@ -108,7 +106,7 @@
                 </p>
 
                 <!-- Warehouse Live Metrics Cards -->
-                <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg">
+                <!-- <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg">
                     <div class="p-3.5 rounded-xl bg-slate-900/70 backdrop-blur-md border border-slate-800/80 shadow-lg">
                         <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">SKUs Synced</div>
                         <div class="mt-1 text-lg sm:text-xl font-bold text-white font-mono-code">14,280+</div>
@@ -128,7 +126,7 @@
                         <div class="mt-1 text-lg sm:text-xl font-bold text-blue-400 font-mono-code">256-Bit</div>
                         <div class="text-[10px] text-slate-400 mt-0.5 font-medium">AES Encrypted</div>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <!-- Bottom Left: Badge and Notice -->
