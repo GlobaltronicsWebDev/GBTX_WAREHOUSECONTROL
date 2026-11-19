@@ -58,12 +58,13 @@
                         <path stroke-linecap="round" d="M16 3v4M8 3v4M3 10h18"/>
                     </svg>
                     <time id="currentDate">{{ now()->format('l, F j, Y') }}</time>
-                    <span aria-hidden="true">-</span>
-                    <time id="currentTime">{{ now()->format('h:i:s A') }}</time>
                 </div>
             </div>
 
-            <p class="relative z-10 mt-12 text-xs text-blue-100/80">Globaltronics Inc.</p>
+            <div class="relative z-10 mt-12 flex flex-wrap items-center justify-between gap-3 text-xs text-blue-100/80">
+                <p>Globaltronics Inc.</p>
+                <time id="currentTime" class="font-mono text-sm tracking-wide text-white">{{ now()->format('h:i:s A') }}</time>
+            </div>
         </section>
 
         <section class="flex min-h-[600px] items-center justify-center bg-white px-6 py-10 transition-colors sm:px-10 dark:bg-slate-950 lg:min-h-screen">
