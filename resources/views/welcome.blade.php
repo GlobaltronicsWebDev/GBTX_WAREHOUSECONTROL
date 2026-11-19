@@ -76,28 +76,29 @@
             </div>
         </section>
 
-        <section class="flex min-h-[600px] items-center justify-center bg-white px-6 py-10 transition-colors sm:px-10 dark:bg-slate-950 lg:min-h-screen">
+        <section class="relative flex min-h-[600px] items-center justify-center bg-white px-6 py-10 transition-colors sm:px-10 dark:bg-slate-950 lg:min-h-screen">
         <div class="w-full max-w-xs">
             <header class="mb-8 text-center">
-                <div class="mb-10 flex justify-center">
+                <div class="absolute right-6 top-6 z-20">
                     <button
                         type="button"
                         id="themeToggle"
                         aria-label="Switch to dark mode"
                         aria-pressed="false"
                         title="Switch to dark mode"
-                        class="rounded-full p-2 text-amber-400 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-amber-300 dark:hover:bg-slate-800"
+                        class="relative inline-flex h-10 w-20 items-center rounded-full bg-slate-100 p-1 shadow-inner ring-1 ring-slate-200 transition-colors hover:bg-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-800 dark:ring-slate-700 dark:hover:bg-slate-700"
                     >
-                        <svg class="h-7 w-7 dark:hidden" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <svg class="absolute right-2 h-4 w-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M12 2a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 17a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm10-7a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM5 12a1 1 0 0 1-1 1H3a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm14.07-6.07a1 1 0 0 1 0 1.41l-.71.71a1 1 0 0 1-1.42-1.41l.71-.71a1 1 0 0 1 1.42 0ZM7.06 17.94a1 1 0 0 1 0 1.41l-.71.71a1 1 0 1 1-1.42-1.41l.71-.71a1 1 0 0 1 1.42 0Zm12.01 1.41a1 1 0 0 1-1.42.71l-.71-.71a1 1 0 0 1 1.42-1.41l.71.71a1 1 0 0 1 0 .7ZM7.06 6.06A1 1 0 0 1 5.64 7.47l-.71-.71a1 1 0 1 1 1.42-1.41l.71.71Z"/>
                             <circle cx="12" cy="12" r="5"/>
                         </svg>
-                        <svg class="hidden h-6 w-6 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <svg class="absolute left-2 h-4 w-4 text-slate-400 dark:text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/>
                         </svg>
+                        <span class="relative z-10 h-8 w-8 rounded-full bg-white shadow-md transition-transform duration-300 dark:translate-x-10 dark:bg-slate-100"></span>
                     </button>
                 </div>
-                <h1 class="text-4xl font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">Log in to your account</h1>
+                <h1 class="text-2xl font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">Log in to your account</h1>
                 <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Login in Warehouse Management System</p>
             </header>
 
