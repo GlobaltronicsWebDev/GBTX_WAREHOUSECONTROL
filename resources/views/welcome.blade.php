@@ -128,6 +128,7 @@
                     </div>
                 </div> -->
             </div>
+        </div>
 
             <!-- Bottom Left: Badge and Notice -->
             <!-- <div class="relative z-10 pt-4 border-t border-slate-800/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
