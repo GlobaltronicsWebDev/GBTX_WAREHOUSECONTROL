@@ -1,9 +1,19 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="min-h-full bg-white">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="min-h-full bg-white dark:bg-slate-950">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Log in | Globaltronics</title>
+
+    <script>
+        const savedTheme = localStorage.getItem('whms-theme');
+        const prefersDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        document.documentElement.classList.toggle(
+            'dark',
+            savedTheme === 'dark' || (savedTheme === null && prefersDarkTheme)
+        );
+    </script>
 
     <link rel="icon" type="image/png" href="{{ asset('assets/images/logo/globaltronics_logo.png') }}">
 
@@ -13,7 +23,7 @@
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     @endif
 </head>
-<body class="min-h-screen bg-white text-slate-950 antialiased">
+<body class="min-h-screen bg-white text-slate-950 antialiased dark:bg-slate-950 dark:text-slate-100">
     <main class="grid min-h-screen grid-cols-1 lg:grid-cols-2">
         <section aria-labelledby="welcome-title" class="relative isolate flex min-h-[320px] flex-col justify-between overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 px-8 py-8 text-white sm:px-12 sm:py-10 lg:min-h-screen">
             <img
@@ -54,25 +64,39 @@
             <p class="relative z-10 mt-12 text-xs text-blue-100/80">Globaltronics Inc.</p>
         </section>
 
-        <section class="flex min-h-[600px] items-center justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-screen">
+        <section class="flex min-h-[600px] items-center justify-center bg-white px-6 py-10 transition-colors sm:px-10 dark:bg-slate-950 lg:min-h-screen">
         <div class="w-full max-w-xs">
             <header class="mb-8 text-center">
-                <svg class="mx-auto mb-10 h-7 w-7 text-amber-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M12 2a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 17a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm10-7a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM5 12a1 1 0 0 1-1 1H3a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm14.07-6.07a1 1 0 0 1 0 1.41l-.71.71a1 1 0 0 1-1.42-1.41l.71-.71a1 1 0 0 1 1.42 0ZM7.06 17.94a1 1 0 0 1 0 1.41l-.71.71a1 1 0 1 1-1.42-1.41l.71-.71a1 1 0 0 1 1.42 0Zm12.01 1.41a1 1 0 0 1-1.42.71l-.71-.71a1 1 0 0 1 1.42-1.41l.71.71a1 1 0 0 1 0 .7ZM7.06 6.06A1 1 0 0 1 5.64 7.47l-.71-.71a1 1 0 1 1 1.42-1.41l.71.71Z"/>
-                    <circle cx="12" cy="12" r="5"/>
-                </svg>
-                <h1 class="text-4xl font-semibold leading-tight tracking-tight">Log in to your account</h1>
-                <p class="mt-2 text-sm text-slate-500">Login in Warehouse Management System</p>
+                <div class="mb-10 flex justify-center">
+                    <button
+                        type="button"
+                        id="themeToggle"
+                        aria-label="Switch to dark mode"
+                        aria-pressed="false"
+                        title="Switch to dark mode"
+                        class="rounded-full p-2 text-amber-400 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-amber-300 dark:hover:bg-slate-800"
+                    >
+                        <svg class="h-7 w-7 dark:hidden" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 17a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm10-7a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM5 12a1 1 0 0 1-1 1H3a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm14.07-6.07a1 1 0 0 1 0 1.41l-.71.71a1 1 0 0 1-1.42-1.41l.71-.71a1 1 0 0 1 1.42 0ZM7.06 17.94a1 1 0 0 1 0 1.41l-.71.71a1 1 0 1 1-1.42-1.41l.71-.71a1 1 0 0 1 1.42 0Zm12.01 1.41a1 1 0 0 1-1.42.71l-.71-.71a1 1 0 0 1 1.42-1.41l.71.71a1 1 0 0 1 0 .7ZM7.06 6.06A1 1 0 0 1 5.64 7.47l-.71-.71a1 1 0 1 1 1.42-1.41l.71.71Z"/>
+                            <circle cx="12" cy="12" r="5"/>
+                        </svg>
+                        <svg class="hidden h-6 w-6 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/>
+                        </svg>
+                    </button>
+                </div>
+                <h1 class="text-4xl font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">Log in to your account</h1>
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Login in Warehouse Management System</p>
             </header>
 
             @if (session('status'))
-                <div role="status" class="mb-5 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800">
+                <div role="status" class="mb-5 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
                     {{ session('status') }}
                 </div>
             @endif
 
             @if ($errors->any())
-                <div role="alert" class="mb-5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
+                <div role="alert" class="mb-5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-200">
                     {{ $errors->first() }}
                 </div>
             @endif
@@ -91,7 +115,7 @@
                         required
                         autofocus
                         placeholder="email@example.com"
-                        class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-400 dark:focus:ring-blue-400/20"
                     >
                 </div>
 
@@ -105,14 +129,14 @@
                             autocomplete="current-password"
                             required
                             placeholder="Password"
-                            class="w-full rounded-md border border-slate-300 px-3 py-2.5 pr-11 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 pr-11 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-400 dark:focus:ring-blue-400/20"
                         >
                         <button
                             type="button"
                             id="passwordToggle"
                             aria-label="Show password"
                             aria-pressed="false"
-                            class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-500 hover:text-slate-800"
+                            class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
                         >
                             <svg id="passwordToggleIcon" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/>
@@ -130,14 +154,14 @@
                             id="remember"
                             value="1"
                             @checked(old('remember'))
-                            class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                            class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-900"
                         >
                         Remember me
                     </label>
                     <button
                         type="button"
                         onclick="document.getElementById('forgotPasswordModal').showModal()"
-                        class="text-sm text-slate-600 underline-offset-2 hover:text-blue-600 hover:underline"
+                        class="text-sm text-slate-600 underline-offset-2 hover:text-blue-600 hover:underline dark:text-slate-300 dark:hover:text-blue-400"
                     >
                         Forgot password?
                     </button>
@@ -152,7 +176,7 @@
             </form>
 
             @auth
-                <div class="mt-6 flex items-center justify-between rounded-md border border-slate-200 px-4 py-3 text-sm">
+                <div class="mt-6 flex items-center justify-between rounded-md border border-slate-200 px-4 py-3 text-sm dark:border-slate-700">
                     <span>Signed in as {{ Auth::user()->name }}</span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -164,18 +188,18 @@
             </section>
     </main>
 
-    <dialog id="forgotPasswordModal" class="w-full max-w-md rounded-xl border border-slate-200 p-0 shadow-xl backdrop:bg-slate-950/40">
+    <dialog id="forgotPasswordModal" class="w-full max-w-md rounded-xl border border-slate-200 bg-white p-0 text-slate-950 shadow-xl backdrop:bg-slate-950/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
         <div class="p-6">
             <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold">Reset your password</h2>
-                    <p class="mt-1 text-sm text-slate-500">Enter your work email and we’ll send you a reset link.</p>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Enter your work email and we’ll send you a reset link.</p>
                 </div>
                 <button
                     type="button"
                     onclick="document.getElementById('forgotPasswordModal').close()"
                     aria-label="Close"
-                    class="text-xl leading-none text-slate-500 hover:text-slate-800"
+                    class="text-xl leading-none text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
                 >
                     &times;
                 </button>
@@ -192,14 +216,14 @@
                         autocomplete="email"
                         required
                         placeholder="email@example.com"
-                        class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
                     >
                 </div>
                 <div class="flex justify-end gap-3">
                     <button
                         type="button"
                         onclick="document.getElementById('forgotPasswordModal').close()"
-                        class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50"
+                        class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
                     >
                         Cancel
                     </button>
@@ -212,6 +236,23 @@
     </dialog>
 
     <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const applyTheme = (isDark) => {
+            document.documentElement.classList.toggle('dark', isDark);
+            localStorage.setItem('whms-theme', isDark ? 'dark' : 'light');
+            themeToggle.setAttribute('aria-pressed', String(isDark));
+            themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+            themeToggle.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        };
+
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        themeToggle.setAttribute('aria-pressed', String(isDarkMode));
+        themeToggle.setAttribute('aria-label', isDarkMode ? 'Switch to light mode' : 'Switch to dark mode');
+        themeToggle.setAttribute('title', isDarkMode ? 'Switch to light mode' : 'Switch to dark mode');
+        themeToggle.addEventListener('click', () => {
+            applyTheme(!document.documentElement.classList.contains('dark'));
+        });
+
         const passwordInput = document.getElementById('password');
         const passwordToggle = document.getElementById('passwordToggle');
 
