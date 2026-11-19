@@ -74,7 +74,7 @@
             </div>
 
             <!-- Top Left: Live Status Pill & System Identity -->
-            <div class="relative z-10 flex flex-wrap items-center justify-between gap-3">
+            <!-- <div class="relative z-10 flex flex-wrap items-center justify-between gap-3">
                 <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-slate-700/60 text-xs font-medium text-slate-300 shadow-xl">
                     <span class="relative flex h-2 w-2">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -90,7 +90,7 @@
                     </svg>
                     <span>Facility: Globaltronics Inc. Warehouse</span>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Middle Left: Warehouse Headline, Description & Metrics -->
             <div class="relative z-10 flex-1 flex flex-col justify-center my-6 lg:my-auto py-6 sm:py-8 lg:py-10 max-w-xl">
