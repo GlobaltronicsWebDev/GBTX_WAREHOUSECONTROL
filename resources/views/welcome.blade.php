@@ -98,7 +98,7 @@
                         <span class="relative z-10 h-8 w-8 rounded-full bg-white shadow-md transition-transform duration-300 dark:translate-x-10 dark:bg-slate-100"></span>
                     </button>
                 </div>
-                <h1 class="text-2xl font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">Log in to your account</h1>
+                <h1 class="text-4xl font-semibold leading-tight tracking-tight text-slate-950 dark:text-white sm:text-5xl">Log in to your account</h1>
                 <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Login in Warehouse Management System</p>
             </header>
 
