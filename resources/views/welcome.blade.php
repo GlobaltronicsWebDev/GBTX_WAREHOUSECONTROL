@@ -158,7 +158,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between">
+                <div class="flex items-center">
                     <label for="remember" class="flex cursor-pointer items-center gap-2 text-sm">
                         <input
                             type="checkbox"
@@ -170,13 +170,6 @@
                         >
                         Remember me
                     </label>
-                    <button
-                        type="button"
-                        onclick="document.getElementById('forgotPasswordModal').showModal()"
-                        class="text-sm text-slate-600 underline-offset-2 hover:text-blue-600 hover:underline dark:text-slate-300 dark:hover:text-blue-400"
-                    >
-                        Forgot password?
-                    </button>
                 </div>
 
                 <button
@@ -199,53 +192,6 @@
         </div>
             </section>
     </main>
-
-    <dialog id="forgotPasswordModal" class="w-full max-w-md rounded-xl border border-slate-200 bg-white p-0 text-slate-950 shadow-xl backdrop:bg-slate-950/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
-        <div class="p-6">
-            <div class="mb-5 flex items-start justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-semibold">Reset your password</h2>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Enter your work email and we’ll send you a reset link.</p>
-                </div>
-                <button
-                    type="button"
-                    onclick="document.getElementById('forgotPasswordModal').close()"
-                    aria-label="Close"
-                    class="text-xl leading-none text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-                >
-                    &times;
-                </button>
-            </div>
-
-            <form method="POST" action="{{ route('password.email') }}" class="space-y-5">
-                @csrf
-                <div>
-                    <label for="recovery_email" class="mb-2 block text-sm font-medium">Email address</label>
-                    <input
-                        type="email"
-                        name="email"
-                        id="recovery_email"
-                        autocomplete="email"
-                        required
-                        placeholder="email@example.com"
-                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
-                    >
-                </div>
-                <div class="flex justify-end gap-3">
-                    <button
-                        type="button"
-                        onclick="document.getElementById('forgotPasswordModal').close()"
-                        class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-                    >
-                        Cancel
-                    </button>
-                    <button type="submit" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-                        Send reset link
-                    </button>
-                </div>
-            </form>
-        </div>
-    </dialog>
 
     <script>
         const themeToggle = document.getElementById('themeToggle');
