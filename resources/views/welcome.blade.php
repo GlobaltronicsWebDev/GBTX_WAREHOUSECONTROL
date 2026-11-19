@@ -186,14 +186,6 @@
 
                 <!-- LOGO SECTION -->
                 <div class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-white border border-slate-200 shadow-xl shadow-slate-200/80 mb-3.5 group hover:border-blue-400 transition-all duration-300 relative overflow-hidden">
-                        <img 
-                            src="{{ asset('assets/images/logo/globaltronics_logo.png') }}" 
-                            alt="Globaltronics Logo" 
-                            class="w-full h-full object-contain p-2.5 drop-shadow group-hover:scale-105 transition-transform duration-300 relative z-10"
-                        />
-                    </div>
-                    
                     <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center justify-center gap-2">
                         <span>GLOBALTRONICS</span>
                     </h2>
