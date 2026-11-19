@@ -15,6 +15,10 @@
         );
     </script>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="icon" type="image/png" href="{{ asset('assets/images/logo/globaltronics_logo.png') }}">
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
@@ -22,6 +26,11 @@
     @else
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     @endif
+    <style>
+        body {
+            font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-white text-slate-950 antialiased dark:bg-slate-950 dark:text-slate-100">
     <main class="grid min-h-screen grid-cols-1 lg:grid-cols-2">
