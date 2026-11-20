@@ -22,7 +22,11 @@
                 <h1 class="text-[18px] font-semibold leading-6 text-slate-900">Company</h1>
                 <span class="border border-[#E5E7EB] bg-[#F8F9FA] px-2 py-1 text-[9px] font-medium uppercase tracking-wide text-slate-500">Preview records</span>
             </div>
-            <button type="button" disabled title="Company management is not connected to application data" class="h-8 cursor-not-allowed border border-[#E5E7EB] px-3 text-[11px] text-slate-400">Add Company</button>
+            <div class="flex flex-wrap items-center gap-3">
+                <time id="dashboardDate" class="text-[9px] uppercase tracking-wide text-slate-500">Loading date</time>
+                <time id="dashboardClock" class="tabular-nums font-mono text-[10px] font-medium text-slate-700">--:--:--</time>
+                <button type="button" disabled title="Company management is not connected to application data" class="h-8 cursor-not-allowed border border-[#E5E7EB] px-3 text-[11px] text-slate-400">Add Company</button>
+            </div>
         </section>
 
         <section class="border border-[#E5E7EB] bg-white">

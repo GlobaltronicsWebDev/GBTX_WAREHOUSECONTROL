@@ -42,7 +42,8 @@ class AdminDashboardTest extends TestCase
         $response->assertSee($user->email);
         $response->assertSee('Notifications');
         $response->assertSee('Log out');
-        $response->assertSee(route('admin.settings.credentials'));
+        $response->assertSee(route('admin.settings.companies'));
+        $response->assertSee(route('admin.reports.index'));
         $response->assertSee(route('admin.dashboard').'#alertsPanel');
         $response->assertSee('Low Stock SKUs');
         $response->assertDontSee('PR-2026-089');
@@ -128,6 +129,64 @@ class AdminDashboardTest extends TestCase
             'id' => $notification->id,
             'is_read' => false,
         ]);
+    }
+
+    public function test_it_admin_can_open_company_settings_preview(): void
+    {
+        $admin = User::factory()->create();
+        $admin->roles()->attach(Role::where('slug', 'it-admin')->first());
+
+        $response = $this->actingAs($admin)->get(route('admin.settings.companies'));
+
+        $response->assertSee('Settings');
+        $response->assertSee('Company');
+        $response->assertSee('Company directory layout preview');
+        $response->assertSee('DB International Sales & Services, Inc.');
+        $response->assertSee(route('admin.settings.credentials'));
+    }
+
+    public function test_non_it_user_cannot_open_company_settings(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('admin.settings.companies'));
+
+        $response->assertForbidden();
+    }
+
+    public function test_reports_use_live_srf_counts_and_mark_inventory_reports_unavailable(): void
+    {
+        $user = User::factory()->create();
+        SrfRequisition::create([
+            'srf_number' => '2026 - 1500',
+            'sso_number' => 'SSO-2026-0500',
+            'project_name' => 'Live report project',
+            'client' => 'Live report client',
+            'po_number' => 'PO-2026-0500',
+            'requisition_date' => now(),
+            'item_model' => 'Report test item',
+            'quantity' => 3,
+            'uom' => 'PCS',
+            'stock_status' => 'not_tracked',
+            'status' => 'pending',
+            'prepared_by' => $user->name,
+            'user_id' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.reports.index'));
+
+        $response->assertSee('data-report-count="1"', false);
+        $response->assertSee('Stock Movement Reports');
+        $response->assertSee('Transaction Listing Reports');
+        $response->assertSee('Inventory Stock List Reports');
+        $response->assertSee('Inventory records are not tracked');
+    }
+
+    public function test_guest_cannot_open_reports(): void
+    {
+        $response = $this->get(route('admin.reports.index'));
+
+        $response->assertRedirect('/login');
     }
 
     public function test_dashboard_greeting_uses_account_first_name_before_noon(): void
