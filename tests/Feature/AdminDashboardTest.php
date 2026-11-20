@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Role;
 use App\Models\SrfRequisition;
+use App\Models\TransactionNotification;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -44,15 +45,89 @@ class AdminDashboardTest extends TestCase
         $response->assertSee(route('admin.settings.credentials'));
         $response->assertSee(route('admin.dashboard').'#alertsPanel');
         $response->assertSee('Low Stock SKUs');
-        $response->assertSee('PR-2026-089');
+        $response->assertDontSee('PR-2026-089');
+        $response->assertSee('Unavailable');
+        $response->assertSee('Not tracked');
         $response->assertSee('Sample data');
         $response->assertSee('data-sort-key="sortRef"', false);
         $response->assertSee('Purchase Requests');
         $response->assertSee('Receivings');
         $response->assertSee('Deliverables');
+        $response->assertSee('No live SRF records are available.');
         $response->assertSee(route('admin.inventory.dashboard'));
         $response->assertDontSee('Sales Order');
         $response->assertDontSee('Sales Order');
+    }
+
+    public function test_dashboard_shows_only_shared_and_current_user_notifications(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        TransactionNotification::create([
+            'title' => 'Shared operational notice',
+            'message' => 'This notice is visible to all signed-in users.',
+            'type' => 'general',
+        ]);
+        TransactionNotification::create([
+            'user_id' => $user->id,
+            'title' => 'Personal operational notice',
+            'message' => 'This notice is assigned to the signed-in user.',
+            'type' => 'general',
+        ]);
+        TransactionNotification::create([
+            'user_id' => $otherUser->id,
+            'title' => 'Private operational notice',
+            'message' => 'This notice belongs to another user.',
+            'type' => 'general',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.dashboard'));
+
+        $response->assertSee('Shared operational notice');
+        $response->assertSee('Personal operational notice');
+        $response->assertDontSee('Private operational notice');
+        $response->assertSee('2 unread');
+        $response->assertDontSee('IMP-2026-041');
+    }
+
+    public function test_user_can_mark_their_notification_as_read(): void
+    {
+        $user = User::factory()->create();
+        $notification = TransactionNotification::create([
+            'user_id' => $user->id,
+            'title' => 'Personal operational notice',
+            'message' => 'A notification assigned to this user.',
+            'type' => 'general',
+        ]);
+
+        $response = $this->actingAs($user)->post(route('admin.notifications.read', $notification));
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('transaction_notifications', [
+            'id' => $notification->id,
+            'is_read' => true,
+        ]);
+    }
+
+    public function test_user_cannot_mark_another_users_notification_as_read(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $notification = TransactionNotification::create([
+            'user_id' => $otherUser->id,
+            'title' => 'Private operational notice',
+            'message' => 'A notification assigned to another user.',
+            'type' => 'general',
+        ]);
+
+        $response = $this->actingAs($user)->post(route('admin.notifications.read', $notification));
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('transaction_notifications', [
+            'id' => $notification->id,
+            'is_read' => false,
+        ]);
     }
 
     public function test_dashboard_greeting_uses_account_first_name_before_noon(): void

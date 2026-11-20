@@ -11,6 +11,9 @@
         $pendingApprovalCount = $user->canViewWarehouseOperations() || $user->isItAdmin()
             ? $srfPendingCount
             : $userSrfPendingCount;
+        $visibleSrfCount = $user->canViewWarehouseOperations() || $user->isItAdmin()
+            ? $srfTotalCount
+            : $userSrfCount;
     @endphp
 
     <div class="space-y-4 px-3 py-4 sm:px-5">
@@ -111,26 +114,26 @@
             <article class="min-w-0 border border-[#E5E7EB] bg-white px-3 py-2.5">
                 <p class="text-[11px] font-medium text-slate-500">Low Stock SKUs</p>
                 <div class="mt-1 flex items-end justify-between gap-2">
-                    <p class="tabular-nums text-[22px] font-semibold leading-6">12</p>
-                    <span class="text-[10px] text-slate-400">Sample</span>
+                    <p class="tabular-nums text-[22px] font-semibold leading-6">—</p>
+                    <span class="text-[10px] text-slate-400">Unavailable</span>
                 </div>
-                <p class="mt-1 truncate text-[10px] text-slate-500">Illustrative · 4 below reorder</p>
+                <p class="mt-1 truncate text-[10px] text-slate-500">Inventory data is not tracked</p>
             </article>
             <article class="min-w-0 border border-[#E5E7EB] bg-white px-3 py-2.5">
                 <p class="text-[11px] font-medium text-slate-500">Active Import Shipments</p>
                 <div class="mt-1 flex items-end justify-between gap-2">
-                    <p class="tabular-nums text-[22px] font-semibold leading-6">04</p>
-                    <span class="text-[10px] text-slate-400">Sample</span>
+                    <p class="tabular-nums text-[22px] font-semibold leading-6">—</p>
+                    <span class="text-[10px] text-slate-400">Unavailable</span>
                 </div>
-                <p class="mt-1 truncate text-[10px] text-slate-500">03 at Customs</p>
+                <p class="mt-1 truncate text-[10px] text-slate-500">Shipment data is not tracked</p>
             </article>
             <article class="min-w-0 border border-[#E5E7EB] bg-white px-3 py-2.5">
                 <p class="text-[11px] font-medium text-slate-500">Today’s Dispatches</p>
                 <div class="mt-1 flex items-end justify-between gap-2">
-                    <p class="tabular-nums text-[22px] font-semibold leading-6">08</p>
-                    <span class="text-[10px] text-slate-400">Sample</span>
+                    <p class="tabular-nums text-[22px] font-semibold leading-6">—</p>
+                    <span class="text-[10px] text-slate-400">Unavailable</span>
                 </div>
-                <p class="mt-1 truncate text-[10px] text-slate-500">05 completed</p>
+                <p class="mt-1 truncate text-[10px] text-slate-500">Dispatch data is not tracked</p>
             </article>
         </section>
 
@@ -139,9 +142,9 @@
                 <div class="flex flex-col gap-1 border-b border-[#E5E7EB] px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 id="transactionsHeading" class="text-[13px] font-semibold text-slate-800">Recent Stock, Importation &amp; Procurement Transactions</h2>
-                        <p class="text-[10px] text-slate-500">Live SRF records are combined with clearly tagged preview rows.</p>
+                        <p class="text-[10px] text-slate-500">Showing current Stock Requisition Forms from the application database.</p>
                     </div>
-                    <span class="w-fit border border-[#E5E7EB] px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-slate-500">Sample rows marked</span>
+                    <span class="w-fit border border-[#E5E7EB] px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-slate-500">Live SRF records</span>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -159,7 +162,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#E5E7EB]">
-                            @foreach ($groupedSrfRequisitions->take(4) as $srfNumber => $items)
+                            @forelse ($groupedSrfRequisitions->take(4) as $srfNumber => $items)
                                 @php
                                     $first = $items->first();
                                     $statusLabel = match ($first->status) {
@@ -180,65 +183,31 @@
                                     <td class="px-2"><span class="whitespace-nowrap border border-[#E5E7EB] bg-[#F8F9FA] px-1.5 py-0.5 text-[10px]">{{ $statusLabel }}</span></td>
                                     <td class="whitespace-nowrap px-3 font-mono text-[10px] tabular-nums">{{ $first->created_at?->format('M d, H:i') ?? '—' }}</td>
                                 </tr>
-                            @endforeach
-
-                            <tr class="h-9 text-slate-700" data-sort-ref="IMP-2026-041" data-sort-module="Importation" data-sort-project="OOLU482910" data-sort-item="LED modules · customs documentation" data-sort-qty="120" data-sort-status="At Customs" data-sort-timestamp="2026-11-20 09:42:00">
-                                <td class="px-3"><input type="checkbox" aria-label="Select sample import row" class="h-3.5 w-3.5 accent-[#2563EB]"></td>
-                                <td class="whitespace-nowrap px-2 font-mono text-[10px] tabular-nums">IMP-2026-041</td>
-                                <td class="px-2">Importation <span class="border border-[#E5E7EB] px-1 text-[9px] text-slate-500">SAMPLE</span></td>
-                                <td class="whitespace-nowrap px-2 font-mono text-[10px] tabular-nums">OOLU482910</td>
-                                <td class="max-w-48 truncate px-2">LED modules · customs documentation</td>
-                                <td class="whitespace-nowrap px-2 text-right tabular-nums">120 pcs</td>
-                                <td class="px-2"><span class="whitespace-nowrap border border-[#E5E7EB] bg-[#F8F9FA] px-1.5 py-0.5 text-[10px]">At Customs</span></td>
-                                <td class="whitespace-nowrap px-3 font-mono text-[10px] tabular-nums">Nov 20, 09:42</td>
-                            </tr>
-                            <tr class="h-9 text-slate-700" data-sort-ref="PR-2026-089" data-sort-module="Procurement" data-sort-project="9FE-4479" data-sort-item="Indoor display modules" data-sort-qty="36" data-sort-status="Pending" data-sort-timestamp="2026-11-20 10:18:00">
-                                <td class="px-3"><input type="checkbox" aria-label="Select sample procurement row" class="h-3.5 w-3.5 accent-[#2563EB]"></td>
-                                <td class="whitespace-nowrap px-2 font-mono text-[10px] tabular-nums">PR-2026-089</td>
-                                <td class="px-2">Procurement <span class="border border-[#E5E7EB] px-1 text-[9px] text-slate-500">SAMPLE</span></td>
-                                <td class="whitespace-nowrap px-2 font-mono text-[10px] tabular-nums">9FE-4479</td>
-                                <td class="max-w-48 truncate px-2">Indoor display modules</td>
-                                <td class="whitespace-nowrap px-2 text-right tabular-nums">36 pcs</td>
-                                <td class="px-2"><span class="whitespace-nowrap border border-[#E5E7EB] bg-[#F8F9FA] px-1.5 py-0.5 text-[10px]">Pending</span></td>
-                                <td class="whitespace-nowrap px-3 font-mono text-[10px] tabular-nums">Nov 20, 10:18</td>
-                            </tr>
-                            <tr class="h-9 text-slate-700" data-sort-ref="DEL-2026-028" data-sort-module="Logistics" data-sort-project="SXN-2816" data-sort-item="LED cabinet assemblies" data-sort-qty="6" data-sort-status="In Transit" data-sort-timestamp="2026-11-20 08:14:00">
-                                <td class="px-3"><input type="checkbox" aria-label="Select sample delivery row" class="h-3.5 w-3.5 accent-[#2563EB]"></td>
-                                <td class="whitespace-nowrap px-2 font-mono text-[10px] tabular-nums">DEL-2026-028</td>
-                                <td class="px-2">Logistics <span class="border border-[#E5E7EB] px-1 text-[9px] text-slate-500">SAMPLE</span></td>
-                                <td class="whitespace-nowrap px-2 font-mono text-[10px] tabular-nums">SXN-2816</td>
-                                <td class="max-w-48 truncate px-2">LED cabinet assemblies</td>
-                                <td class="whitespace-nowrap px-2 text-right tabular-nums">6 pallets</td>
-                                <td class="px-2"><span class="whitespace-nowrap border border-[#E5E7EB] bg-[#F8F9FA] px-1.5 py-0.5 text-[10px]">In Transit</span></td>
-                                <td class="whitespace-nowrap px-3 font-mono text-[10px] tabular-nums">Nov 20, 08:14</td>
-                            </tr>
-                            <tr class="h-9 text-slate-700" data-sort-ref="GRN-2026-102" data-sort-module="Warehouse" data-sort-project="9FE-4479" data-sort-item="P2.5 indoor panels" data-sort-qty="48" data-sort-status="Approved" data-sort-timestamp="2026-11-20 07:55:00">
-                                <td class="px-3"><input type="checkbox" aria-label="Select sample warehouse row" class="h-3.5 w-3.5 accent-[#2563EB]"></td>
-                                <td class="whitespace-nowrap px-2 font-mono text-[10px] tabular-nums">GRN-2026-102</td>
-                                <td class="px-2">Warehouse <span class="border border-[#E5E7EB] px-1 text-[9px] text-slate-500">SAMPLE</span></td>
-                                <td class="whitespace-nowrap px-2 font-mono text-[10px] tabular-nums">9FE-4479</td>
-                                <td class="max-w-48 truncate px-2">P2.5 indoor panels</td>
-                                <td class="whitespace-nowrap px-2 text-right tabular-nums">48 pcs</td>
-                                <td class="px-2"><span class="whitespace-nowrap border border-[#E5E7EB] bg-[#F8F9FA] px-1.5 py-0.5 text-[10px]">Approved</span></td>
-                                <td class="whitespace-nowrap px-3 font-mono text-[10px] tabular-nums">Nov 20, 07:55</td>
-                            </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="px-3 py-6 text-center text-[11px] text-slate-500">No live SRF records are available.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
-                <div class="border-t border-[#E5E7EB] px-3 py-2 text-[10px] text-slate-400">Inventory, importation, procurement, and logistics entries are illustrative previews. SRF records and approvals are live.</div>
+                <div class="border-t border-[#E5E7EB] px-3 py-2 text-[10px] text-slate-400">SRF records and notifications are loaded from the application database. Inventory, shipment, procurement, and dispatch data are not tracked.</div>
             </section>
 
             <aside class="min-w-0 border border-[#E5E7EB] bg-white" aria-labelledby="queueHeading">
                 <div class="flex items-start justify-between gap-2 border-b border-[#E5E7EB] px-3 py-2">
                     <div>
                         <h2 id="queueHeading" class="text-[13px] font-semibold text-slate-800">System Alerts &amp; Action Queue</h2>
-                        <p class="text-[10px] text-slate-500">Live notifications and sample queue items</p>
+                        <p class="text-[10px] text-slate-500">Notifications and pending SRF reviews</p>
                     </div>
                     @if (!empty($unreadNotificationCount) && $unreadNotificationCount > 0)
-                        <form method="POST" action="{{ route('admin.notifications.markAllRead') }}">
-                            @csrf
-                            <button type="submit" class="whitespace-nowrap text-[10px] text-slate-500 underline decoration-[#E5E7EB] underline-offset-2 hover:text-[#2563EB]">Mark all read</button>
-                        </form>
+                        <div class="flex items-center gap-2">
+                            <span class="whitespace-nowrap text-[9px] text-slate-500">{{ number_format($unreadNotificationCount) }} unread</span>
+                            <form method="POST" action="{{ route('admin.notifications.markAllRead') }}">
+                                @csrf
+                                <button type="submit" class="whitespace-nowrap text-[10px] text-slate-500 underline decoration-[#E5E7EB] underline-offset-2 hover:text-[#2563EB]">Mark all read</button>
+                            </form>
+                        </div>
                     @endif
                 </div>
 
@@ -263,6 +232,9 @@
                     @php
                         $pendingSrfAlerts = $srfRequisitions->whereIn('status', ['pending', 'for_approval'])->unique('srf_number')->take(2);
                     @endphp
+                    @if (($headerNotifications ?? collect())->isEmpty() && $pendingSrfAlerts->isEmpty())
+                        <p class="px-3 py-6 text-center text-[11px] text-slate-500">No live alerts or pending SRF reviews.</p>
+                    @endif
                     @foreach ($pendingSrfAlerts as $pendingSrf)
                         <article class="px-3 py-2.5">
                             <p class="text-[11px] leading-4 text-slate-700">{{ $pendingSrf->srf_number }} awaiting warehouse review</p>
@@ -271,24 +243,17 @@
                         </article>
                     @endforeach
 
-                    <article class="px-3 py-2.5">
-                        <p class="text-[11px] leading-4 text-slate-700">IMP-2026-041 · BL# OOLU482910 awaiting BOC clearance</p>
-                        <span class="mt-1 inline-block border border-[#E5E7EB] px-1 py-0.5 text-[9px] uppercase text-slate-500">Sample</span>
-                    </article>
-                    <article class="px-3 py-2.5">
-                        <p class="text-[11px] leading-4 text-slate-700">PR-2026-089 awaiting approval for Project 9FE-4479</p>
-                        <span class="mt-1 inline-block border border-[#E5E7EB] px-1 py-0.5 text-[9px] uppercase text-slate-500">Sample</span>
-                    </article>
                 </div>
 
-                <div data-dashboard-panel="stats" hidden class="divide-y divide-[#E5E7EB]" aria-label="Sample operational statistics">
+                <div data-dashboard-panel="stats" hidden class="divide-y divide-[#E5E7EB]" aria-label="Live application statistics">
                     <div class="flex items-center gap-3 px-3 py-2.5">
                         <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600" aria-hidden="true">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="17" rx="2"/><path stroke-linecap="round" d="M9 4.5h6M8 10h8M8 14h8M8 18h5"/></svg>
                         </span>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] uppercase tracking-wide text-slate-500">Requisitions</p>
-                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">0</p>
+                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">{{ number_format($visibleSrfCount) }}</p>
+                            <p class="text-[9px] text-slate-400">Live SRF records</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3 px-3 py-2.5">
@@ -297,7 +262,8 @@
                         </span>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] uppercase tracking-wide text-slate-500">Purchase Requests</p>
-                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">0</p>
+                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">—</p>
+                            <p class="text-[9px] text-slate-400">Not tracked</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3 px-3 py-2.5">
@@ -306,7 +272,8 @@
                         </span>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] uppercase tracking-wide text-slate-500">Receivings</p>
-                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">0</p>
+                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">—</p>
+                            <p class="text-[9px] text-slate-400">Not tracked</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3 px-3 py-2.5">
@@ -315,10 +282,11 @@
                         </span>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] uppercase tracking-wide text-slate-500">Deliverables</p>
-                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">0</p>
+                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">—</p>
+                            <p class="text-[9px] text-slate-400">Not tracked</p>
                         </div>
                     </div>
-                    <p class="px-3 py-2 text-[10px] text-slate-400">Sample counts only; these ERP workflows are not connected to application data.</p>
+                    <p class="px-3 py-2 text-[10px] text-slate-400">Only SRF records are available as live requisition data.</p>
                 </div>
             </aside>
         </section>

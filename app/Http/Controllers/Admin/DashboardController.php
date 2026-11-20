@@ -28,6 +28,10 @@ class DashboardController extends Controller
         }
 
         $distinctSrfCount = $groupedSrfRequisitions->count();
+        $userId = Auth::id();
+        $notificationRecipients = fn ($query) => $query
+            ->whereNull('user_id')
+            ->orWhere('user_id', $userId);
 
         return view('admin.dashboard', [
             'totalUsers' => User::count(),
@@ -51,6 +55,8 @@ class DashboardController extends Controller
             'userSrfCount' => $srfRequisitions->where('user_id', Auth::id())->unique('srf_number')->count(),
             'userSrfPendingCount' => $srfRequisitions->where('user_id', Auth::id())->whereIn('status', ['pending', 'for_approval'])->unique('srf_number')->count(),
             'userSrfCompletedCount' => $srfRequisitions->where('user_id', Auth::id())->whereIn('status', ['completed', 'verified', 'approved'])->unique('srf_number')->count(),
+            'headerNotifications' => TransactionNotification::where($notificationRecipients)->latest()->take(3)->get(),
+            'unreadNotificationCount' => TransactionNotification::where($notificationRecipients)->where('is_read', false)->count(),
             'autoSrfNumber' => date('Y').' - '.str_pad($maxSequence + 1, 4, '0', STR_PAD_LEFT),
             'autoSsoNumber' => 'SSO-'.date('Y').'-'.str_pad($distinctSrfCount + 101, 4, '0', STR_PAD_LEFT),
         ]);
@@ -234,6 +240,11 @@ class DashboardController extends Controller
 
     public function markNotificationRead(TransactionNotification $notification): RedirectResponse
     {
+        abort_unless(
+            $notification->user_id === null || (int) $notification->user_id === Auth::id(),
+            403
+        );
+
         $notification->update(['is_read' => true]);
 
         return back()->with('status', 'Notification marked as read.');
