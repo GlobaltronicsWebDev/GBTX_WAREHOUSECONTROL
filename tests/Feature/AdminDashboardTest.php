@@ -42,8 +42,30 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('PR-2026-089');
         $response->assertSee('Sample data');
         $response->assertSee('data-sort-key="sortRef"', false);
+        $response->assertSee(route('admin.inventory.dashboard'));
         $response->assertDontSee('Sales Order');
         $response->assertDontSee('Sales Order');
+    }
+
+    public function test_guest_cannot_access_inventory_dashboard_and_is_redirected_to_login(): void
+    {
+        $this->get(route('admin.inventory.dashboard'))
+            ->assertRedirect('/login');
+    }
+
+    public function test_authenticated_user_can_view_inventory_dashboard_prototype(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('admin.inventory.dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('Inventory Management');
+        $response->assertSee('Inventory / Dashboard');
+        $response->assertSee('UI prototype · Sample data');
+        $response->assertSee('Today’s Movement');
+        $response->assertSee('Stock Health');
+        $response->assertSee('Recent Movement');
     }
 
     public function test_admin_can_create_user_with_roles(): void
@@ -900,5 +922,4 @@ class AdminDashboardTest extends TestCase
         $pdfResponse->assertSee('NETWORK-TEST-UNIT');
         $pdfResponse->assertSee('Stephanie Refe');
     }
-
 }

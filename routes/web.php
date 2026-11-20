@@ -42,7 +42,6 @@ Route::post('/login', function (Request $request) {
         return redirect()->intended(route('admin.dashboard'))->with('status', 'Authentication successful! Welcome, '.Auth::user()->name);
     }
 
-
     return back()->withErrors([
         'username' => 'Authentication error: Invalid credentials provided. Please verify your email and password.',
     ])->withInput($request->only('username'));
@@ -104,8 +103,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         return redirect()->route('admin.dashboard');
     });
 
-
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::view('/inventory/dashboard', 'admin.inventory.dashboard')->name('inventory.dashboard');
 
     // SRF request, approval, and history
     Route::get('/srf/approved', [DashboardController::class, 'approvedSrf'])->name('srf.approved');

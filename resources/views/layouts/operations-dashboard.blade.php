@@ -65,7 +65,7 @@
 
             <nav class="min-h-0 flex-1 overflow-y-auto px-2 py-3 text-[13px]" aria-label="Primary navigation">
                 <p class="sidebar-section-label px-2 pb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Workspace</p>
-                <a href="{{ route('admin.dashboard') }}" class="sidebar-nav-button mb-1 flex h-8 items-center gap-2.5 rounded-sm bg-[#EAECEF] px-2 text-[#2563EB]" aria-current="page">
+                <a href="{{ route('admin.dashboard') }}" class="sidebar-nav-button mb-1 flex h-8 items-center gap-2.5 rounded-sm px-2 {{ request()->routeIs('admin.dashboard') ? 'bg-[#EAECEF] text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}" @if (request()->routeIs('admin.dashboard')) aria-current="page" @endif>
                     <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                         <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
                         <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
@@ -75,7 +75,7 @@
 
                 <p class="sidebar-section-label px-2 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Operations</p>
                 <div class="space-y-0.5">
-                    <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="inventoryMenu" aria-expanded="false" aria-controls="inventoryMenu">
+                    <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="inventoryMenu" aria-expanded="{{ request()->routeIs('admin.inventory.dashboard') ? 'true' : 'false' }}" aria-controls="inventoryMenu">
                         <svg class="h-4 w-4 shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                             <path stroke-linejoin="round" d="m3 7 9-4 9 4-9 4-9-4Z"/><path stroke-linejoin="round" d="M3 7v10l9 4 9-4V7M12 11v10"/>
                         </svg>
@@ -84,8 +84,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="m5 7.5 5 5 5-5"/>
                         </svg>
                     </button>
-                    <div id="inventoryMenu" class="sidebar-subnav hidden pb-1 pl-8">
-                        <button type="button" disabled title="Prototype navigation only" class="block h-7 w-full cursor-not-allowed text-left text-[12px] text-slate-400">Dashboard</button>
+                    <div id="inventoryMenu" class="sidebar-subnav pb-1 pl-8 {{ request()->routeIs('admin.inventory.dashboard') ? '' : 'hidden' }}">
+                        <a href="{{ route('admin.inventory.dashboard') }}" class="block h-7 w-full text-left text-[12px] {{ request()->routeIs('admin.inventory.dashboard') ? 'font-medium text-[#2563EB]' : 'text-slate-500 hover:text-slate-700' }}" @if (request()->routeIs('admin.inventory.dashboard')) aria-current="page" @endif>Dashboard</a>
                         <button type="button" disabled title="Prototype navigation only" class="block h-7 w-full cursor-not-allowed text-left text-[12px] text-slate-400">Inventory List</button>
                     </div>
 
@@ -196,7 +196,7 @@
                             <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
                     </button>
-                    <span class="truncate text-[12px] text-slate-500">Workspace <span class="px-1 text-slate-300">/</span> <span class="font-medium text-slate-800">My Dashboard</span></span>
+                    <span class="truncate text-[12px] text-slate-500">Workspace <span class="px-1 text-slate-300">/</span> <span class="font-medium text-slate-800">@yield('breadcrumb', 'My Dashboard')</span></span>
                 </div>
 
                 <div class="flex shrink-0 items-center gap-2.5">
