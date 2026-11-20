@@ -33,6 +33,9 @@ class ProfileControllerTest extends TestCase
         $response->assertSee('Profile Settings');
         $response->assertSee('Edit Profile');
         $response->assertSee('Edit Account');
+        $response->assertSee('Primary navigation');
+        $response->assertSee('Settings navigation');
+        $response->assertSee('My Dashboard');
         $response->assertSee('MIS');
         $response->assertSee('Globaltronics, Inc.');
 
