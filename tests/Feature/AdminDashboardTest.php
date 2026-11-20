@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
+use App\Models\Company;
+use App\Models\Department;
 use App\Models\SrfRequisition;
 use App\Models\TransactionNotification;
 use App\Models\User;
@@ -299,6 +301,8 @@ class AdminDashboardTest extends TestCase
         $admin = User::factory()->create();
         $itRole = Role::where('slug', 'it-admin')->first();
         $staffRole = Role::where('slug', 'warehouse-staff')->first();
+        $department = Department::factory()->create();
+        $company = Company::factory()->create();
         $admin->roles()->attach($itRole);
 
         $response = $this->actingAs($admin)->post('/admin/users', [
@@ -306,12 +310,16 @@ class AdminDashboardTest extends TestCase
             'email' => 'carlos.mendoza@globaltronics.net',
             'password' => 'SecurePass123!@#',
             'roles' => [$staffRole->id],
+            'department_id' => $department->id,
+            'company_id' => $company->id,
         ]);
 
         $response->assertRedirect(route('admin.users.index'));
         $this->assertDatabaseHas('users', [
             'email' => 'carlos.mendoza@globaltronics.net',
             'name' => 'Carlos Mendoza',
+            'department_id' => $department->id,
+            'company_id' => $company->id,
         ]);
 
         $createdUser = User::where('email', 'carlos.mendoza@globaltronics.net')->first();
