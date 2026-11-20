@@ -151,7 +151,8 @@ class AdminDashboardTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('admin.settings.companies'));
 
-        $response->assertForbidden();
+        $response->assertRedirect(route('admin.dashboard'));
+        $response->assertSessionHasErrors('error');
     }
 
     public function test_reports_use_live_srf_counts_and_mark_inventory_reports_unavailable(): void
