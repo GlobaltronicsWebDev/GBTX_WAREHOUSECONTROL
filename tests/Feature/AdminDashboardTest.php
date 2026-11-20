@@ -610,7 +610,7 @@ class AdminDashboardTest extends TestCase
         $response->assertDontSee('Search inventory');
     }
 
-    public function test_srf_summary_displays_manual_item_snapshots_and_approved_link(): void
+    public function test_dashboard_summarizes_multi_item_srf_with_live_item_count(): void
     {
         $user = User::factory()->create();
         $user->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
@@ -639,11 +639,7 @@ class AdminDashboardTest extends TestCase
         $response->assertOk();
         $response->assertSee('2026 - 1100');
         $response->assertSee('PANEL-X1');
-        $response->assertSee('20');
-        $response->assertSee('PCS');
-        $response->assertSee('CONTROLLER-Y2');
-        $response->assertSee('4');
-        $response->assertSee('UNITS');
+        $response->assertSee('+1 more');
         $response->assertDontSee('Launch Stock Requisition Form (SRF)');
         $response->assertSee('Approvals');
     }
