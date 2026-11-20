@@ -154,9 +154,7 @@ class WarehouseLocationControllerTest extends TestCase
         $admin->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
-        foreach (['Globaltronics', 'Ohaap', 'Marikina', 'Carmona'] as $name) {
-            $response->assertSee($name);
-        }
+        $response->assertSeeInOrder(['Globaltronics', 'Ohaap', 'Marikina', 'Carmona']);
     }
 
     public function test_guest_is_redirected_to_login_from_a_warehouse_dashboard(): void

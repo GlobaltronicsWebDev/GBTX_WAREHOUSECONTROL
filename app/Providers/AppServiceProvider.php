@@ -93,7 +93,6 @@ class AppServiceProvider extends ServiceProvider
                 WarehouseLocation::query()
                     ->where('is_active', true)
                     ->where('navigation_enabled', true)
-                    ->orderBy('name')
                     ->orderBy('id')
                     ->get(),
             );
