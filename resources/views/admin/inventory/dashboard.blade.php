@@ -18,7 +18,7 @@
                     <p class="mt-1 max-w-3xl text-[12px] leading-5 text-slate-500">Stock movement, item activity, and stock health overview.</p>
                 </div>
             </div>
-            <span class="inline-flex w-fit shrink-0 items-center border border-[#E5E7EB] bg-[#F8F9FA] px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-500">UI prototype · Sample data</span>
+            <span class="inline-flex w-fit shrink-0 items-center border border-[#E5E7EB] bg-[#F8F9FA] px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-500">UI prototype · BETA</span>
         </section>
 
         <section class="-mx-3 flex flex-col gap-3 border-y border-[#E5E7EB] px-3 py-2.5 sm:-mx-5 sm:px-5 xl:flex-row xl:items-center xl:justify-between" aria-label="Inventory actions and telemetry">
@@ -79,7 +79,7 @@
             <div class="min-w-0 space-y-3">
                 <section class="grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="Inventory metrics">
                     <article class="flex min-h-20 items-center gap-3 border border-[#E5E7EB] bg-white px-4 py-3">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-[#F8F9FA] text-[#2563EB]" aria-hidden="true">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-blue-600" aria-hidden="true">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path stroke-linecap="round" d="M16 3v4M8 3v4M3 10h18"/></svg>
                         </span>
                         <div>
@@ -88,7 +88,7 @@
                         </div>
                     </article>
                     <article class="flex min-h-20 items-center gap-3 border border-[#E5E7EB] bg-white px-4 py-3">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-[#F8F9FA] text-[#2563EB]" aria-hidden="true">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-emerald-600" aria-hidden="true">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M3 17 9 11l4 4 8-9"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 6h6v6"/></svg>
                         </span>
                         <div>
@@ -110,9 +110,19 @@
                             @endforeach
                         </div>
                         <div class="grid grid-cols-3 divide-x divide-[#E5E7EB] py-2 sm:grid-cols-5 lg:grid-cols-9">
-                            @foreach (['DO', 'EQU', 'GEN', 'OS', 'PM', 'PPE', 'SCR', 'SP', 'TOO'] as $category)
+                            @foreach ([
+                                'DO' => 'text-blue-600',
+                                'EQU' => 'text-green-600',
+                                'GEN' => 'text-slate-500',
+                                'OS' => 'text-violet-600',
+                                'PM' => 'text-orange-500',
+                                'PPE' => 'text-sky-600',
+                                'SCR' => 'text-blue-500',
+                                'SP' => 'text-emerald-600',
+                                'TOO' => 'text-amber-600',
+                            ] as $category => $iconColor)
                                 <div class="flex min-w-0 items-center justify-center gap-1.5 px-1 py-1 text-[10px] text-slate-600">
-                                    <svg class="h-3.5 w-3.5 shrink-0 text-[#2563EB]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path stroke-linejoin="round" d="m12 3 9 5-9 5-9-5 9-5Z"/><path stroke-linejoin="round" d="M3 12l9 5 9-5M3 16l9 5 9-5"/></svg>
+                                    <svg class="h-3.5 w-3.5 shrink-0 {{ $iconColor }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path stroke-linejoin="round" d="m12 3 9 5-9 5-9-5 9-5Z"/><path stroke-linejoin="round" d="M3 12l9 5 9-5M3 16l9 5 9-5"/></svg>
                                     <span class="truncate">{{ $category }}</span>
                                     <span class="font-mono tabular-nums text-slate-900">0</span>
                                 </div>
@@ -150,9 +160,14 @@
                         </div>
                     </div>
                     <dl class="min-w-0 flex-1 space-y-3">
-                        @foreach (['In Stock', 'Low Stock', 'Last Stock', 'Out of Stock'] as $status)
+                        @foreach ([
+                            'In Stock' => 'bg-emerald-500',
+                            'Low Stock' => 'bg-amber-500',
+                            'Last Stock' => 'bg-orange-500',
+                            'Out of Stock' => 'bg-red-500',
+                        ] as $status => $indicatorColor)
                             <div class="flex items-center gap-2 text-[11px]">
-                                <span class="h-2 w-2 shrink-0 rounded-full bg-[#2563EB]" aria-hidden="true"></span>
+                                <span class="h-2 w-2 shrink-0 rounded-full {{ $indicatorColor }}" aria-hidden="true"></span>
                                 <dt class="min-w-0 flex-1 truncate text-slate-600">{{ $status }}</dt>
                                 <dd class="w-6 text-right font-mono font-medium tabular-nums text-slate-800">0</dd>
                                 <dd class="w-9 text-right font-mono tabular-nums text-slate-500">0%</dd>
