@@ -90,10 +90,32 @@
 @endsection
 
 @push('scripts')
-    @if ($errors->any())
-        <script>
+    <script>
+        document.querySelectorAll('[data-open-modal]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const modal = document.getElementById(button.dataset.openModal);
+                modal?.classList.replace('hidden', 'flex');
+            });
+        });
+
+        document.querySelectorAll('[data-close-modal]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const modal = button.closest('[data-modal]');
+                modal?.classList.replace('flex', 'hidden');
+            });
+        });
+
+        document.querySelectorAll('[data-modal]').forEach((modal) => {
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.classList.replace('flex', 'hidden');
+                }
+            });
+        });
+
+        @if ($errors->any())
             const failedPartnerId = @json(old('partner_id'));
             document.getElementById(failedPartnerId ? `editPartnerModal-${failedPartnerId}` : 'createPartnerModal')?.classList.replace('hidden', 'flex');
-        </script>
-    @endif
+        @endif
+    </script>
 @endpush
