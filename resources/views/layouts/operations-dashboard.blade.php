@@ -49,7 +49,7 @@
     <div id="dashboardSidebarBackdrop" class="fixed inset-0 z-30 hidden bg-slate-950/25 lg:hidden" aria-hidden="true"></div>
 
     <div class="flex min-h-screen">
-        <aside id="dashboardSidebar" class="fixed inset-y-0 left-0 z-40 flex {{ request()->routeIs('admin.settings.companies') ? 'w-[190px]' : 'w-[240px]' }} -translate-x-full flex-col border-r border-[#E5E7EB] bg-[#F8F9FA] transition-[width,transform] duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0">
+        <aside id="dashboardSidebar" class="fixed inset-y-0 left-0 z-40 flex {{ request()->routeIs('admin.settings.*') ? 'w-[190px]' : 'w-[240px]' }} -translate-x-full flex-col border-r border-[#E5E7EB] bg-[#F8F9FA] transition-[width,transform] duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0">
             <div class="flex h-12 shrink-0 items-center gap-2.5 border-b border-[#E5E7EB] px-4">
                 <img
                     src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
@@ -58,7 +58,7 @@
                     width="48"
                     height="27"
                 >
-                <span class="sidebar-copy text-[14px] font-semibold tracking-tight">{{ request()->routeIs('admin.settings.companies') ? 'Settings' : 'Globaltronics IMS' }}</span>
+                <span class="sidebar-copy text-[14px] font-semibold tracking-tight">{{ request()->routeIs('admin.settings.*') ? 'Settings' : 'Globaltronics IMS' }}</span>
                 <button type="button" id="sidebarClose" class="ml-auto rounded-sm p-1 text-slate-500 hover:bg-[#EAECEF] lg:hidden" aria-label="Close navigation">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                         <path stroke-linecap="round" d="m6 6 12 12M18 6 6 18"/>
@@ -66,42 +66,44 @@
                 </button>
             </div>
 
-            @if (request()->routeIs('admin.settings.companies'))
+            @if (request()->routeIs('admin.settings.*'))
                 <nav class="min-h-0 flex-1 overflow-y-auto px-2 py-3 text-[12px]" aria-label="Settings navigation">
                     <p class="sidebar-section-label px-2 pb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">General</p>
                     <div class="space-y-0.5">
                         <button type="button" disabled title="Application settings are not connected" class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">App</button>
-                        <a href="{{ route('admin.settings.credentials', ['tab' => 'credentials']) }}" class="sidebar-nav-button flex h-8 items-center gap-2 rounded-sm px-2 text-slate-700 hover:bg-[#EAECEF]">Profile</a>
-                        <a href="{{ route('admin.settings.credentials', ['tab' => 'credentials']) }}" class="sidebar-nav-button flex h-8 items-center gap-2 rounded-sm px-2 text-slate-700 hover:bg-[#EAECEF]">Security</a>
+                        <a href="{{ route('admin.settings.profile') }}" @if (request()->routeIs('admin.settings.profile*')) aria-current="page" @endif class="sidebar-nav-button flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.profile*') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Profile</a>
+                        <a href="{{ route('admin.settings.security') }}" @if (request()->routeIs('admin.settings.security*')) aria-current="page" @endif class="sidebar-nav-button flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.security*') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Security</a>
                         <button type="button" disabled title="API settings are not connected" class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">API</button>
                     </div>
 
-                    <p class="sidebar-section-label px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Catalog</p>
-                    <div class="space-y-0.5">
-                        <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Brand</button>
-                        <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Category</button>
-                        <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Category Type</button>
-                        <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Sub Category</button>
-                        <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">UOM</button>
-                    </div>
+                    @if (Auth::user()->canAccessAdminCredentials())
+                        <p class="sidebar-section-label px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Catalog</p>
+                        <div class="space-y-0.5">
+                            <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Brand</button>
+                            <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Category</button>
+                            <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Category Type</button>
+                            <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Sub Category</button>
+                            <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">UOM</button>
+                        </div>
 
-                    <p class="sidebar-section-label px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Organization</p>
-                    <div class="space-y-0.5">
-                        <a href="{{ route('admin.settings.companies') }}" aria-current="page" class="sidebar-nav-button flex h-8 items-center gap-2 rounded-sm bg-[#EAECEF] px-2 font-medium text-[#2563EB]">Company</a>
-                        <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Department</button>
-                        <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Warehouse/Location</button>
-                        <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Supplier</button>
-                    </div>
+                        <p class="sidebar-section-label px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Organization</p>
+                        <div class="space-y-0.5">
+                            <a href="{{ route('admin.settings.companies') }}" @if (request()->routeIs('admin.settings.companies')) aria-current="page" @endif class="sidebar-nav-button flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.companies') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Company</a>
+                            <a href="{{ route('admin.settings.departments') }}" @if (request()->routeIs('admin.settings.departments')) aria-current="page" @endif class="sidebar-nav-button flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.departments') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Department</a>
+                            <a href="{{ route('admin.settings.locations') }}" @if (request()->routeIs('admin.settings.locations')) aria-current="page" @endif class="sidebar-nav-button flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.locations') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Warehouse/Location</a>
+                            <a href="{{ route('admin.settings.partners') }}" @if (request()->routeIs('admin.settings.partners')) aria-current="page" @endif class="sidebar-nav-button flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.partners') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Supplier/Client</a>
+                        </div>
 
-                    <p class="sidebar-section-label px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wide text-slate-400">System</p>
-                    <div class="space-y-0.5">
-                        <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Threshold Settings</button>
-                        <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Approval Flow</button>
-                        <a href="{{ route('admin.users.index') }}" class="sidebar-nav-button flex h-8 items-center gap-2 rounded-sm px-2 text-slate-700 hover:bg-[#EAECEF]">Users</a>
-                    </div>
+                        <p class="sidebar-section-label px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wide text-slate-400">System</p>
+                        <div class="space-y-0.5">
+                            <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Threshold Settings</button>
+                            <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Approval Flow</button>
+                            <a href="{{ route('admin.users.index') }}" class="sidebar-nav-button flex h-8 items-center gap-2 rounded-sm px-2 text-slate-700 hover:bg-[#EAECEF]">Users</a>
+                        </div>
 
-                    <p class="sidebar-section-label px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Logs</p>
-                    <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">User Logs</button>
+                        <p class="sidebar-section-label px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Logs</p>
+                        <button type="button" disabled class="sidebar-nav-button flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">User Logs</button>
+                    @endif
                 </nav>
             @else
             <nav class="min-h-0 flex-1 overflow-y-auto px-2 py-3 text-[13px]" aria-label="Primary navigation">
@@ -220,8 +222,8 @@
             @endif
 
             <div class="shrink-0 border-t border-[#E5E7EB] p-2">
-                @if (request()->routeIs('admin.settings.companies'))
-                    <p class="sidebar-copy px-2 py-1 text-[10px] leading-4 text-slate-400">Some settings are unavailable in this preview.</p>
+                @if (request()->routeIs('admin.settings.*'))
+                    <p class="sidebar-copy px-2 py-1 text-[10px] leading-4 text-slate-400">Additional settings will be added in later phases.</p>
                 @else
                 <a href="{{ route('admin.reports.index') }}" class="sidebar-nav-button flex h-8 items-center gap-2.5 rounded-sm px-2 {{ request()->routeIs('admin.reports.*') ? 'bg-[#EAECEF] text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}" @if (request()->routeIs('admin.reports.*')) aria-current="page" @endif>
                     <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
@@ -243,7 +245,7 @@
                         </svg>
                     </button>
                     <span class="truncate text-[12px] text-slate-500">
-                        @if (request()->routeIs('admin.settings.companies'))
+                        @if (request()->routeIs('admin.settings.*'))
                             Settings <span class="px-1 text-slate-300">›</span> <span class="font-medium text-slate-800">@yield('breadcrumb', 'Companies')</span>
                         @elseif (request()->routeIs('admin.reports.*'))
                             <span class="font-medium text-slate-800">Reports</span>
@@ -277,6 +279,12 @@
                         </div>
 
                         <div class="border-t border-[#E5E7EB] py-1">
+                            <a href="{{ route('admin.settings.profile') }}" class="flex h-9 items-center gap-2.5 px-3 text-[12px] text-slate-700 hover:bg-[#F8F9FA]">
+                                <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                                    <circle cx="12" cy="8" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 21a8 8 0 0 1 16 0"/>
+                                </svg>
+                                <span>Profile</span>
+                            </a>
                             @if (Auth::user()->canAccessAdminCredentials())
                                 <a href="{{ route('admin.settings.companies') }}" class="flex h-9 items-center gap-2.5 px-3 text-[12px] text-slate-700 hover:bg-[#F8F9FA]">
                                     <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
