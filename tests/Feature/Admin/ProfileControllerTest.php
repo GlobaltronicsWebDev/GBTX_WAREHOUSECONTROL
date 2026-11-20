@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\Company;
 use App\Models\Department;
 use App\Models\User;
+use Database\Seeders\ProfileDirectorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -47,6 +48,45 @@ class ProfileControllerTest extends TestCase
             'company_id' => $company->id,
             'department_id' => $department->id,
         ]);
+    }
+
+    public function test_profile_edit_lists_the_requested_departments_and_companies(): void
+    {
+        $this->seed(ProfileDirectorySeeder::class);
+        $this->seed(ProfileDirectorySeeder::class);
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('admin.settings.profile'));
+
+        foreach ([
+            'Executive',
+            'Admin',
+            'Sales',
+            'TSD',
+            'DBE',
+            'Accounting',
+            'Audit',
+            'HRAD',
+            'Purchasing',
+            'Warehouse',
+            'MIS',
+            'VISMIN',
+            'DB International Sales & Services, Inc.',
+            'General',
+            'GGC Foundation',
+            'Globaltronics, Inc.',
+            'Glory International Technology Inc.',
+            'Nutriceutical',
+            'Organic Coconut Association of The Philippines',
+            'Philippine Shanghai Chamber Of Commerce and Industry Inc.',
+            'TeamAsia Corp.',
+            'The Parc Foundations',
+        ] as $option) {
+            $response->assertSeeText($option);
+        }
+
+        $this->assertDatabaseCount('departments', 12);
+        $this->assertDatabaseCount('companies', 10);
     }
 
     public function test_user_can_update_their_username_and_email(): void

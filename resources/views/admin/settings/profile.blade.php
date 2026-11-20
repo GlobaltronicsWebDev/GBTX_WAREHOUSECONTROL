@@ -23,9 +23,13 @@
 
         <section class="flex flex-col gap-5 py-3 sm:flex-row sm:items-center">
             @if ($user->profile_photo_path)
-                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($user->profile_photo_path) }}" alt="" class="h-20 w-20 shrink-0 rounded-full border-4 border-white object-cover shadow-md">
+                <img id="profileSummaryPhoto" src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($user->profile_photo_path) }}" alt="Profile photo" class="h-20 w-20 shrink-0 rounded-full border-4 border-white object-cover shadow-md">
+                <div id="profileSummaryInitials" class="hidden h-20 w-20 shrink-0 items-center justify-center rounded-full border-4 border-white bg-blue-600 text-2xl font-semibold text-white shadow-md">
+                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                </div>
             @else
-                <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-4 border-white bg-blue-600 text-2xl font-semibold text-white shadow-md">
+                <img id="profileSummaryPhoto" alt="Profile photo" class="hidden h-20 w-20 shrink-0 rounded-full border-4 border-white object-cover shadow-md">
+                <div id="profileSummaryInitials" class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-4 border-white bg-blue-600 text-2xl font-semibold text-white shadow-md">
                     {{ strtoupper(substr($user->name, 0, 1)) }}
                 </div>
             @endif
@@ -196,6 +200,20 @@
         const photoInput = document.getElementById('profile_photo');
         const photoPreview = document.getElementById('profilePhotoPreview');
         const photoInitials = document.getElementById('profilePhotoInitials');
+        const revealPhotoInitials = (image, initials) => {
+            if (!image || !initials) {
+                return;
+            }
+            image.classList.add('hidden');
+            initials.classList.remove('hidden');
+            initials.classList.add('flex');
+        };
+
+        document.getElementById('profileSummaryPhoto')?.addEventListener('error', (event) => {
+            revealPhotoInitials(event.currentTarget, document.getElementById('profileSummaryInitials'));
+        });
+        photoPreview?.addEventListener('error', () => revealPhotoInitials(photoPreview, photoInitials));
+
         photoInput?.addEventListener('change', () => {
             const photo = photoInput.files?.[0];
             if (!photo) {
