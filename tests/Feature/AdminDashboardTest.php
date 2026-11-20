@@ -36,9 +36,13 @@ class AdminDashboardTest extends TestCase
         $response = $this->actingAs($user)->get('/admin/dashboard');
 
         $response->assertOk();
-        $response->assertSee('IT Administration');
-        $response->assertSee('User accounts');
-        $response->assertDontSee('Inventory');
+        $response->assertSee('Operations Overview');
+        $response->assertSee('My Dashboard');
+        $response->assertSee('Low Stock SKUs');
+        $response->assertSee('PR-2026-089');
+        $response->assertSee('Sample data');
+        $response->assertSee('data-sort-key="sortRef"', false);
+        $response->assertDontSee('Sales Order');
         $response->assertDontSee('Sales Order');
     }
 
@@ -331,7 +335,7 @@ class AdminDashboardTest extends TestCase
         $response = $this->actingAs($warehouseAdmin)->get(route('admin.dashboard'));
 
         $response->assertOk();
-        $response->assertSee('Warehouse Operations');
+        $response->assertSee('Operations Overview');
         $response->assertDontSee('Manage accounts');
     }
 
@@ -362,7 +366,7 @@ class AdminDashboardTest extends TestCase
         $response = $this->actingAs($user)->get(route('admin.dashboard'));
 
         $response->assertStatus(200);
-        $response->assertSee('Warehouse Operations');
+        $response->assertSee('Operations Overview');
         $response->assertDontSee('5 OPERATIONAL WORKFLOW MODULES', false);
     }
 
@@ -529,13 +533,13 @@ class AdminDashboardTest extends TestCase
         $response = $this->actingAs($tech)->get('/admin/dashboard');
 
         $response->assertOk();
-        $response->assertSee('Technical Operations');
-        $response->assertSee('Stock Requisition Forms');
-        $response->assertSee('Create SRF');
+        $response->assertSee('Operations Overview');
+        $response->assertSee('Requisitions');
+        $response->assertSee('Create Stock Requisition Form');
         $response->assertSee('id="installationSrfModal"', false);
         $response->assertDontSee('Warehouse Operations &amp; Workflow Engine', false);
         $response->assertDontSee('Sales Order');
-        $response->assertDontSee('Inventory');
+        $response->assertSee('Inventory List');
     }
 
     public function test_technical_user_can_submit_srf_and_it_shows_in_dashboard_summary(): void
@@ -641,7 +645,7 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('4');
         $response->assertSee('UNITS');
         $response->assertDontSee('Launch Stock Requisition Form (SRF)');
-        $response->assertSee('Approved SRF');
+        $response->assertSee('Approvals');
     }
 
     public function test_approved_srf_page_lists_verified_requisitions(): void
