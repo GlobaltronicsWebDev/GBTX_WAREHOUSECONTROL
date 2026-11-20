@@ -6,7 +6,9 @@ use App\Models\Company;
 use App\Models\Department;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ProfileControllerTest extends TestCase
@@ -26,24 +28,110 @@ class ProfileControllerTest extends TestCase
         $response = $this->actingAs($user)->get(route('admin.settings.profile'));
 
         $response->assertSee('Profile Settings');
+        $response->assertSee('Edit Profile');
+        $response->assertSee('Edit Account');
         $response->assertSee('MIS');
         $response->assertSee('Globaltronics, Inc.');
 
         $this->actingAs($user)->put(route('admin.settings.profile.update'), [
-            'name' => 'Paz Updated',
-            'email' => 'unexpected@example.com',
+            'settings_modal' => 'profile',
+            'first_name' => 'Paz',
+            'last_name' => 'Updated',
+            'company_id' => $company->id,
+            'department_id' => $department->id,
         ])->assertRedirect(route('admin.settings.profile'));
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
             'name' => 'Paz Updated',
-            'email' => $user->email,
+            'company_id' => $company->id,
+            'department_id' => $department->id,
         ]);
+    }
+
+    public function test_user_can_update_their_username_and_email(): void
+    {
+        $user = User::factory()->create([
+            'username' => 'paz.user',
+            'email' => 'paz@example.com',
+        ]);
+
+        $this->actingAs($user)->put(route('admin.settings.profile.account'), [
+            'settings_modal' => 'account',
+            'username' => 'paz.updated',
+            'email' => 'paz.updated@example.com',
+        ])->assertRedirect(route('admin.settings.profile'));
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'username' => 'paz.updated',
+            'email' => 'paz.updated@example.com',
+            'email_verified_at' => null,
+        ]);
+    }
+
+    public function test_user_can_upload_a_profile_photo_and_replace_the_previous_photo(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('profile-photos/old.png', 'old photo');
+        $user = User::factory()->create([
+            'profile_photo_path' => 'profile-photos/old.png',
+        ]);
+
+        $this->actingAs($user)->put(route('admin.settings.profile.account'), [
+            'settings_modal' => 'account',
+            'username' => 'photo.user',
+            'email' => $user->email,
+            'profile_photo' => UploadedFile::fake()->image('avatar.png'),
+        ])->assertRedirect(route('admin.settings.profile'));
+
+        $photoPath = $user->fresh()->profile_photo_path;
+        $this->assertNotSame('profile-photos/old.png', $photoPath);
+        Storage::disk('public')->assertExists($photoPath);
+        Storage::disk('public')->assertMissing('profile-photos/old.png');
+    }
+
+    public function test_invalid_profile_photo_keeps_account_information_unchanged(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create([
+            'username' => 'original.user',
+            'email' => 'original@example.com',
+        ]);
+
+        $response = $this->actingAs($user)->put(route('admin.settings.profile.account'), [
+            'settings_modal' => 'account',
+            'username' => 'updated.user',
+            'email' => 'updated@example.com',
+            'profile_photo' => UploadedFile::fake()->image('large.png')->size(2049),
+        ]);
+
+        $response->assertSessionHasErrors('profile_photo');
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'username' => 'original.user',
+            'email' => 'original@example.com',
+        ]);
+    }
+
+    public function test_user_cannot_choose_a_username_already_used_by_another_account(): void
+    {
+        User::factory()->create(['username' => 'taken.user']);
+        $user = User::factory()->create(['username' => 'current.user']);
+
+        $this->actingAs($user)->put(route('admin.settings.profile.account'), [
+            'settings_modal' => 'account',
+            'username' => 'taken.user',
+            'email' => $user->email,
+        ])->assertSessionHasErrors('username');
+
+        $this->assertSame('current.user', $user->fresh()->username);
     }
 
     public function test_guest_is_redirected_to_login_from_profile_settings(): void
     {
         $this->get(route('admin.settings.profile'))->assertRedirect('/login');
+        $this->put(route('admin.settings.profile.account'))->assertRedirect('/login');
     }
 
     public function test_security_page_requires_password_confirmation(): void
