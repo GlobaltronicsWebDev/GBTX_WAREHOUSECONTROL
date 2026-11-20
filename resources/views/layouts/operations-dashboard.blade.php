@@ -55,7 +55,7 @@
                     width="28"
                     height="28"
                 >
-                <span class="sidebar-copy text-[14px] font-semibold tracking-tight">Inventory</span>
+                <span class="sidebar-copy text-[14px] font-semibold tracking-tight">Globaltronics IMS</span>
                 <button type="button" id="sidebarClose" class="ml-auto rounded-sm p-1 text-slate-500 hover:bg-[#EAECEF] lg:hidden" aria-label="Close navigation">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                         <path stroke-linecap="round" d="m6 6 12 12M18 6 6 18"/>
