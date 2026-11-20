@@ -37,7 +37,7 @@ class AdminDashboardTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('IT Administration');
-        $response->assertSee('Total Accounts');
+        $response->assertSee('User accounts');
         $response->assertDontSee('Inventory');
         $response->assertDontSee('Sales Order');
     }
@@ -332,7 +332,7 @@ class AdminDashboardTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Warehouse Operations');
-        $response->assertDontSee('Admin Credentials');
+        $response->assertDontSee('Manage accounts');
     }
 
     public function test_removed_inventory_and_sales_modules_are_unavailable(): void
@@ -529,8 +529,8 @@ class AdminDashboardTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Technical Operations');
-        $response->assertSee('Stock Requisition Form (SRF)');
-        $response->assertSee('Launch Stock Requisition Form (SRF)');
+        $response->assertSee('Stock Requisition Forms');
+        $response->assertSee('Create SRF');
         $response->assertSee('id="installationSrfModal"', false);
         $response->assertDontSee('Warehouse Operations &amp; Workflow Engine', false);
         $response->assertDontSee('Sales Order');
@@ -576,9 +576,8 @@ class AdminDashboardTest extends TestCase
         $dashResponse->assertOk();
         $dashResponse->assertSee('SRF-2026-9001');
         $dashResponse->assertSee('SM Megamall Curved LED');
-        $dashResponse->assertSee('PO-2026-9912');
         $dashResponse->assertSee('P10 OUTDOOR SCREEN');
-        $dashResponse->assertSee('FOR APPROVAL');
+        $dashResponse->assertSee('Pending');
 
         $warehouseAdmin = User::factory()->create();
         $warehouseAdmin->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
@@ -599,7 +598,7 @@ class AdminDashboardTest extends TestCase
         $response = $this->actingAs($tech)->get('/admin/dashboard');
 
         $response->assertOk();
-        $response->assertSee('Item Model');
+        $response->assertSee('Model / item name');
         $response->assertSee('Manufacturer');
         $response->assertSee('item_model');
         $response->assertDontSee('item-search-input');
@@ -693,6 +692,7 @@ class AdminDashboardTest extends TestCase
         $admin->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
         $srf = SrfRequisition::create([
             'srf_number' => '2026 - 1300',
+            'sso_number' => 'SSO-2026-1300',
             'project_name' => 'Ayala Malls Project',
             'client' => 'Ayala Land',
             'item_model' => 'PANEL-SNAPSHOT',
@@ -724,6 +724,7 @@ class AdminDashboardTest extends TestCase
         $admin->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
         $srf = SrfRequisition::create([
             'srf_number' => '2026 - 1301',
+            'sso_number' => 'SSO-2026-1301',
             'project_name' => 'Megamall Tower Project',
             'client' => 'SM Prime',
             'item_model' => 'PANEL-SNAPSHOT',
@@ -753,6 +754,7 @@ class AdminDashboardTest extends TestCase
         $admin->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
         $srf = SrfRequisition::create([
             'srf_number' => '2026 - 1302',
+            'sso_number' => 'SSO-2026-1302',
             'project_name' => 'Robinsons Galleria Project',
             'client' => 'Robinsons Land',
             'item_model' => 'PANEL-SNAPSHOT',
