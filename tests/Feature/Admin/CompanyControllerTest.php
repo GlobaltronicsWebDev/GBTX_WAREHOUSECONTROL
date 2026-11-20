@@ -109,7 +109,6 @@ class CompanyControllerTest extends TestCase
         ]));
 
         $response->assertSee('DB International');
-        $response->assertDontSee('Globaltronics');
+        $response->assertDontSee('GLOBAL');
     }
-
 }
