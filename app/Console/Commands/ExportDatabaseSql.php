@@ -416,7 +416,17 @@ class ExportDatabaseSql extends Command
                     } elseif (is_numeric($val) && ! is_string($val)) {
                         $values[] = (string) $val;
                     } else {
-                        $escaped = str_replace(['\\', "'", "\0", "\n", "\r"], ['\\\\', "\\'", '\\0', '\\n', '\\r'], (string) $val);
+                        $value = (string) $val;
+
+                        if ($isSqlite) {
+                            $values[] = str_contains($value, "\0")
+                                ? "CAST(X'".bin2hex($value)."' AS TEXT)"
+                                : "'".str_replace("'", "''", $value)."'";
+
+                            continue;
+                        }
+
+                        $escaped = str_replace(['\\', "'", "\0", "\n", "\r"], ['\\\\', "\\'", '\\0', '\\n', '\\r'], $value);
                         $values[] = "'{$escaped}'";
                     }
                 }
