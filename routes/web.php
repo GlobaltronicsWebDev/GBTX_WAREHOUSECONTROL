@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WarehouseLocationController;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -116,6 +117,26 @@ Route::post('/confirm-password', function (Request $request) {
 
     return redirect()->intended(route('admin.settings.security'));
 })->middleware(['auth', 'throttle:6,1'])->name('password.confirm.store');
+
+Route::get('/email/verify', function () {
+    return redirect()->route('admin.settings.profile');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    return redirect()->route('admin.settings.profile')->with('status', 'Your email address has been verified.');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    if ($request->user()->hasVerifiedEmail()) {
+        return redirect()->route('admin.settings.profile')->with('status', 'Your email address is already verified.');
+    }
+
+    $request->user()->sendEmailVerificationNotification();
+
+    return redirect()->route('admin.settings.profile')->with('status', 'A verification email has been sent.');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {

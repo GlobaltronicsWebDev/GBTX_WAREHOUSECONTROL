@@ -58,7 +58,13 @@
                 Your email address was verified.
             </div>
         @else
-            <div role="status" class="border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">Your email address is not verified.</div>
+            <div role="status" class="flex flex-col gap-3 border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800 sm:flex-row sm:items-center sm:justify-between">
+                <span>Your email address is not verified. Check your inbox or request a new verification email.</span>
+                <form method="POST" action="{{ route('verification.send') }}">
+                    @csrf
+                    <button type="submit" class="h-8 border border-amber-300 bg-white px-3 text-[11px] font-medium text-amber-900 hover:bg-amber-100">Resend verification email</button>
+                </form>
+            </div>
         @endif
     </div>
 

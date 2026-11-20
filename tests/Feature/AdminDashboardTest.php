@@ -9,8 +9,10 @@ use App\Models\SrfRequisition;
 use App\Models\TransactionNotification;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -299,6 +301,7 @@ class AdminDashboardTest extends TestCase
 
     public function test_admin_can_create_user_with_roles(): void
     {
+        Notification::fake();
         $admin = User::factory()->create();
         $itRole = Role::where('slug', 'it-admin')->first();
         $staffRole = Role::where('slug', 'warehouse-staff')->first();
@@ -326,10 +329,12 @@ class AdminDashboardTest extends TestCase
         $createdUser = User::where('email', 'carlos.mendoza@globaltronics.net')->first();
         $this->assertTrue($createdUser->roles->contains($staffRole->id));
         $this->assertTrue(Hash::check('SecurePass123!@#', $createdUser->password));
+        Notification::assertSentTo($createdUser, VerifyEmail::class);
     }
 
     public function test_admin_can_update_user_credentials_and_roles(): void
     {
+        Notification::fake();
         $admin = User::factory()->create();
         $itRole = Role::where('slug', 'it-admin')->first();
         $admin->roles()->attach($itRole);
@@ -353,8 +358,10 @@ class AdminDashboardTest extends TestCase
 
         $this->assertSame('Updated Name', $targetUser->name);
         $this->assertSame('updated.email@globaltronics.net', $targetUser->email);
+        $this->assertNull($targetUser->email_verified_at);
         $this->assertTrue(Hash::check('NewPassword999!', $targetUser->password));
         $this->assertTrue($targetUser->roles->contains($warehouseAdminRole->id));
+        Notification::assertSentTo($targetUser, VerifyEmail::class);
     }
 
     public function test_admin_cannot_delete_own_account(): void

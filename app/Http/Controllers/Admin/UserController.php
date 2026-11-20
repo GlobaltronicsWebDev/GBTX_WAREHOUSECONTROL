@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Department;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -108,6 +109,8 @@ class UserController extends Controller
             $user->roles()->sync($validated['roles']);
         }
 
+        event(new Registered($user));
+
         return redirect()->route('admin.users.index')
             ->with('status', "User account '{$user->name}' was successfully created.");
     }
@@ -127,8 +130,12 @@ class UserController extends Controller
             'company_id' => ['nullable', Rule::exists('companies', 'id')],
         ]);
 
+        $emailChanged = $user->email !== $validated['email'];
         $user->name = $validated['name'];
         $user->email = $validated['email'];
+        if ($emailChanged) {
+            $user->email_verified_at = null;
+        }
         $user->department_id = $validated['department_id'] ?? null;
         $user->company_id = $validated['company_id'] ?? null;
 
@@ -137,6 +144,9 @@ class UserController extends Controller
         }
 
         $user->save();
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+        }
 
         if (isset($validated['roles'])) {
             // Prevent removing last admin role if this is the only IT admin

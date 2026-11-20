@@ -9,10 +9,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
-use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
@@ -77,8 +77,9 @@ class ProfileController extends Controller
             }
         }
 
+        $emailChanged = $user->email !== $validated['email'];
         $user->username = $validated['username'];
-        if ($user->email !== $validated['email']) {
+        if ($emailChanged) {
             $user->email_verified_at = null;
         }
         $user->email = $validated['email'];
@@ -93,7 +94,13 @@ class ProfileController extends Controller
             Log::warning('A replaced profile photo could not be deleted.', ['user_id' => $user->id]);
         }
 
-        return redirect()->route('admin.settings.profile')->with('status', 'Your account information was updated successfully.');
+        $status = 'Your account information was updated successfully.';
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+            $status .= ' A verification email has been sent to your new email address.';
+        }
+
+        return redirect()->route('admin.settings.profile')->with('status', $status);
     }
 
     public function security(Request $request): View

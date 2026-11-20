@@ -6,9 +6,11 @@ use App\Models\Company;
 use App\Models\Department;
 use App\Models\User;
 use Database\Seeders\ProfileDirectorySeeder;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -91,6 +93,7 @@ class ProfileControllerTest extends TestCase
 
     public function test_user_can_update_their_username_and_email(): void
     {
+        Notification::fake();
         $user = User::factory()->create([
             'username' => 'paz.user',
             'email' => 'paz@example.com',
@@ -108,6 +111,8 @@ class ProfileControllerTest extends TestCase
             'email' => 'paz.updated@example.com',
             'email_verified_at' => null,
         ]);
+
+        Notification::assertSentTo($user, VerifyEmail::class);
     }
 
     public function test_user_can_upload_a_profile_photo_and_replace_the_previous_photo(): void
