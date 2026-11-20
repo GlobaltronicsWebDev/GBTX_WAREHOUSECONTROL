@@ -43,13 +43,13 @@
             >
 
             <div class="relative z-10 flex items-center gap-3">
-                <span class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full shadow-lg">
-                    <img
-                        src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
-                        alt=""
-                        class="h-full w-full object-cover"
-                    >
-                </span>
+                <img
+                    src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
+                    alt="Globaltronics logo"
+                    class="h-auto w-20 object-contain"
+                    width="80"
+                    height="45"
+                >
                 <div>
                     <p class="text-sm font-bold tracking-[0.16em]">Inventory Control</p>
                     

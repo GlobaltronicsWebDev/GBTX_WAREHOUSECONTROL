@@ -51,9 +51,9 @@
                 <img
                     src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
                     alt="Globaltronics logo"
-                    class="h-7 w-7 shrink-0 rounded-full object-cover"
-                    width="28"
-                    height="28"
+                    class="h-auto w-12 shrink-0 object-contain"
+                    width="48"
+                    height="27"
                 >
                 <span class="sidebar-copy text-[14px] font-semibold tracking-tight">Globaltronics IMS</span>
                 <button type="button" id="sidebarClose" class="ml-auto rounded-sm p-1 text-slate-500 hover:bg-[#EAECEF] lg:hidden" aria-label="Close navigation">
