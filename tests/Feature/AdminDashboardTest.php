@@ -42,6 +42,9 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('PR-2026-089');
         $response->assertSee('Sample data');
         $response->assertSee('data-sort-key="sortRef"', false);
+        $response->assertSee('Purchase Requests');
+        $response->assertSee('Receivings');
+        $response->assertSee('Deliverables');
         $response->assertSee(route('admin.inventory.dashboard'));
         $response->assertDontSee('Sales Order');
         $response->assertDontSee('Sales Order');

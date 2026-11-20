@@ -279,24 +279,44 @@
                     </article>
                 </div>
 
-                <div data-dashboard-panel="stats" hidden class="divide-y divide-[#E5E7EB]">
-                    <div class="flex items-center justify-between px-3 py-2.5">
-                        <span class="text-[11px] text-slate-600">Pending SRFs</span>
-                        <span class="tabular-nums font-mono text-[12px] font-medium">{{ number_format($pendingApprovalCount) }}</span>
+                <div data-dashboard-panel="stats" hidden class="divide-y divide-[#E5E7EB]" aria-label="Sample operational statistics">
+                    <div class="flex items-center gap-3 px-3 py-2.5">
+                        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600" aria-hidden="true">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="17" rx="2"/><path stroke-linecap="round" d="M9 4.5h6M8 10h8M8 14h8M8 18h5"/></svg>
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] uppercase tracking-wide text-slate-500">Requisitions</p>
+                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">0</p>
+                        </div>
                     </div>
-                    <div class="flex items-center justify-between px-3 py-2.5">
-                        <span class="text-[11px] text-slate-600">Approved SRFs</span>
-                        <span class="tabular-nums font-mono text-[12px] font-medium">{{ number_format($user->canViewWarehouseOperations() || $user->isItAdmin() ? $srfCompletedCount : $userSrfCompletedCount) }}</span>
+                    <div class="flex items-center gap-3 px-3 py-2.5">
+                        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600" aria-hidden="true">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l2.2 11.2A2 2 0 0 0 9.2 17h8.9a2 2 0 0 0 1.9-1.4L22 9H6"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] uppercase tracking-wide text-slate-500">Purchase Requests</p>
+                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">0</p>
+                        </div>
                     </div>
-                    <div class="flex items-center justify-between px-3 py-2.5">
-                        <span class="text-[11px] text-slate-600">Import shipments</span>
-                        <span class="tabular-nums font-mono text-[12px] font-medium">04 <span class="font-sans text-[9px] font-normal text-slate-400">sample</span></span>
+                    <div class="flex items-center gap-3 px-3 py-2.5">
+                        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-600" aria-hidden="true">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h12v11H3zM15 11h4l3 3v4h-7z"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="18.5" cy="18.5" r="1.5"/></svg>
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] uppercase tracking-wide text-slate-500">Receivings</p>
+                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">0</p>
+                        </div>
                     </div>
-                    <div class="flex items-center justify-between px-3 py-2.5">
-                        <span class="text-[11px] text-slate-600">At Customs</span>
-                        <span class="tabular-nums font-mono text-[12px] font-medium">03 <span class="font-sans text-[9px] font-normal text-slate-400">sample</span></span>
+                    <div class="flex items-center gap-3 px-3 py-2.5">
+                        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600" aria-hidden="true">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="m8 12 2.5 2.5L16 9"/></svg>
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] uppercase tracking-wide text-slate-500">Deliverables</p>
+                            <p class="font-mono text-[15px] font-semibold leading-5 tabular-nums">0</p>
+                        </div>
                     </div>
-                    <p class="px-3 py-2 text-[10px] text-slate-400">Only SRF counts are connected to application data.</p>
+                    <p class="px-3 py-2 text-[10px] text-slate-400">Sample counts only; these ERP workflows are not connected to application data.</p>
                 </div>
             </aside>
         </section>
