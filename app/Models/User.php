@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 
-#[Fillable(['name', 'email', 'password', 'is_admin'])]
+#[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -29,7 +29,6 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_admin' => 'boolean',
         ];
     }
 
@@ -71,7 +70,7 @@ class User extends Authenticatable
 
     /**
      * Determine if the user has access to Admin Credentials.
-     * Only IT Administrators have access; all other roles (Warehouse, Technical, Sales, etc.) are restricted.
+     * Only IT Administrators have access; all other roles are restricted.
      */
     public function canAccessAdminCredentials(): bool
     {

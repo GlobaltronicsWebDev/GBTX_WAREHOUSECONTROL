@@ -141,6 +141,12 @@ return new class extends Migration
             }
         }
 
+        if (Schema::hasTable('users') && Schema::hasColumn('users', 'is_admin')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('is_admin');
+            });
+        }
+
         Schema::dropIfExists('inventory_items');
     }
 
