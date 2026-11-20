@@ -1,7 +1,7 @@
 -- ========================================================
 -- Globaltronics Warehouse Management System (GBTX WHMS)
 -- Complete SQLite Database Dump (Schema + Active Data)
--- Generated on: 2026-11-20 00:38:10
+-- Generated on: 2026-11-20 00:42:00
 -- Target DBMS: SQLite 3
 -- ========================================================
 
@@ -18,15 +18,15 @@ INSERT INTO "roles" ("id", "name", "slug", "description", "badge_color", "is_sys
 (7, 'Technical', 'technical', 'Technical personnel handling Stock Requisition Forms (SRF), site installation hardware, and diagnostics.', 'cyan', 0, '2026-10-06 03:49:06', '2026-10-06 03:49:06');
 
 DROP TABLE IF EXISTS "users";
-CREATE TABLE "users" ("id" integer primary key autoincrement not null, "name" varchar not null, "email" varchar not null, "email_verified_at" datetime, "password" varchar not null, "remember_token" varchar, "created_at" datetime, "updated_at" datetime, "is_admin" tinyint(1) not null default '0');
+CREATE TABLE "users" ("id" integer primary key autoincrement not null, "name" varchar not null, "email" varchar not null, "email_verified_at" datetime, "password" varchar not null, "remember_token" varchar, "created_at" datetime, "updated_at" datetime);
 
 -- Dumping data for table `users` (5 records)
-INSERT INTO "users" ("id", "name", "email", "email_verified_at", "password", "remember_token", "created_at", "updated_at", "is_admin") VALUES
-(1, 'Mark Joseph Estoesta', 'mark.estoesta@globaltronics.net', NULL, '$2y$12$daM8abN8XDOPx.mfO97Shu0Zt47/O1s9sgFym7ZXRLuCN/CMtwtwC', '8d5nvmhPq8ZtmbIX6rB4wwPdcuL7TKGCtSib5ksvys1kxoXHCpED7HuXfpTR', '2026-09-25 06:31:10', '2026-10-06 04:35:41', 0),
-(2, 'Joshua Labios', 'joshua.labios@globaltronics.net', NULL, '$2y$12$PBhNwHfuSqZ.73MQrpZEneFZevL/qFZklypAFVSgpDi7jUDAIXjhq', '64m8ikmGnpucC3yZ47iM1Ym5sGszw953jFOYbUojBigefWfIB3dr4o8zhfhB', '2026-09-25 06:31:10', '2026-10-06 03:49:53', 0),
-(3, 'Warehouse Staff User', 'staff@globaltronics.net', NULL, '$2y$12$Z2XsrlQCHWC4hc6EZu.q.ezd.2wKI9DwG8CMpkkoO9Y9Gw0Kq4Px6', 'R8lQoJMwqcxboUAZobBTeOXqupVUQTo2zpOL6ZGy50EftcDtPhqQqeAaz7gx', '2026-09-25 06:31:10', '2026-10-06 03:49:53', 0),
-(4, 'Ariel Moro', 'ariel.moro@globaltronics.net', NULL, '$2y$12$2DwBWwV8GBSE//BmxbyYR.FDNR9cfh1ejpJSaxCMYtFB8rdXmRNhm', 'HIVKq0D3E9m37BYx1JIdaoXiExkpnhNTOMjLOHkFxJzz5BL60C9wF2hvk3ZH', '2026-10-06 03:27:48', '2026-10-06 03:49:53', 0),
-(6, 'Charles Quiachon', 'charles.quiachon@globaltronics.net', NULL, '$2y$12$D/CMTp5fVbH3pVoTeHbcZOrbJ11pqwf/lYcf1SGGJ6LRAGN0XSHES', NULL, '2026-10-06 04:36:48', '2026-10-06 04:36:48', 0);
+INSERT INTO "users" ("id", "name", "email", "email_verified_at", "password", "remember_token", "created_at", "updated_at") VALUES
+(1, 'Mark Joseph Estoesta', 'mark.estoesta@globaltronics.net', NULL, '$2y$12$daM8abN8XDOPx.mfO97Shu0Zt47/O1s9sgFym7ZXRLuCN/CMtwtwC', '8d5nvmhPq8ZtmbIX6rB4wwPdcuL7TKGCtSib5ksvys1kxoXHCpED7HuXfpTR', '2026-09-25 06:31:10', '2026-10-06 04:35:41'),
+(2, 'Joshua Labios', 'joshua.labios@globaltronics.net', NULL, '$2y$12$PBhNwHfuSqZ.73MQrpZEneFZevL/qFZklypAFVSgpDi7jUDAIXjhq', '64m8ikmGnpucC3yZ47iM1Ym5sGszw953jFOYbUojBigefWfIB3dr4o8zhfhB', '2026-09-25 06:31:10', '2026-10-06 03:49:53'),
+(3, 'Warehouse Staff User', 'staff@globaltronics.net', NULL, '$2y$12$Z2XsrlQCHWC4hc6EZu.q.ezd.2wKI9DwG8CMpkkoO9Y9Gw0Kq4Px6', 'R8lQoJMwqcxboUAZobBTeOXqupVUQTo2zpOL6ZGy50EftcDtPhqQqeAaz7gx', '2026-09-25 06:31:10', '2026-10-06 03:49:53'),
+(4, 'Ariel Moro', 'ariel.moro@globaltronics.net', NULL, '$2y$12$2DwBWwV8GBSE//BmxbyYR.FDNR9cfh1ejpJSaxCMYtFB8rdXmRNhm', 'HIVKq0D3E9m37BYx1JIdaoXiExkpnhNTOMjLOHkFxJzz5BL60C9wF2hvk3ZH', '2026-10-06 03:27:48', '2026-10-06 03:49:53'),
+(6, 'Charles Quiachon', 'charles.quiachon@globaltronics.net', NULL, '$2y$12$D/CMTp5fVbH3pVoTeHbcZOrbJ11pqwf/lYcf1SGGJ6LRAGN0XSHES', NULL, '2026-10-06 04:36:48', '2026-10-06 04:36:48');
 
 DROP TABLE IF EXISTS "role_user";
 CREATE TABLE "role_user" ("user_id" integer not null, "role_id" integer not null, "created_at" datetime, "updated_at" datetime, foreign key("user_id") references "users"("id") on delete cascade, foreign key("role_id") references "roles"("id") on delete cascade, primary key ("user_id", "role_id"));

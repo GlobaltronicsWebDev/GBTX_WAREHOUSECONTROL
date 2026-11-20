@@ -347,6 +347,7 @@ class AdminDashboardTest extends TestCase
         $this->assertFalse(Schema::hasTable('inventory_items'));
         $this->assertFalse(Schema::hasTable('sales_orders'));
         $this->assertFalse(Schema::hasTable('order_logs'));
+        $this->assertFalse(Schema::hasColumn('users', 'is_admin'));
         $this->assertTrue(Schema::hasColumn('srf_requisitions', 'item_model'));
         $this->assertFalse(Schema::hasColumn('srf_requisitions', 'inventory_item_id'));
         $this->assertDatabaseMissing('roles', ['slug' => 'sales-executive']);
