@@ -97,7 +97,7 @@
             </div>
         </section>
 
-        <section class="grid grid-cols-2 gap-2.5 2xl:grid-cols-4" aria-label="Operational metrics">
+        <section class="grid grid-cols-2 gap-2.5 lg:grid-cols-4" aria-label="Operational metrics">
             <article class="min-w-0 border border-[#E5E7EB] bg-white px-3 py-2.5">
                 <p class="text-[11px] font-medium text-slate-500">Pending Approvals</p>
                 <div class="mt-1 flex items-end justify-between gap-2">

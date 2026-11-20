@@ -264,6 +264,7 @@
                 const panel = document.getElementById(toggle.getAttribute('aria-controls'));
                 const expanded = toggle.getAttribute('aria-expanded') === 'true';
                 panel.hidden = expanded;
+                panel.classList.toggle('hidden', expanded);
                 toggle.setAttribute('aria-expanded', String(!expanded));
             });
         });
