@@ -103,6 +103,11 @@
                                         @endif
                                     </div>
                                     <div class="text-xs font-mono-code text-slate-500">{{ $user->email }}</div>
+                                    @if ($user->department || $user->company)
+                                        <div class="mt-1 text-[10px] text-slate-500">
+                                            {{ $user->department?->name ?? 'No department' }}{{ $user->company ? ' · '.$user->company->name : '' }}
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </td>
@@ -168,6 +173,8 @@
                                         'id' => $user->id,
                                         'name' => $user->name,
                                         'email' => $user->email,
+                                        'department_id' => $user->department_id,
+                                        'company_id' => $user->company_id,
                                         'role_ids' => $user->roles->pluck('id')->toArray(),
                                         'is_self' => Auth::id() === $user->id
                                     ]) }})" 
@@ -287,6 +294,27 @@
                     placeholder="e.g. juan.delacruz@globaltronics.net" 
                     class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 font-mono-code"
                 />
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="create_department_id" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">Department</label>
+                    <select id="create_department_id" name="department_id" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">No department</option>
+                        @foreach ($departments as $department)
+                            <option value="{{ $department->id }}" @selected(old('department_id') == $department->id)>{{ $department->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label for="create_company_id" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">Company</label>
+                    <select id="create_company_id" name="company_id" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">No company</option>
+                        @foreach ($companies as $company)
+                            <option value="{{ $company->id }}" @selected(old('company_id') == $company->id)>{{ $company->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
 
             <!-- Password -->
@@ -427,6 +455,27 @@
                 />
             </div>
 
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="edit_department_id" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">Department</label>
+                    <select id="edit_department_id" name="department_id" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">No department</option>
+                        @foreach ($departments as $department)
+                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label for="edit_company_id" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">Company</label>
+                    <select id="edit_company_id" name="company_id" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">No company</option>
+                        @foreach ($companies as $company)
+                            <option value="{{ $company->id }}">{{ $company->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
             <!-- Optional New Password -->
             <div>
                 <div class="flex items-center justify-between mb-1.5">
@@ -560,6 +609,8 @@
         document.getElementById('edit_name').value = user.name;
         document.getElementById('edit_email').value = user.email;
         document.getElementById('edit_password').value = '';
+        document.getElementById('edit_department_id').value = user.department_id ?? '';
+        document.getElementById('edit_company_id').value = user.company_id ?? '';
         document.getElementById('editUserForm').action = '/admin/users/' + user.id;
 
         // Reset and check assigned role checkboxes
