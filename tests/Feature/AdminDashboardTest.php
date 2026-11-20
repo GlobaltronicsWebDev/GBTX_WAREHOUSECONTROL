@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\Role;
 use App\Models\Company;
 use App\Models\Department;
+use App\Models\Role;
 use App\Models\SrfRequisition;
 use App\Models\TransactionNotification;
 use App\Models\User;

@@ -58,6 +58,23 @@ class WarehouseLocationControllerTest extends TestCase
         $this->assertDatabaseCount('warehouse_locations', 1);
     }
 
+    public function test_location_listing_filters_by_search_and_status(): void
+    {
+        $admin = User::factory()->create();
+        $admin->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        WarehouseLocation::factory()->create(['name' => 'DBI Warehouse', 'is_active' => true]);
+        WarehouseLocation::factory()->create(['name' => 'Inactive Storage', 'is_active' => false]);
+
+        $response = $this->actingAs($admin)->get(route('admin.settings.locations', [
+            'search' => 'DBI',
+            'status' => 'active',
+        ]));
+
+        $response->assertSee('DBI Warehouse');
+        $response->assertSee('Warehouse');
+        $response->assertDontSee('Inactive Storage');
+    }
+
     public function test_location_can_be_updated_and_deleted(): void
     {
         $admin = User::factory()->create();

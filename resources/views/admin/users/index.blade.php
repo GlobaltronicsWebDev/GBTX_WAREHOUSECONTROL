@@ -302,7 +302,7 @@
                     <select id="create_department_id" name="department_id" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">No department</option>
                         @foreach ($departments as $department)
-                            <option value="{{ $department->id }}" @selected(old('department_id') == $department->id)>{{ $department->name }}</option>
+                            <option value="{{ $department->id }}" @selected(old('department_id') == $department->id)>{{ $department->name }}{{ $department->is_active ? '' : ' (Inactive)' }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -311,7 +311,7 @@
                     <select id="create_company_id" name="company_id" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">No company</option>
                         @foreach ($companies as $company)
-                            <option value="{{ $company->id }}" @selected(old('company_id') == $company->id)>{{ $company->name }}</option>
+                            <option value="{{ $company->id }}" @selected(old('company_id') == $company->id)>{{ $company->name }}{{ $company->is_active ? '' : ' (Inactive)' }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -461,7 +461,7 @@
                     <select id="edit_department_id" name="department_id" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">No department</option>
                         @foreach ($departments as $department)
-                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                            <option value="{{ $department->id }}">{{ $department->name }}{{ $department->is_active ? '' : ' (Inactive)' }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -470,7 +470,7 @@
                     <select id="edit_company_id" name="company_id" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">No company</option>
                         @foreach ($companies as $company)
-                            <option value="{{ $company->id }}">{{ $company->name }}</option>
+                            <option value="{{ $company->id }}">{{ $company->name }}{{ $company->is_active ? '' : ' (Inactive)' }}</option>
                         @endforeach
                     </select>
                 </div>

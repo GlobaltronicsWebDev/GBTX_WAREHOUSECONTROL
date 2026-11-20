@@ -48,8 +48,8 @@ class UserController extends Controller
             ->orderByDesc('is_system')
             ->orderBy('name')
             ->get();
-        $departments = Department::where('is_active', true)->orderBy('name')->get();
-        $companies = Company::where('is_active', true)->orderBy('name')->get();
+        $departments = Department::orderBy('name')->get();
+        $companies = Company::orderBy('name')->get();
 
         $totalUsers = User::count();
         $totalRoles = $roles->count();

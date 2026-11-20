@@ -61,6 +61,23 @@ class BusinessPartnerControllerTest extends TestCase
         $response->assertDontSee('Inactive Client');
     }
 
+    public function test_partner_list_escapes_user_supplied_names_and_addresses(): void
+    {
+        $admin = User::factory()->create();
+        $admin->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        BusinessPartner::factory()->create([
+            'name' => '<script>alert(1)</script>',
+            'address' => '<img src=x onerror=alert(1)>',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.settings.partners'));
+
+        $response->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false);
+        $response->assertSee('&lt;img src=x onerror=alert(1)&gt;', false);
+        $response->assertDontSee('<script>alert(1)</script>', false);
+        $response->assertDontSee('<img src=x onerror=alert(1)>', false);
+    }
+
     public function test_partner_can_be_updated_and_deleted(): void
     {
         $admin = User::factory()->create();

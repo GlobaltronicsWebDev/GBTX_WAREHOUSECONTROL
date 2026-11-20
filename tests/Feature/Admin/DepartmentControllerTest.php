@@ -51,6 +51,24 @@ class DepartmentControllerTest extends TestCase
         $response->assertDontSee('Inactive Department Name');
     }
 
+    public function test_it_admin_can_rename_a_department_and_change_its_status(): void
+    {
+        $admin = User::factory()->create();
+        $admin->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        $department = Department::factory()->create(['name' => 'MIS']);
+
+        $this->actingAs($admin)->put(route('admin.settings.departments.update', $department), [
+            'name' => 'Information Systems',
+            'is_active' => '0',
+        ])->assertRedirect(route('admin.settings.departments'));
+
+        $this->assertDatabaseHas('departments', [
+            'id' => $department->id,
+            'name' => 'Information Systems',
+            'is_active' => false,
+        ]);
+    }
+
     public function test_deleting_a_department_unassigns_its_users(): void
     {
         $admin = User::factory()->create();

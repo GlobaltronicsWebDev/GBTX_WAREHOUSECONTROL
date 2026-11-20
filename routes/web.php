@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\Admin\CredentialController;
-use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\BusinessPartnerController;
-use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\CredentialController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
