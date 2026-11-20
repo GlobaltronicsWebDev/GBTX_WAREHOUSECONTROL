@@ -242,7 +242,7 @@
                     @endif
                 </div>
 
-                <div data-dashboard-panel="alerts" class="divide-y divide-[#E5E7EB]">
+                <div id="alertsPanel" data-dashboard-panel="alerts" class="divide-y divide-[#E5E7EB]">
                     @forelse (($headerNotifications ?? collect())->take(3) as $notification)
                         <article class="px-3 py-2.5">
                             <div class="flex items-start justify-between gap-2">

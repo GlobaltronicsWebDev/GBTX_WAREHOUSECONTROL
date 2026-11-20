@@ -202,13 +202,56 @@
                     <span class="truncate text-[12px] text-slate-500">Workspace <span class="px-1 text-slate-300">/</span> <span class="font-medium text-slate-800">@yield('breadcrumb', 'My Dashboard')</span></span>
                 </div>
 
-                <div class="flex shrink-0 items-center gap-2.5">
-                    <span class="flex h-7 w-7 items-center justify-center rounded-full border border-[#E5E7EB] bg-[#F8F9FA] text-[12px] font-semibold text-slate-700">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
-                    <span class="hidden max-w-32 truncate text-[12px] font-medium text-slate-700 sm:inline">{{ Auth::user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-slate-600 hover:bg-[#F8F9FA]" title="Log out">Log out</button>
-                    </form>
+                <div id="accountMenuRoot" class="relative shrink-0">
+                    <button type="button" id="accountMenuToggle" aria-label="Open account menu for {{ Auth::user()->name }}" aria-controls="accountMenu" aria-expanded="false" class="flex items-center gap-2 rounded-sm border border-transparent px-2 py-1 hover:border-[#E5E7EB] hover:bg-[#F8F9FA]">
+                        <span class="flex h-7 w-7 items-center justify-center rounded-full border border-[#E5E7EB] bg-[#F8F9FA] text-[12px] font-semibold text-slate-700">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                        <span class="hidden max-w-32 truncate text-[12px] font-medium text-slate-700 sm:inline">{{ Auth::user()->name }}</span>
+                        <svg class="h-3.5 w-3.5 text-slate-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m5 7.5 5 5 5-5"/>
+                        </svg>
+                    </button>
+
+                    <div id="accountMenu" class="absolute right-0 top-full z-50 mt-2 hidden w-60 border border-[#E5E7EB] bg-white" aria-label="Account menu">
+                        <div class="flex items-center gap-2.5 px-3 py-3">
+                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-[#F8F9FA] text-[12px] font-semibold text-slate-700" aria-hidden="true">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-[12px] font-medium text-slate-900">{{ Auth::user()->name }}</p>
+                                <p class="truncate text-[10px] text-slate-500">{{ Auth::user()->email }}</p>
+                            </div>
+                            <span class="flex h-7 w-7 shrink-0 items-center justify-center text-amber-500" title="Light theme active" aria-label="Light theme active">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div class="border-t border-[#E5E7EB] py-1">
+                            @if (Auth::user()->canAccessAdminCredentials())
+                                <a href="{{ route('admin.settings.credentials') }}" class="flex h-9 items-center gap-2.5 px-3 text-[12px] text-slate-700 hover:bg-[#F8F9FA]">
+                                    <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="m19.4 15 .1.1 1 1.7-1.6 2.8-2-.5a8 8 0 0 1-1.5.9l-.4 2h-3.2l-.4-2a8 8 0 0 1-1.5-.9l-2 .5-1.6-2.8 1-1.7a8 8 0 0 1 0-1.8l-1-1.7L7 5.9l2 .5a8 8 0 0 1 1.5-.9l.4-2h3.2l.4 2a8 8 0 0 1 1.5.9l2-.5 1.6 2.8-1 1.7a8 8 0 0 1 0 1.8Z"/>
+                                    </svg>
+                                    <span>Settings</span>
+                                </a>
+                            @endif
+                            <a href="{{ route('admin.dashboard') }}#alertsPanel" class="flex h-9 items-center gap-2.5 px-3 text-[12px] text-slate-700 hover:bg-[#F8F9FA]">
+                                <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>
+                                </svg>
+                                <span>Notifications</span>
+                            </a>
+                        </div>
+
+                        <form method="POST" action="{{ route('logout') }}" class="border-t border-[#E5E7EB] py-1">
+                            @csrf
+                            <button type="submit" class="flex h-9 w-full items-center gap-2.5 px-3 text-left text-[12px] text-slate-700 hover:bg-[#F8F9FA]">
+                                <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 17l5-5-5-5m5 5H3m9-9h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/>
+                                </svg>
+                                <span>Log out</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </header>
 
@@ -238,12 +281,32 @@
         const sidebar = document.getElementById('dashboardSidebar');
         const sidebarBackdrop = document.getElementById('dashboardSidebarBackdrop');
         const sidebarToggle = document.getElementById('sidebarToggle');
+        const accountMenuRoot = document.getElementById('accountMenuRoot');
+        const accountMenu = document.getElementById('accountMenu');
+        const accountMenuToggle = document.getElementById('accountMenuToggle');
 
         const closeMobileSidebar = () => {
             sidebar.classList.add('-translate-x-full');
             sidebarBackdrop.classList.add('hidden');
             sidebarToggle.setAttribute('aria-expanded', 'false');
         };
+
+        const closeAccountMenu = () => {
+            accountMenu.classList.add('hidden');
+            accountMenuToggle.setAttribute('aria-expanded', 'false');
+        };
+
+        accountMenuToggle.addEventListener('click', () => {
+            const isExpanded = accountMenuToggle.getAttribute('aria-expanded') === 'true';
+            accountMenu.classList.toggle('hidden', isExpanded);
+            accountMenuToggle.setAttribute('aria-expanded', String(!isExpanded));
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!accountMenuRoot.contains(event.target)) {
+                closeAccountMenu();
+            }
+        });
 
         sidebarToggle.addEventListener('click', () => {
             if (window.innerWidth < 1024) {
@@ -293,6 +356,19 @@
             });
         });
 
+        const openAlertsFromHash = () => {
+            if (window.location.hash === '#alertsPanel') {
+                const alertsTab = document.querySelector('[data-dashboard-tab="alerts"]');
+
+                if (alertsTab) {
+                    alertsTab.click();
+                }
+            }
+        };
+
+        window.addEventListener('hashchange', openAlertsFromHash);
+        openAlertsFromHash();
+
         const dateElement = document.getElementById('dashboardDate');
         const timeElement = document.getElementById('dashboardClock');
         const greetingElement = document.getElementById('dashboardGreeting');
@@ -325,6 +401,7 @@
 
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
+                closeAccountMenu();
                 closeMobileSidebar();
                 document.querySelectorAll('[data-modal]').forEach((modal) => {
                     modal.classList.add('hidden');

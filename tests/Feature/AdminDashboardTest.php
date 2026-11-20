@@ -38,6 +38,11 @@ class AdminDashboardTest extends TestCase
         $response->assertOk();
         $response->assertSee('Operations Overview');
         $response->assertSee('My Dashboard');
+        $response->assertSee($user->email);
+        $response->assertSee('Notifications');
+        $response->assertSee('Log out');
+        $response->assertSee(route('admin.settings.credentials'));
+        $response->assertSee(route('admin.dashboard').'#alertsPanel');
         $response->assertSee('Low Stock SKUs');
         $response->assertSee('PR-2026-089');
         $response->assertSee('Sample data');
@@ -384,6 +389,7 @@ class AdminDashboardTest extends TestCase
         $response->assertOk();
         $response->assertSee('Operations Overview');
         $response->assertDontSee('Manage accounts');
+        $response->assertDontSee(route('admin.settings.credentials'));
     }
 
     public function test_removed_inventory_and_sales_modules_are_unavailable(): void
