@@ -295,6 +295,7 @@
 
         const dateElement = document.getElementById('dashboardDate');
         const timeElement = document.getElementById('dashboardClock');
+        const greetingElement = document.getElementById('dashboardGreeting');
         const dateFormatter = new Intl.DateTimeFormat('en-US', {
             weekday: 'long',
             month: 'long',
@@ -312,6 +313,11 @@
             const now = new Date();
             dateElement.textContent = dateFormatter.format(now).toUpperCase();
             timeElement.textContent = timeFormatter.format(now);
+
+            if (greetingElement) {
+                const greeting = now.getHours() < 12 ? 'Good Day' : 'Good Afternoon';
+                greetingElement.textContent = `${greeting} ${greetingElement.dataset.firstName}!`;
+            }
         };
 
         updateClock();

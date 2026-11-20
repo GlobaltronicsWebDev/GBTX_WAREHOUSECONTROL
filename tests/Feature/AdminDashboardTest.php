@@ -50,6 +50,28 @@ class AdminDashboardTest extends TestCase
         $response->assertDontSee('Sales Order');
     }
 
+    public function test_dashboard_greeting_uses_account_first_name_before_noon(): void
+    {
+        $user = User::factory()->create(['name' => 'Paz Santos']);
+
+        $this->travelTo(now()->setTime(9, 0), function () use ($user): void {
+            $this->actingAs($user)
+                ->get(route('admin.dashboard'))
+                ->assertSee('Good Day Paz!');
+        });
+    }
+
+    public function test_dashboard_greeting_uses_afternoon_after_noon(): void
+    {
+        $user = User::factory()->create(['name' => 'Paz Santos']);
+
+        $this->travelTo(now()->setTime(15, 0), function () use ($user): void {
+            $this->actingAs($user)
+                ->get(route('admin.dashboard'))
+                ->assertSee('Good Afternoon Paz!');
+        });
+    }
+
     public function test_guest_cannot_access_inventory_dashboard_and_is_redirected_to_login(): void
     {
         $this->get(route('admin.inventory.dashboard'))

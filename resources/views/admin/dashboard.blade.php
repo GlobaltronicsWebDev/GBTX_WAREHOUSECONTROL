@@ -5,6 +5,8 @@
 @section('content')
     @php
         $user = Auth::user();
+        $firstName = explode(' ', trim($user->name), 2)[0] ?: $user->name;
+        $greeting = now()->hour < 12 ? 'Good Day' : 'Good Afternoon';
         $canReviewSrf = $user->canManageSrf();
         $pendingApprovalCount = $user->canViewWarehouseOperations() || $user->isItAdmin()
             ? $srfPendingCount
@@ -20,8 +22,8 @@
                     </svg>
                 </span>
                 <div>
-                    <h1 class="text-[20px] font-semibold leading-6 tracking-tight text-slate-900">Operations Overview</h1>
-                    <p class="mt-1 max-w-3xl text-[12px] leading-5 text-slate-500">Real-time stock movements, active import shipments, pending approvals, and project allocations.</p>
+                    <h1 id="dashboardGreeting" data-first-name="{{ $firstName }}" class="text-[20px] font-semibold leading-6 tracking-tight text-slate-900">{{ $greeting }} {{ $firstName }}!</h1>
+                    <p class="mt-1 max-w-3xl text-[12px] leading-5 text-slate-500">Track, manage and keep your transactions organized.</p>
                 </div>
             </div>
             <span class="inline-flex w-fit shrink-0 items-center border border-[#E5E7EB] bg-[#F8F9FA] px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-500">ERP preview · Sample data</span>
