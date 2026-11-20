@@ -29,7 +29,7 @@
                     <p class="mt-1 max-w-3xl text-[12px] leading-5 text-slate-500">Track, manage and keep your transactions organized.</p>
                 </div>
             </div>
-            <span class="inline-flex w-fit shrink-0 items-center border border-[#E5E7EB] bg-[#F8F9FA] px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-500">ERP preview · Sample data</span>
+            <span class="inline-flex w-fit shrink-0 items-center border border-[#E5E7EB] bg-[#F8F9FA] px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-500">ERP preview · Connected records only</span>
         </section>
 
         <section class="-mx-3 flex flex-col gap-3 border-y border-[#E5E7EB] px-3 py-2.5 sm:-mx-5 sm:px-5 xl:flex-row xl:items-center xl:justify-between" aria-label="Operational actions and telemetry">
@@ -141,7 +141,7 @@
             <section class="min-w-0 border border-[#E5E7EB] bg-white" aria-labelledby="transactionsHeading">
                 <div class="flex flex-col gap-1 border-b border-[#E5E7EB] px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 id="transactionsHeading" class="text-[13px] font-semibold text-slate-800">Recent Stock, Importation &amp; Procurement Transactions</h2>
+                        <h2 id="transactionsHeading" class="text-[13px] font-semibold text-slate-800">Recent SRF Transactions</h2>
                         <p class="text-[10px] text-slate-500">Showing current Stock Requisition Forms from the application database.</p>
                     </div>
                     <span class="w-fit border border-[#E5E7EB] px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-slate-500">Live SRF records</span>
