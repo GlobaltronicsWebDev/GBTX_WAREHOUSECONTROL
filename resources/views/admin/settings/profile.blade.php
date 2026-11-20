@@ -164,6 +164,28 @@
 
 @push('scripts')
     <script>
+        document.querySelectorAll('[data-open-modal]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const modal = document.getElementById(button.dataset.openModal);
+                modal?.classList.replace('hidden', 'flex');
+            });
+        });
+
+        document.querySelectorAll('[data-close-modal]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const modal = button.closest('[data-modal]');
+                modal?.classList.replace('flex', 'hidden');
+            });
+        });
+
+        document.querySelectorAll('[data-modal]').forEach((modal) => {
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.classList.replace('flex', 'hidden');
+                }
+            });
+        });
+
         const modalToReopen = @json(old('settings_modal'));
         if (modalToReopen === 'profile') {
             document.getElementById('editProfileModal')?.classList.replace('hidden', 'flex');
