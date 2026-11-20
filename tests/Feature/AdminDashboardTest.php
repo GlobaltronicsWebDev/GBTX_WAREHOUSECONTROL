@@ -144,7 +144,8 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Company');
         $response->assertSee('No companies have been added yet.');
         $response->assertSee('Add Company');
-        $response->assertSee(route('admin.settings.credentials'));
+        $response->assertSee(route('admin.settings.profile'));
+        $response->assertSee(route('admin.settings.security'));
     }
 
     public function test_non_it_user_cannot_open_company_settings(): void

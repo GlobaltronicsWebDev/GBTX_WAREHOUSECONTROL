@@ -38,7 +38,7 @@ class DepartmentControllerTest extends TestCase
         $admin = User::factory()->create();
         $admin->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
         $department = Department::factory()->create(['name' => 'MIS', 'is_active' => true]);
-        Department::factory()->create(['name' => 'Warehouse', 'is_active' => false]);
+        Department::factory()->create(['name' => 'Inactive Department Name', 'is_active' => false]);
         User::factory()->create(['department_id' => $department->id]);
 
         $response = $this->actingAs($admin)->get(route('admin.settings.departments', [
@@ -48,7 +48,7 @@ class DepartmentControllerTest extends TestCase
 
         $response->assertSee('MIS');
         $response->assertSee('1 User');
-        $response->assertDontSee('Warehouse');
+        $response->assertDontSee('Inactive Department Name');
     }
 
     public function test_deleting_a_department_unassigns_its_users(): void
