@@ -118,7 +118,7 @@
                 @csrf
 
                 <div>
-                    <label for="email" class="mb-2 block text-sm font-medium">Email address</label>
+                    <label for="email" class="mb-2 block text-sm font-medium">Email address or username</label>
                     <input
                         type="email"
                         name="username"
@@ -127,7 +127,7 @@
                         autocomplete="username"
                         required
                         autofocus
-                        placeholder="email@example.com"
+                        placeholder="email@example.com or username"
                         class="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-400 dark:focus:ring-blue-400/20"
                     >
                 </div>

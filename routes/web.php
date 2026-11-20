@@ -39,7 +39,7 @@ Route::post('/login', function (Request $request) {
         'password' => 'required',
     ]);
 
-    $loginField = filter_var($credentials['username'], FILTER_VALIDATE_EMAIL) ? 'email' : 'email';
+    $loginField = filter_var($credentials['username'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
     if (Auth::attempt([$loginField => $credentials['username'], 'password' => $credentials['password']], $request->boolean('remember'))) {
         $request->session()->regenerate();
@@ -48,7 +48,7 @@ Route::post('/login', function (Request $request) {
     }
 
     return back()->withErrors([
-        'username' => 'Authentication error: Invalid credentials provided. Please verify your email and password.',
+        'username' => 'Authentication error: Invalid credentials provided. Please verify your email/username and password.',
     ])->withInput($request->only('username'));
 });
 
@@ -139,6 +139,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/settings/profile', [ProfileController::class, 'show'])->name('settings.profile');
     Route::put('/settings/profile', [ProfileController::class, 'update'])->name('settings.profile.update');
+    Route::put('/settings/profile/account', [ProfileController::class, 'updateAccount'])->name('settings.profile.account');
     Route::get('/settings/security', [ProfileController::class, 'security'])
         ->middleware('password.confirm')
         ->name('settings.security');
