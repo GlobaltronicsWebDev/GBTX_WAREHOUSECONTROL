@@ -48,7 +48,7 @@ class AdminDashboardTest extends TestCase
         $response->assertDontSee('PR-2026-089');
         $response->assertSee('Unavailable');
         $response->assertSee('Not tracked');
-        $response->assertSee('Sample data');
+        $response->assertSee('Connected records only');
         $response->assertSee('data-sort-key="sortRef"', false);
         $response->assertSee('Purchase Requests');
         $response->assertSee('Receivings');
