@@ -92,18 +92,23 @@
                         <button type="button" disabled title="Prototype navigation only" class="block h-7 w-full cursor-not-allowed text-left text-[12px] text-slate-400">Inventory List</button>
                     </div>
 
-                    <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="warehouseMenu" aria-expanded="false" aria-controls="warehouseMenu">
+                    <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="warehouseMenu" aria-expanded="{{ request()->routeIs('admin.warehouses.*') ? 'true' : 'false' }}" aria-controls="warehouseMenu">
                         <svg class="h-4 w-4 shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                             <path stroke-linejoin="round" d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6M9 10h.01M15 10h.01"/>
                         </svg>
                         <span class="sidebar-copy flex-1">Warehouse</span>
                         <svg class="sidebar-copy h-3.5 w-3.5 text-slate-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m5 7.5 5 5 5-5"/></svg>
                     </button>
-                    <div id="warehouseMenu" class="sidebar-subnav hidden pb-1 pl-8">
-                        <button type="button" disabled class="block h-7 w-full cursor-not-allowed text-left text-[12px] text-slate-400">Globatronics</button>
-                        <button type="button" disabled class="block h-7 w-full cursor-not-allowed text-left text-[12px] text-slate-400">Ohaap</button>
-                        <button type="button" disabled class="block h-7 w-full cursor-not-allowed text-left text-[12px] text-slate-400">Marikina</button>
-                        <button type="button" disabled class="block h-7 w-full cursor-not-allowed text-left text-[12px] text-slate-400">Carmona</button>
+                    <div id="warehouseMenu" class="sidebar-subnav pb-1 pl-8 {{ request()->routeIs('admin.warehouses.*') ? '' : 'hidden' }}">
+                        @forelse ($warehouseNavigationLocations as $warehouseNavigationLocation)
+                            <a
+                                href="{{ route('admin.warehouses.show', $warehouseNavigationLocation) }}"
+                                @if (request()->routeIs('admin.warehouses.show') && request()->route('location')?->is($warehouseNavigationLocation)) aria-current="page" @endif
+                                class="block h-7 w-full truncate text-left text-[12px] {{ request()->routeIs('admin.warehouses.show') && request()->route('location')?->is($warehouseNavigationLocation) ? 'font-medium text-[#2563EB]' : 'text-[#7891B8] hover:text-[#2563EB]' }}"
+                            >{{ $warehouseNavigationLocation->name }}</a>
+                        @empty
+                            <span class="block py-1 text-[11px] text-slate-400">No locations configured</span>
+                        @endforelse
                     </div>
 
                     <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="projectMenu" aria-expanded="false" aria-controls="projectMenu">
@@ -254,6 +259,8 @@
                             Settings <span class="px-1 text-slate-300">›</span> <span class="font-medium text-slate-800">@yield('breadcrumb', 'Companies')</span>
                         @elseif (request()->routeIs('admin.reports.*'))
                             <span class="font-medium text-slate-800">Reports</span>
+                        @elseif (request()->routeIs('admin.warehouses.*'))
+                            Warehouse <span class="px-1 text-slate-300">›</span> <span class="font-medium text-slate-800">@yield('breadcrumb', 'Overview')</span>
                         @else
                             Workspace <span class="px-1 text-slate-300">/</span> <span class="font-medium text-slate-800">@yield('breadcrumb', 'My Dashboard')</span>
                         @endif

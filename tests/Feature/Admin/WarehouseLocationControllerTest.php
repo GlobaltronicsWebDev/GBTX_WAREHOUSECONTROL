@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\WarehouseLocation;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\WarehouseLocationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -100,5 +101,69 @@ class WarehouseLocationControllerTest extends TestCase
             ->assertRedirect(route('admin.settings.locations'));
 
         $this->assertDatabaseMissing('warehouse_locations', ['id' => $location->id]);
+    }
+
+    public function test_warehouse_admin_can_open_an_active_warehouse_dashboard(): void
+    {
+        $warehouseAdmin = User::factory()->create();
+        $warehouseAdmin->roles()->attach(Role::where('slug', 'warehouse-admin')->firstOrFail());
+        $location = WarehouseLocation::factory()->create(['name' => 'Marikina']);
+        WarehouseLocation::factory()->create([
+            'name' => 'Hidden Warehouse',
+            'navigation_enabled' => false,
+        ]);
+
+        $response = $this->actingAs($warehouseAdmin)->get(route('admin.warehouses.show', $location));
+
+        $response->assertSee('Marikina Warehouse');
+        $response->assertSee('Stock tracking is not configured');
+        $response->assertSee(route('admin.warehouses.show', $location));
+        $response->assertSee('aria-current="page"', false);
+        $response->assertDontSee('Hidden Warehouse');
+    }
+
+    public function test_inactive_warehouse_dashboard_returns_not_found(): void
+    {
+        $admin = User::factory()->create();
+        $admin->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        $location = WarehouseLocation::factory()->create(['is_active' => false]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.warehouses.show', $location))
+            ->assertNotFound();
+    }
+
+    public function test_warehouse_dashboard_returns_not_found_when_navigation_is_disabled(): void
+    {
+        $admin = User::factory()->create();
+        $admin->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        $location = WarehouseLocation::factory()->create(['navigation_enabled' => false]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.warehouses.show', $location))
+            ->assertNotFound();
+    }
+
+    public function test_warehouse_location_seeder_populates_the_menu_without_duplicates(): void
+    {
+        $this->seed(WarehouseLocationSeeder::class);
+        $this->seed(WarehouseLocationSeeder::class);
+        $this->assertDatabaseCount('warehouse_locations', 4);
+
+        $admin = User::factory()->create();
+        $admin->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        foreach (['Globaltronics', 'Ohaap', 'Marikina', 'Carmona'] as $name) {
+            $response->assertSee($name);
+        }
+    }
+
+    public function test_guest_is_redirected_to_login_from_a_warehouse_dashboard(): void
+    {
+        $location = WarehouseLocation::factory()->create();
+
+        $this->get(route('admin.warehouses.show', $location))
+            ->assertRedirect(route('login'));
     }
 }

@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Models\TransactionNotification;
+use App\Models\WarehouseLocation;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -58,7 +60,7 @@ class AppServiceProvider extends ServiceProvider
                         ->count();
 
                     $threshold = now()->subMinutes(5)->timestamp;
-                    $onlineUsersCount = max(1, (int) \Illuminate\Support\Facades\DB::table('sessions')
+                    $onlineUsersCount = max(1, (int) DB::table('sessions')
                         ->whereNotNull('user_id')
                         ->where('last_activity', '>=', $threshold)
                         ->distinct('user_id')
@@ -83,6 +85,18 @@ class AppServiceProvider extends ServiceProvider
                     'onlineUsersCount' => 0,
                 ]);
             }
+        });
+
+        View::composer('layouts.operations-dashboard', function ($view) {
+            $view->with(
+                'warehouseNavigationLocations',
+                WarehouseLocation::query()
+                    ->where('is_active', true)
+                    ->where('navigation_enabled', true)
+                    ->orderBy('name')
+                    ->orderBy('id')
+                    ->get(),
+            );
         });
     }
 }

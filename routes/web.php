@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\WarehouseDashboardController;
 use App\Http\Controllers\Admin\WarehouseLocationController;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -145,6 +146,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::view('/inventory/dashboard', 'admin.inventory.dashboard')->name('inventory.dashboard');
+    Route::get('/warehouses/{location}', [WarehouseDashboardController::class, 'show'])->name('warehouses.show');
     Route::get('/reports', [DashboardController::class, 'reports'])->name('reports.index');
     Route::get('/reports/transactions', [DashboardController::class, 'transactionReport'])->name('reports.transactions');
 
