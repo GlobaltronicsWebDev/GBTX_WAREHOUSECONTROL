@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
+use App\Models\Department;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -25,7 +27,7 @@ class UserController extends Controller
         $search = $request->query('search');
         $roleFilter = $request->query('role');
 
-        $usersQuery = User::with('roles')->latest();
+        $usersQuery = User::with(['roles', 'department', 'company'])->latest();
 
         if ($search) {
             $usersQuery->where(function ($query) use ($search) {
@@ -46,6 +48,8 @@ class UserController extends Controller
             ->orderByDesc('is_system')
             ->orderBy('name')
             ->get();
+        $departments = Department::where('is_active', true)->orderBy('name')->get();
+        $companies = Company::where('is_active', true)->orderBy('name')->get();
 
         $totalUsers = User::count();
         $totalRoles = $roles->count();
@@ -64,6 +68,8 @@ class UserController extends Controller
             'user' => $user,
             'users' => $users,
             'roles' => $roles,
+            'departments' => $departments,
+            'companies' => $companies,
             'totalUsers' => $totalUsers,
             'totalRoles' => $totalRoles,
             'adminCount' => $adminCount,
@@ -86,12 +92,16 @@ class UserController extends Controller
             'password' => ['required', 'string', 'min:8'],
             'roles' => ['nullable', 'array'],
             'roles.*' => ['exists:roles,id'],
+            'department_id' => ['nullable', Rule::exists('departments', 'id')],
+            'company_id' => ['nullable', Rule::exists('companies', 'id')],
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'department_id' => $validated['department_id'] ?? null,
+            'company_id' => $validated['company_id'] ?? null,
         ]);
 
         if (! empty($validated['roles'])) {
@@ -113,10 +123,14 @@ class UserController extends Controller
             'password' => ['nullable', 'string', 'min:8'],
             'roles' => ['nullable', 'array'],
             'roles.*' => ['exists:roles,id'],
+            'department_id' => ['nullable', Rule::exists('departments', 'id')],
+            'company_id' => ['nullable', Rule::exists('companies', 'id')],
         ]);
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
+        $user->department_id = $validated['department_id'] ?? null;
+        $user->company_id = $validated['company_id'] ?? null;
 
         if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
