@@ -105,6 +105,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::view('/inventory/dashboard', 'admin.inventory.dashboard')->name('inventory.dashboard');
+    Route::get('/reports', [DashboardController::class, 'reports'])->name('reports.index');
 
     // SRF request, approval, and history
     Route::get('/srf/approved', [DashboardController::class, 'approvedSrf'])->name('srf.approved');
@@ -118,6 +119,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Credentials & Access Control (Restricted to IT Administrators)
     Route::middleware('credentials.manage')->group(function () {
+        Route::view('/settings/companies', 'admin.settings.companies')->name('settings.companies');
+
         // User & Credential management
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');

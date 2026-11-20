@@ -62,6 +62,20 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function reports(): View
+    {
+        $user = Auth::user();
+        $srfQuery = SrfRequisition::query();
+
+        if (! $user->canViewWarehouseOperations() && ! $user->isItAdmin()) {
+            $srfQuery->where('user_id', $user->id);
+        }
+
+        return view('admin.reports.index', [
+            'srfCount' => $srfQuery->distinct('srf_number')->count('srf_number'),
+        ]);
+    }
+
     public function approvedSrf(Request $request): View
     {
         $query = SrfRequisition::with(['requester', 'verifier'])
