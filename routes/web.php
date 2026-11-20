@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CredentialController;
+use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
@@ -106,6 +107,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::view('/inventory/dashboard', 'admin.inventory.dashboard')->name('inventory.dashboard');
     Route::get('/reports', [DashboardController::class, 'reports'])->name('reports.index');
+    Route::get('/reports/transactions', [DashboardController::class, 'transactionReport'])->name('reports.transactions');
 
     // SRF request, approval, and history
     Route::get('/srf/approved', [DashboardController::class, 'approvedSrf'])->name('srf.approved');
@@ -119,7 +121,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Credentials & Access Control (Restricted to IT Administrators)
     Route::middleware('credentials.manage')->group(function () {
-        Route::view('/settings/companies', 'admin.settings.companies')->name('settings.companies');
+        Route::get('/settings/companies', [CompanyController::class, 'index'])->name('settings.companies');
+        Route::post('/settings/companies', [CompanyController::class, 'store'])->name('settings.companies.store');
+        Route::put('/settings/companies/{company}', [CompanyController::class, 'update'])->name('settings.companies.update');
+        Route::delete('/settings/companies/{company}', [CompanyController::class, 'destroy'])->name('settings.companies.destroy');
 
         // User & Credential management
         Route::get('/users', [UserController::class, 'index'])->name('users.index');

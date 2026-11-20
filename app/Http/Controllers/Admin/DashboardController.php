@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -73,6 +74,45 @@ class DashboardController extends Controller
 
         return view('admin.reports.index', [
             'srfCount' => $srfQuery->distinct('srf_number')->count('srf_number'),
+        ]);
+    }
+
+    public function transactionReport(Request $request): View
+    {
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'status' => [
+                'nullable',
+                'string',
+                Rule::in(['pending', 'for_approval', 'approved', 'completed', 'verified', 'declined', 'rejected', 'on_hold']),
+            ],
+        ]);
+        $user = Auth::user();
+        $query = SrfRequisition::query();
+
+        if (! $user->canViewWarehouseOperations() && ! $user->isItAdmin()) {
+            $query->where('user_id', $user->id);
+        }
+
+        $search = $validated['search'] ?? '';
+        if ($search !== '') {
+            $query->where(function ($query) use ($search) {
+                $query->where('srf_number', 'like', "%{$search}%")
+                    ->orWhere('sso_number', 'like', "%{$search}%")
+                    ->orWhere('project_name', 'like', "%{$search}%")
+                    ->orWhere('client', 'like', "%{$search}%")
+                    ->orWhere('item_model', 'like', "%{$search}%");
+            });
+        }
+
+        if (! empty($validated['status'])) {
+            $query->where('status', $validated['status']);
+        }
+
+        return view('admin.reports.transactions', [
+            'transactions' => $query->latest()->paginate(25)->withQueryString(),
+            'search' => $search,
+            'status' => $validated['status'] ?? '',
         ]);
     }
 

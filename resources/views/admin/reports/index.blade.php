@@ -28,7 +28,7 @@
                 <p data-report-count="{{ $srfCount }}" class="mt-2 font-mono text-[25px] font-semibold leading-7 tabular-nums text-slate-800">{{ number_format($srfCount) }}</p>
                 <div class="mt-auto flex items-center justify-between gap-2 pt-4">
                     <span class="text-[10px] text-slate-500">Live SRF records</span>
-                    <a href="{{ route('admin.dashboard') }}#transactionsHeading" class="text-[10px] font-medium text-[#2563EB] hover:underline">View <span aria-hidden="true">›</span></a>
+                    <a href="{{ route('admin.reports.transactions') }}" class="text-[10px] font-medium text-[#2563EB] hover:underline">View <span aria-hidden="true">›</span></a>
                 </div>
             </article>
             <article class="flex min-h-32 flex-col border border-[#E5E7EB] bg-white p-4">

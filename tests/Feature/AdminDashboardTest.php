@@ -131,7 +131,7 @@ class AdminDashboardTest extends TestCase
         ]);
     }
 
-    public function test_it_admin_can_open_company_settings_preview(): void
+    public function test_it_admin_can_open_empty_company_settings(): void
     {
         $admin = User::factory()->create();
         $admin->roles()->attach(Role::where('slug', 'it-admin')->first());
@@ -140,8 +140,8 @@ class AdminDashboardTest extends TestCase
 
         $response->assertSee('Settings');
         $response->assertSee('Company');
-        $response->assertSee('Company directory layout preview');
-        $response->assertSee('DB International Sales & Services, Inc.');
+        $response->assertSee('No companies have been added yet.');
+        $response->assertSee('Add Company');
         $response->assertSee(route('admin.settings.credentials'));
     }
 
@@ -181,6 +181,67 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Transaction Listing Reports');
         $response->assertSee('Inventory Stock List Reports');
         $response->assertSee('Inventory records are not tracked');
+    }
+
+    public function test_transaction_report_filters_by_status_and_only_shows_the_users_srf_records(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        SrfRequisition::create([
+            'srf_number' => '2026 - 1501',
+            'sso_number' => 'SSO-2026-0501',
+            'project_name' => 'Pending report project',
+            'client' => 'Current user client',
+            'po_number' => 'PO-2026-0501',
+            'requisition_date' => now(),
+            'item_model' => 'Current user report item',
+            'quantity' => 1,
+            'uom' => 'PCS',
+            'stock_status' => 'not_tracked',
+            'status' => 'pending',
+            'prepared_by' => $user->name,
+            'user_id' => $user->id,
+        ]);
+        SrfRequisition::create([
+            'srf_number' => '2026 - 1502',
+            'sso_number' => 'SSO-2026-0502',
+            'project_name' => 'Other user report project',
+            'client' => 'Other user client',
+            'po_number' => 'PO-2026-0502',
+            'requisition_date' => now(),
+            'item_model' => 'Other user private item',
+            'quantity' => 1,
+            'uom' => 'PCS',
+            'stock_status' => 'not_tracked',
+            'status' => 'pending',
+            'prepared_by' => $otherUser->name,
+            'user_id' => $otherUser->id,
+        ]);
+        SrfRequisition::create([
+            'srf_number' => '2026 - 1503',
+            'sso_number' => 'SSO-2026-0503',
+            'project_name' => 'Approved report project',
+            'client' => 'Current user client',
+            'po_number' => 'PO-2026-0503',
+            'requisition_date' => now(),
+            'item_model' => 'Approved report item',
+            'quantity' => 1,
+            'uom' => 'PCS',
+            'stock_status' => 'not_tracked',
+            'status' => 'approved',
+            'prepared_by' => $user->name,
+            'user_id' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.reports.transactions', [
+            'status' => 'pending',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('2026 - 1501');
+        $response->assertDontSee('2026 - 1502');
+        $response->assertDontSee('2026 - 1503');
     }
 
     public function test_guest_cannot_open_reports(): void
