@@ -2,9 +2,13 @@
 
 use App\Http\Controllers\Admin\CredentialController;
 use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\BusinessPartnerController;
+use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\WarehouseLocationController;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -99,6 +103,20 @@ Route::post('/reset-password', function (Request $request) {
         : back()->withErrors(['email' => __($status)]);
 })->name('password.update');
 
+Route::get('/confirm-password', function () {
+    return view('auth.confirm-password');
+})->middleware('auth')->name('password.confirm');
+
+Route::post('/confirm-password', function (Request $request) {
+    $request->validate([
+        'password' => ['required', 'current_password'],
+    ]);
+
+    $request->session()->passwordConfirmed();
+
+    return redirect()->intended(route('admin.settings.security'));
+})->middleware(['auth', 'throttle:6,1'])->name('password.confirm.store');
+
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('admin.dashboard');
@@ -119,12 +137,33 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/notifications/{notification}/read', [DashboardController::class, 'markNotificationRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [DashboardController::class, 'markAllNotificationsRead'])->name('notifications.markAllRead');
 
+    Route::get('/settings/profile', [ProfileController::class, 'show'])->name('settings.profile');
+    Route::put('/settings/profile', [ProfileController::class, 'update'])->name('settings.profile.update');
+    Route::get('/settings/security', [ProfileController::class, 'security'])
+        ->middleware('password.confirm')
+        ->name('settings.security');
+    Route::put('/settings/security/password', [ProfileController::class, 'updatePassword'])
+        ->middleware('password.confirm')
+        ->name('settings.security.password');
+
     // Credentials & Access Control (Restricted to IT Administrators)
     Route::middleware('credentials.manage')->group(function () {
         Route::get('/settings/companies', [CompanyController::class, 'index'])->name('settings.companies');
         Route::post('/settings/companies', [CompanyController::class, 'store'])->name('settings.companies.store');
         Route::put('/settings/companies/{company}', [CompanyController::class, 'update'])->name('settings.companies.update');
         Route::delete('/settings/companies/{company}', [CompanyController::class, 'destroy'])->name('settings.companies.destroy');
+        Route::get('/settings/departments', [DepartmentController::class, 'index'])->name('settings.departments');
+        Route::post('/settings/departments', [DepartmentController::class, 'store'])->name('settings.departments.store');
+        Route::put('/settings/departments/{department}', [DepartmentController::class, 'update'])->name('settings.departments.update');
+        Route::delete('/settings/departments/{department}', [DepartmentController::class, 'destroy'])->name('settings.departments.destroy');
+        Route::get('/settings/locations', [WarehouseLocationController::class, 'index'])->name('settings.locations');
+        Route::post('/settings/locations', [WarehouseLocationController::class, 'store'])->name('settings.locations.store');
+        Route::put('/settings/locations/{location}', [WarehouseLocationController::class, 'update'])->name('settings.locations.update');
+        Route::delete('/settings/locations/{location}', [WarehouseLocationController::class, 'destroy'])->name('settings.locations.destroy');
+        Route::get('/settings/partners', [BusinessPartnerController::class, 'index'])->name('settings.partners');
+        Route::post('/settings/partners', [BusinessPartnerController::class, 'store'])->name('settings.partners.store');
+        Route::put('/settings/partners/{partner}', [BusinessPartnerController::class, 'update'])->name('settings.partners.update');
+        Route::delete('/settings/partners/{partner}', [BusinessPartnerController::class, 'destroy'])->name('settings.partners.destroy');
 
         // User & Credential management
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
