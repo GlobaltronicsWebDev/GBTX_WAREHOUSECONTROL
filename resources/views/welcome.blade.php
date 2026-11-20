@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="icon" type="image/gif" href="{{ asset('assets/images/logo/GBTX Rotating Globe.gif') }}">
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/logo/globaltronics_logo.png') }}">
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -36,7 +36,7 @@
     <main class="grid min-h-screen grid-cols-1 lg:grid-cols-2">
         <section aria-labelledby="welcome-title" class="relative isolate flex min-h-[320px] flex-col justify-between overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 px-8 py-8 text-white sm:px-12 sm:py-10 lg:min-h-screen">
             <img
-                src="{{ asset('assets/images/logo/GBTX Rotating Globe.gif') }}"
+                src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
                 alt=""
                 aria-hidden="true"
                 class="pointer-events-none absolute -bottom-24 -right-24 w-80 mix-blend-screen opacity-10 sm:-bottom-32 sm:-right-32 sm:w-[28rem]"
@@ -45,7 +45,7 @@
             <div class="relative z-10 flex items-center gap-3">
                 <span class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-black shadow-lg">
                     <img
-                        src="{{ asset('assets/images/logo/GBTX Rotating Globe.gif') }}"
+                        src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
                         alt=""
                         class="h-full w-full object-cover"
                     >

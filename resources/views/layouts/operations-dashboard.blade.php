@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Operations Overview') | Globaltronics</title>
-    <link rel="icon" type="image/gif" href="{{ asset('assets/images/logo/GBTX Rotating Globe.gif') }}">
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/logo/globaltronics_logo.png') }}">
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -49,7 +49,7 @@
         <aside id="dashboardSidebar" class="fixed inset-y-0 left-0 z-40 flex w-[240px] -translate-x-full flex-col border-r border-[#E5E7EB] bg-[#F8F9FA] transition-[width,transform] duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0">
             <div class="flex h-12 shrink-0 items-center gap-2.5 border-b border-[#E5E7EB] px-4">
                 <img
-                    src="{{ asset('assets/images/logo/GBTX Rotating Globe.gif') }}"
+                    src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
                     alt="Globaltronics logo"
                     class="h-7 w-7 shrink-0 rounded-full bg-black object-cover"
                     width="28"
