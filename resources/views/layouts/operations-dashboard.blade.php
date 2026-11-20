@@ -51,7 +51,7 @@
                 <img
                     src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
                     alt="Globaltronics logo"
-                    class="h-7 w-7 shrink-0 rounded-full bg-black object-cover"
+                    class="h-7 w-7 shrink-0 rounded-full object-cover"
                     width="28"
                     height="28"
                 >

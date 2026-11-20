@@ -39,11 +39,11 @@
                 src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
                 alt=""
                 aria-hidden="true"
-                class="pointer-events-none absolute -bottom-24 -right-24 w-80 mix-blend-screen opacity-10 sm:-bottom-32 sm:-right-32 sm:w-[28rem]"
+                class="pointer-events-none absolute -bottom-24 -right-24 w-80 opacity-10 sm:-bottom-32 sm:-right-32 sm:w-[28rem]"
             >
 
             <div class="relative z-10 flex items-center gap-3">
-                <span class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-black shadow-lg">
+                <span class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full shadow-lg">
                     <img
                         src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
                         alt=""
