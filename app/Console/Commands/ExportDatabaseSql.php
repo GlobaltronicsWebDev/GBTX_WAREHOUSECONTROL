@@ -128,45 +128,7 @@ class ExportDatabaseSql extends Command
         $sql[] = $this->buildInsertStatements('role_user');
         $sql[] = '';
 
-        // 4. Inventory items table
-        $sql[] = '-- --------------------------------------------------------';
-        $sql[] = '-- Table structure for table `inventory_items`';
-        $sql[] = '-- --------------------------------------------------------';
-        $sql[] = 'DROP TABLE IF EXISTS `inventory_items`;';
-        $sql[] = 'CREATE TABLE `inventory_items` (';
-        $sql[] = '  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,';
-        $sql[] = "  `category` varchar(255) NOT NULL DEFAULT 'EOL PHILIPS UNITS',";
-        $sql[] = '  `tag_number` text DEFAULT NULL,';
-        $sql[] = '  `manufacturer` varchar(255) NOT NULL,';
-        $sql[] = '  `check_in_date` date NOT NULL,';
-        $sql[] = '  `po_number` varchar(255) DEFAULT NULL,';
-        $sql[] = '  `model` varchar(255) NOT NULL,';
-        $sql[] = '  `screen_size` varchar(255) DEFAULT NULL,';
-        $sql[] = '  `item_description` text NOT NULL,';
-        $sql[] = '  `quantity` int(11) NOT NULL DEFAULT 1,';
-        $sql[] = '  `forecasted_quantity` int(11) DEFAULT NULL,';
-        $sql[] = '  `acu_quantity` int(11) DEFAULT NULL,';
-        $sql[] = '  `sqm` decimal(10,2) DEFAULT NULL,';
-        $sql[] = '  `location` varchar(255) DEFAULT NULL,';
-        $sql[] = "  `status` varchar(255) NOT NULL DEFAULT 'in_stock',";
-        $sql[] = '  `created_by` bigint(20) unsigned DEFAULT NULL,';
-        $sql[] = '  `created_at` timestamp NULL DEFAULT NULL,';
-        $sql[] = '  `updated_at` timestamp NULL DEFAULT NULL,';
-        $sql[] = '  PRIMARY KEY (`id`),';
-        $sql[] = '  KEY `inventory_items_category_index` (`category`),';
-        $sql[] = '  KEY `inventory_items_manufacturer_index` (`manufacturer`),';
-        $sql[] = '  KEY `inventory_items_check_in_date_index` (`check_in_date`),';
-        $sql[] = '  KEY `inventory_items_model_index` (`model`),';
-        $sql[] = '  KEY `inventory_items_screen_size_index` (`screen_size`),';
-        $sql[] = '  KEY `inventory_items_status_index` (`status`),';
-        $sql[] = '  KEY `inventory_items_created_by_foreign` (`created_by`),';
-        $sql[] = '  CONSTRAINT `inventory_items_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL';
-        $sql[] = ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;';
-        $sql[] = '';
-        $sql[] = $this->buildInsertStatements('inventory_items');
-        $sql[] = '';
-
-        // 5. SRF Requisitions table
+        // 4. SRF Requisitions table
         $sql[] = '-- --------------------------------------------------------';
         $sql[] = '-- Table structure for table `srf_requisitions`';
         $sql[] = '-- --------------------------------------------------------';
@@ -180,10 +142,13 @@ class ExportDatabaseSql extends Command
         $sql[] = '  `po_number` varchar(255) DEFAULT NULL,';
         $sql[] = '  `date_needed` date DEFAULT NULL,';
         $sql[] = '  `requisition_date` date DEFAULT NULL,';
-        $sql[] = '  `inventory_item_id` bigint(20) unsigned NOT NULL,';
+        $sql[] = '  `item_model` varchar(255) DEFAULT NULL,';
+        $sql[] = '  `item_manufacturer` varchar(255) DEFAULT NULL,';
+        $sql[] = '  `item_category` varchar(255) DEFAULT NULL,';
+        $sql[] = '  `item_description` text DEFAULT NULL,';
         $sql[] = '  `quantity` int(11) NOT NULL,';
         $sql[] = "  `uom` varchar(50) NOT NULL DEFAULT 'PCS',";
-        $sql[] = "  `stock_status` varchar(255) NOT NULL DEFAULT 'available_reserved',";
+        $sql[] = "  `stock_status` varchar(255) NOT NULL DEFAULT 'not_tracked',";
         $sql[] = "  `status` varchar(255) NOT NULL DEFAULT 'pending',";
         $sql[] = "  `department` varchar(255) DEFAULT 'TECHNICAL',";
         $sql[] = '  `prepared_by` varchar(255) NOT NULL,';
@@ -200,10 +165,8 @@ class ExportDatabaseSql extends Command
         $sql[] = '  `created_at` timestamp NULL DEFAULT NULL,';
         $sql[] = '  `updated_at` timestamp NULL DEFAULT NULL,';
         $sql[] = '  PRIMARY KEY (`id`),';
-        $sql[] = '  KEY `srf_requisitions_inventory_item_id_foreign` (`inventory_item_id`),';
         $sql[] = '  KEY `srf_requisitions_user_id_foreign` (`user_id`),';
         $sql[] = '  KEY `srf_requisitions_verified_by_user_id_foreign` (`verified_by_user_id`),';
-        $sql[] = '  CONSTRAINT `srf_requisitions_inventory_item_id_foreign` FOREIGN KEY (`inventory_item_id`) REFERENCES `inventory_items` (`id`) ON DELETE CASCADE,';
         $sql[] = '  CONSTRAINT `srf_requisitions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,';
         $sql[] = '  CONSTRAINT `srf_requisitions_verified_by_user_id_foreign` FOREIGN KEY (`verified_by_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL';
         $sql[] = ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;';
@@ -382,7 +345,6 @@ class ExportDatabaseSql extends Command
             'roles',
             'users',
             'role_user',
-            'inventory_items',
             'srf_requisitions',
             'transaction_notifications',
             'password_reset_tokens',

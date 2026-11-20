@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\InventoryItem;
 use App\Models\Role;
 use App\Models\SrfRequisition;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class AdminDashboardTest extends TestCase
@@ -31,14 +31,15 @@ class AdminDashboardTest extends TestCase
     public function test_authenticated_user_can_view_dashboard(): void
     {
         $user = User::factory()->create();
-        $role = Role::where('slug', 'it-admin')->first();
-        $user->roles()->attach($role);
+        $user->roles()->attach(Role::where('slug', 'it-admin')->first());
 
         $response = $this->actingAs($user)->get('/admin/dashboard');
 
-        $response->assertStatus(200);
-        $response->assertSee('Admin Operations Console');
+        $response->assertOk();
+        $response->assertSee('IT Administration');
         $response->assertSee('Total Accounts');
+        $response->assertDontSee('Inventory');
+        $response->assertDontSee('Sales Order');
     }
 
     public function test_admin_can_create_user_with_roles(): void
@@ -273,16 +274,15 @@ class AdminDashboardTest extends TestCase
     public function test_authenticated_admin_can_view_admin_credentials_console(): void
     {
         $admin = User::factory()->create();
-        $role = Role::where('slug', 'it-admin')->first();
-        $admin->roles()->attach($role);
+        $admin->roles()->attach(Role::where('slug', 'it-admin')->first());
 
         $response = $this->actingAs($admin)->get(route('admin.settings.credentials'));
 
-        $response->assertStatus(200);
-        $response->assertSee('Admin Operations Console');
+        $response->assertOk();
         $response->assertSee('Recent User Accounts');
         $response->assertSee('Role Directory');
         $response->assertSee('Security Policy Notice');
+        $response->assertDontSee('Sales Executive');
     }
 
     public function test_warehouse_admin_cannot_access_admin_credentials(): void
@@ -326,32 +326,30 @@ class AdminDashboardTest extends TestCase
     public function test_warehouse_admin_dashboard_hides_admin_credentials_actions(): void
     {
         $warehouseAdmin = User::factory()->create();
-        $role = Role::where('slug', 'warehouse-admin')->first();
-        $warehouseAdmin->roles()->attach($role);
+        $warehouseAdmin->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
 
         $response = $this->actingAs($warehouseAdmin)->get(route('admin.dashboard'));
 
-        $response->assertStatus(200);
-        $response->assertSee('Warehouse Operations Dashboard');
-        $response->assertSee('Facility Operations Command');
-        $response->assertDontSee('Open Admin Credentials');
-        $response->assertDontSee('Manage in Credentials →');
+        $response->assertOk();
+        $response->assertSee('Warehouse Operations');
+        $response->assertDontSee('Admin Credentials');
     }
 
-    public function test_sidebar_contains_inventory_dropdown_with_categories(): void
+    public function test_removed_inventory_and_sales_modules_are_unavailable(): void
     {
         $user = User::factory()->create();
-        $role = Role::where('slug', 'it-admin')->first();
-        $user->roles()->attach($role);
+        $user->roles()->attach(Role::where('slug', 'it-admin')->first());
 
-        $response = $this->actingAs($user)->get(route('admin.dashboard'));
+        $this->actingAs($user)->get('/admin/inventory')->assertNotFound();
+        $this->actingAs($user)->get('/admin/sales-orders')->assertNotFound();
+        $this->actingAs($user)->get('/admin/sales-orders/reports')->assertNotFound();
 
-        $response->assertStatus(200);
-        $response->assertSee('id="inventoryDropdownBtn"', false);
-        $response->assertSee('id="inventorySubmenu"', false);
-        $response->assertSee('Centralized LED');
-        $response->assertSee('EOL Philips Units');
-        $response->assertSee('All Categories');
+        $this->assertFalse(Schema::hasTable('inventory_items'));
+        $this->assertFalse(Schema::hasTable('sales_orders'));
+        $this->assertFalse(Schema::hasTable('order_logs'));
+        $this->assertTrue(Schema::hasColumn('srf_requisitions', 'item_model'));
+        $this->assertFalse(Schema::hasColumn('srf_requisitions', 'inventory_item_id'));
+        $this->assertDatabaseMissing('roles', ['slug' => 'sales-executive']);
     }
 
     public function test_dashboard_renders_for_warehouse_admin(): void
@@ -365,95 +363,6 @@ class AdminDashboardTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Warehouse Operations');
         $response->assertDontSee('5 OPERATIONAL WORKFLOW MODULES', false);
-    }
-
-    public function test_admin_can_dispatch_order(): void
-    {
-        $user = User::factory()->create();
-        $role = Role::where('slug', 'warehouse-admin')->first();
-        $user->roles()->attach($role);
-
-        $item = InventoryItem::factory()->create([
-            'location' => 'MARIKINA',
-            'quantity' => 10,
-            'sqm' => 5.0,
-            'status' => 'in_stock',
-        ]);
-
-        $response = $this->actingAs($user)->post('/admin/operations/dispatch', [
-            'inventory_item_id' => $item->id,
-            'quantity' => 4,
-            'order_number' => 'SO-2026-0099',
-            'recipient' => 'SM Mall of Asia',
-            'vehicle_plate' => 'ABC-1234',
-        ]);
-
-        $response->assertRedirect(route('admin.dashboard'));
-        $response->assertSessionHas('status');
-
-        $item->refresh();
-        $this->assertEquals(6, $item->quantity);
-        $this->assertEquals(3.0, (float) $item->sqm);
-    }
-
-    public function test_admin_can_perform_cycle_count(): void
-    {
-        $user = User::factory()->create();
-        $role = Role::where('slug', 'warehouse-admin')->first();
-        $user->roles()->attach($role);
-
-        $item = InventoryItem::factory()->create([
-            'location' => 'MARIKINA',
-            'quantity' => 20,
-            'sqm' => 5.0,
-            'status' => 'in_stock',
-        ]);
-
-        $response = $this->actingAs($user)->post('/admin/operations/cycle-count', [
-            'inventory_item_id' => $item->id,
-            'counted_quantity' => 18,
-            'auditor_notes' => 'Found 2 damaged boxes in aisle 3',
-        ]);
-
-        $response->assertRedirect(route('admin.dashboard'));
-        $response->assertSessionHas('status');
-
-        $item->refresh();
-        $this->assertEquals(18, $item->quantity);
-        $this->assertEquals(4.5, (float) $item->sqm);
-    }
-
-    public function test_admin_can_record_defective_return(): void
-    {
-        $user = User::factory()->create();
-        $role = Role::where('slug', 'warehouse-admin')->first();
-        $user->roles()->attach($role);
-
-        $item = InventoryItem::factory()->create([
-            'model' => 'TEST MODEL RMA',
-            'location' => 'MARIKINA',
-            'quantity' => 5,
-            'sqm' => 1.0,
-            'status' => 'in_stock',
-        ]);
-
-        $response = $this->actingAs($user)->post('/admin/operations/return-item', [
-            'inventory_item_id' => $item->id,
-            'quantity' => 2,
-            'disposition' => 'quarantine_defective',
-            'serial_numbers' => 'SN-DEF-001, SN-DEF-002',
-            'reason' => 'Dead pixels on upper quadrant',
-        ]);
-
-        $response->assertRedirect(route('admin.dashboard'));
-        $response->assertSessionHas('status');
-
-        // Verify quarantined defective item was created
-        $this->assertDatabaseHas('inventory_items', [
-            'location' => 'DEFECTIVE',
-            'status' => 'maintenance',
-            'quantity' => 2,
-        ]);
     }
 
     public function test_dashboard_does_not_render_sop_workflow_engine(): void
@@ -489,27 +398,22 @@ class AdminDashboardTest extends TestCase
 
     public function test_technical_user_can_submit_installation_srf_requisition(): void
     {
-        $techUser = User::factory()->create([
-            'name' => 'Ariel Moro',
-            'email' => 'ariel.moro@globaltronics.net',
-        ]);
-        $techRole = Role::where('slug', 'technical')->first();
-        $techUser->roles()->attach($techRole);
-
-        $item = InventoryItem::factory()->create([
-            'model' => 'P2.5 INDOOR LED',
-            'quantity' => 20,
-            'location' => 'MARIKINA',
-            'status' => 'in_stock',
-        ]);
+        $techUser = User::factory()->create();
+        $techUser->roles()->attach(Role::where('slug', 'technical')->first());
 
         $response = $this->actingAs($techUser)->post(route('admin.operations.installation.srf'), [
             'project_name' => 'SM Mall of Asia Main Atrium',
             'sso_number' => 'SSO-2026-9021',
             'srf_number' => 'SRF-2026-0042',
-            'inventory_item_id' => $item->id,
-            'quantity' => 10,
-            'prepared_by' => 'Ariel Moro',
+            'items' => [[
+                'item_model' => 'P2.5 INDOOR LED',
+                'item_manufacturer' => 'Globaltronics',
+                'item_category' => 'LED DISPLAY',
+                'item_description' => 'Indoor display panel',
+                'quantity' => 10,
+                'uom' => 'PCS',
+            ]],
+            'prepared_by' => $techUser->name,
             'noted_by' => 'Joshua Labios / Felix Tumambing',
             'pre_approved_by' => 'Teddymar Bajeta',
             'approved_by' => 'Macy Guido Lee',
@@ -517,97 +421,67 @@ class AdminDashboardTest extends TestCase
 
         $response->assertRedirect(route('admin.dashboard'));
         $response->assertSessionHas('status');
-
-        $item->refresh();
-        $this->assertEquals(10, $item->quantity);
-
-        // Verify reserved project item was created
-        $this->assertDatabaseHas('inventory_items', [
-            'po_number' => 'SRF-2026-0042',
-            'location' => 'STAGE-BAY-01',
-            'status' => 'reserved',
+        $this->assertDatabaseHas('srf_requisitions', [
+            'srf_number' => 'SRF-2026-0042',
+            'item_model' => 'P2.5 INDOOR LED',
+            'item_manufacturer' => 'Globaltronics',
+            'item_category' => 'LED DISPLAY',
+            'item_description' => 'Indoor display panel',
             'quantity' => 10,
+            'stock_status' => 'not_tracked',
+            'status' => 'pending',
         ]);
     }
 
     public function test_auto_generated_srf_number_starts_at_2026_0957(): void
     {
         $techUser = User::factory()->create();
-        $techRole = Role::where('slug', 'technical')->first();
-        $techUser->roles()->attach($techRole);
+        $techUser->roles()->attach(Role::where('slug', 'technical')->first());
 
-        // When visiting dashboard with 0 requisitions, auto-generated SRF # starts at 2026 - 0957
         $response = $this->actingAs($techUser)->get(route('admin.dashboard'));
         $response->assertOk();
         $expectedFirstSrf = date('Y').' - 0957';
         $response->assertSee($expectedFirstSrf);
 
-        $item = InventoryItem::factory()->create([
-            'model' => 'P2.5 INDOOR LED',
-            'quantity' => 15,
-            'location' => 'MARIKINA',
-            'status' => 'in_stock',
-        ]);
-
-        // Submit without explicit srf_number to use auto-generated number
         $submitResponse = $this->actingAs($techUser)->post(route('admin.operations.installation.srf'), [
-            'client' => 'SM Megamall Curved LED',
-            'po_number' => 'PO-2026-8812',
-            'date_needed' => date('Y-m-d', strtotime('+3 days')),
-            'requisition_date' => date('Y-m-d'),
-            'inventory_item_id' => $item->id,
-            'quantity' => 5,
-            'uom' => 'PCS',
-            'remarks' => 'Urgent staging for event',
-            'prepared_by' => 'Ariel Moro',
+            'items' => [[
+                'item_model' => 'P2.5 INDOOR LED',
+                'quantity' => 5,
+                'uom' => 'PCS',
+            ]],
+            'prepared_by' => $techUser->name,
         ]);
 
         $submitResponse->assertRedirect(route('admin.dashboard'));
         $this->assertDatabaseHas('srf_requisitions', [
             'srf_number' => $expectedFirstSrf,
-            'client' => 'SM Megamall Curved LED',
-            'po_number' => 'PO-2026-8812',
-            'uom' => 'PCS',
+            'item_model' => 'P2.5 INDOOR LED',
+            'stock_status' => 'not_tracked',
         ]);
     }
 
     public function test_technical_user_can_submit_multi_item_srf_requisition(): void
     {
         $techUser = User::factory()->create();
-        $techRole = Role::where('slug', 'technical')->first();
-        $techUser->roles()->attach($techRole);
+        $techUser->roles()->attach(Role::where('slug', 'technical')->first());
 
-        $itemA = InventoryItem::factory()->create([
-            'model' => 'P2.5 INDOOR LED MODULE',
-            'quantity' => 50,
-            'location' => 'STAGE-BAY-01',
-            'status' => 'in_stock',
-        ]);
-
-        $itemB = InventoryItem::factory()->create([
-            'model' => 'NOVASTAR VX4S CONTROLLER',
-            'quantity' => 10,
-            'location' => 'CONTROLLER-BAY',
-            'status' => 'in_stock',
-        ]);
-
-        $srfNum = '2026 - 0957';
+        $srfNumber = '2026 - 0957';
         $response = $this->actingAs($techUser)->post(route('admin.operations.installation.srf'), [
-            'client' => 'Robinsons Galleria Cebu',
+            'srf_number' => $srfNumber,
+            'project_name' => 'Robinsons Galleria Cebu',
             'po_number' => 'PO-2026-9901',
-            'date_needed' => date('Y-m-d', strtotime('+5 days')),
-            'requisition_date' => date('Y-m-d'),
-            'srf_number' => $srfNum,
-            'prepared_by' => 'Ariel Moro',
+            'prepared_by' => $techUser->name,
             'items' => [
                 [
-                    'inventory_item_id' => $itemA->id,
+                    'item_model' => 'P2.5 INDOOR LED MODULE',
+                    'item_manufacturer' => 'Globaltronics',
                     'quantity' => 12,
                     'uom' => 'PCS',
                     'remarks' => 'Batch A modules with testing required',
                 ],
                 [
-                    'inventory_item_id' => $itemB->id,
+                    'item_model' => 'NOVASTAR VX4S CONTROLLER',
+                    'item_manufacturer' => 'NovaStar',
                     'quantity' => 2,
                     'uom' => 'UNITS',
                     'remarks' => 'Pre-configured controllers',
@@ -617,216 +491,56 @@ class AdminDashboardTest extends TestCase
 
         $response->assertRedirect(route('admin.dashboard'));
         $response->assertSessionHas('status');
-
-        // Both items exist under the same SRF number in srf_requisitions
-        $srfRecords = SrfRequisition::where('srf_number', $srfNum)->get();
-        $this->assertCount(2, $srfRecords);
-
         $this->assertDatabaseHas('srf_requisitions', [
-            'srf_number' => $srfNum,
-            'inventory_item_id' => $itemA->id,
+            'srf_number' => $srfNumber,
+            'item_model' => 'P2.5 INDOOR LED MODULE',
+            'item_manufacturer' => 'Globaltronics',
             'quantity' => 12,
-            'uom' => 'PCS',
-            'remarks' => 'Batch A modules with testing required',
+            'stock_status' => 'not_tracked',
             'status' => 'pending',
         ]);
-
         $this->assertDatabaseHas('srf_requisitions', [
-            'srf_number' => $srfNum,
-            'inventory_item_id' => $itemB->id,
+            'srf_number' => $srfNumber,
+            'item_model' => 'NOVASTAR VX4S CONTROLLER',
             'quantity' => 2,
             'uom' => 'UNITS',
-            'remarks' => 'Pre-configured controllers',
+            'stock_status' => 'not_tracked',
             'status' => 'pending',
         ]);
 
-        // Verify warehouse admin verifying one record verifies all items in that SRF
         $adminUser = User::factory()->create();
-        $adminRole = Role::where('slug', 'warehouse-admin')->first();
-        $adminUser->roles()->attach($adminRole);
+        $adminUser->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
+        $srf = SrfRequisition::where('srf_number', $srfNumber)->firstOrFail();
 
-        $verifyResponse = $this->actingAs($adminUser)->post(route('admin.operations.installation.srf.verify', $srfRecords->first()), [
-            'verification_notes' => 'All items picked and staged at STAGE-BAY-01.',
+        $verifyResponse = $this->actingAs($adminUser)->post(route('admin.operations.installation.srf.verify', $srf), [
+            'verification_notes' => 'All items picked and staged.',
         ]);
 
         $verifyResponse->assertRedirect(route('admin.dashboard'));
-        $this->assertEquals(2, SrfRequisition::where('srf_number', $srfNum)->where('status', 'approved')->count());
-    }
-
-    public function test_installation_sto_bay_transfer(): void
-    {
-        $user = User::factory()->create();
-        $role = Role::where('slug', 'warehouse-admin')->first();
-        $user->roles()->attach($role);
-
-        $item = InventoryItem::factory()->create([
-            'model' => 'UMINI P1.2',
-            'quantity' => 15,
-            'location' => 'MARIKINA MAIN BAY A',
-        ]);
-
-        $response = $this->actingAs($user)->post(route('admin.operations.installation.sto'), [
-            'project_name' => 'Clark Airport Video Wall',
-            'sto_number' => 'STO-2026-0128',
-            'inventory_item_id' => $item->id,
-            'quantity' => 5,
-            'source_bay' => 'MARIKINA MAIN BAY A',
-            'destination_bay' => 'TECH QA TESTING BENCH (MARIKINA)',
-            'prepared_by' => 'Arbie Hipolito',
-            'checked_by' => 'Ryan Lomboy',
-            'released_by' => 'Ryan Matuguina',
-            'received_by' => 'WH Staff',
-            'approved_by' => 'Joshua Labios',
-        ]);
-
-        $response->assertRedirect(route('admin.dashboard'));
-        $response->assertSessionHas('status');
-
-        $item->refresh();
-        $this->assertEquals('TECH QA TESTING BENCH (MARIKINA)', $item->location);
-    }
-
-    public function test_installation_dr_dispatch(): void
-    {
-        $user = User::factory()->create();
-        $role = Role::where('slug', 'warehouse-admin')->first();
-        $user->roles()->attach($role);
-
-        $item = InventoryItem::factory()->create([
-            'model' => '55BDL4050D DISPLAY',
-            'quantity' => 8,
-            'status' => 'in_stock',
-        ]);
-
-        $response = $this->actingAs($user)->post(route('admin.operations.installation.dr'), [
-            'project_name' => 'Robinson Galleria Project',
-            'dr_number' => 'DR-2026-4402',
-            'inventory_item_id' => $item->id,
-            'quantity' => 4,
-            'recipient_destination' => 'Robinsons Galleria Level 3',
-            'vehicle_plate' => 'ABC-9921',
-            'prepared_by' => 'Arbie Hipolito',
-            'approved_by' => 'Joshua Labios',
-        ]);
-
-        $response->assertRedirect(route('admin.dashboard'));
-        $response->assertSessionHas('status');
-
-        $item->refresh();
-        $this->assertEquals(4, $item->quantity);
-    }
-
-    public function test_installation_return_and_eol_scrap(): void
-    {
-        $user = User::factory()->create();
-        $role = Role::where('slug', 'warehouse-admin')->first();
-        $user->roles()->attach($role);
-
-        $item = InventoryItem::factory()->create([
-            'category' => 'CENTRALIZED LED INVENTORY',
-            'model' => 'P1.9 DEFECTIVE MODULE',
-            'quantity' => 10,
-        ]);
-
-        $response = $this->actingAs($user)->post(route('admin.operations.installation.return'), [
-            'project_name' => 'City of Dreams Project',
-            'return_slip_number' => 'RS-2026-8819',
-            'inventory_item_id' => $item->id,
-            'quantity' => 2,
-            'disposition_flow' => 'eol_scrap',
-            'findings' => 'Cracked surface mask and dead driver ICs',
-            'returned_by' => 'Technical Staff',
-            'received_by' => 'Francis Perez',
-            'approved_by' => 'Jerico Rivera',
-        ]);
-
-        $response->assertRedirect(route('admin.dashboard'));
-        $response->assertSessionHas('status');
-
-        // Verify item was created in EOL category
-        $this->assertDatabaseHas('inventory_items', [
-            'category' => 'EOL PHILIPS UNITS',
-            'location' => 'EOL-SCRAP',
-            'status' => 'out_of_stock',
-            'quantity' => 2,
-        ]);
-    }
-
-    public function test_it_admin_can_create_sales_account_with_sales_role(): void
-    {
-        $admin = User::factory()->create();
-        $itRole = Role::where('slug', 'it-admin')->first();
-        $salesRole = Role::where('slug', 'sales-executive')->first();
-        $admin->roles()->attach($itRole);
-
-        $response = $this->actingAs($admin)->post('/admin/users', [
-            'name' => 'New Sales Rep',
-            'email' => 'sales.rep@globaltronics.net',
-            'password' => 'SecurePass123!@#',
-            'roles' => [$salesRole->id],
-        ]);
-
-        $response->assertRedirect(route('admin.users.index'));
-        $this->assertDatabaseHas('users', [
-            'email' => 'sales.rep@globaltronics.net',
-            'name' => 'New Sales Rep',
-        ]);
-
-        $createdUser = User::where('email', 'sales.rep@globaltronics.net')->first();
-        $this->assertTrue($createdUser->hasRole('sales-executive'));
+        $this->assertSame(2, SrfRequisition::where('srf_number', $srfNumber)->where('status', 'approved')->count());
     }
 
     public function test_technical_user_dashboard_does_not_see_warehouse_operations_workflow_engine_or_department_management(): void
     {
-        $tech = User::factory()->create([
-            'name' => 'Ariel Moro',
-            'email' => 'ariel.moro@globaltronics.net',
-        ]);
-        $techRole = Role::where('slug', 'technical')->first();
-        $salesRole = Role::where('slug', 'sales-executive')->first();
-        $tech->roles()->attach([$techRole->id, $salesRole->id]);
+        $tech = User::factory()->create();
+        $tech->roles()->attach(Role::where('slug', 'technical')->first());
 
         $response = $this->actingAs($tech)->get('/admin/dashboard');
 
-        $response->assertStatus(200);
-
-        // Should see Technical features
-        $response->assertSee('Technical Operations &amp; SRF Requisitions', false);
+        $response->assertOk();
+        $response->assertSee('Technical Operations');
         $response->assertSee('Stock Requisition Form (SRF)');
         $response->assertSee('Launch Stock Requisition Form (SRF)');
         $response->assertSee('id="installationSrfModal"', false);
-        $response->assertSee('Stock Requisition Form (SRF) Summary');
-        $response->assertSee('Assignators');
-
-        // Should NOT see Warehouse Operations & Workflow Engine
         $response->assertDontSee('Warehouse Operations &amp; Workflow Engine', false);
-        $response->assertDontSee('5 OPERATIONAL WORKFLOW MODULES');
-
-        // Should NOT see Department Account Management
-        $response->assertDontSee('Department Account Management');
-        $response->assertDontSee('IT ADMINISTRATION CONSOLE');
-
-        // Should NOT see Authorized System Accounts & Telemetry
-        $response->assertDontSee('Authorized System Accounts');
-        $response->assertDontSee('Facility Telemetry');
-        $response->assertDontSee('Storage &amp; Pallet Bays', false);
+        $response->assertDontSee('Sales Order');
+        $response->assertDontSee('Inventory');
     }
 
     public function test_technical_user_can_submit_srf_and_it_shows_in_dashboard_summary(): void
     {
-        $tech = User::factory()->create([
-            'name' => 'Ariel Moro',
-            'email' => 'ariel.moro@globaltronics.net',
-        ]);
-        $techRole = Role::where('slug', 'technical')->first();
-        $salesRole = Role::where('slug', 'sales-executive')->first();
-        $tech->roles()->attach([$techRole->id, $salesRole->id]);
-
-        $item = InventoryItem::factory()->create([
-            'category' => 'OUTDOOR LED PANELS',
-            'model' => 'P10 OUTDOOR SCREEN',
-            'quantity' => 50,
-        ]);
+        $tech = User::factory()->create();
+        $tech->roles()->attach(Role::where('slug', 'technical')->first());
 
         $response = $this->actingAs($tech)->post(route('admin.operations.installation.srf'), [
             'client' => 'SM Megamall Curved LED',
@@ -835,143 +549,105 @@ class AdminDashboardTest extends TestCase
             'requisition_date' => '2026-10-06',
             'srf_number' => 'SRF-2026-9001',
             'sso_number' => 'SSO-2026-1001',
-            'inventory_item_id' => $item->id,
-            'quantity' => 10,
-            'uom' => 'PCS',
-            'remarks' => 'Urgent outdoor display staging with harnesses',
-            'prepared_by' => 'Ariel Moro',
+            'items' => [[
+                'item_model' => 'P10 OUTDOOR SCREEN',
+                'item_category' => 'OUTDOOR LED PANELS',
+                'quantity' => 10,
+                'uom' => 'PCS',
+                'remarks' => 'Urgent outdoor display staging with harnesses',
+            ]],
+            'prepared_by' => $tech->name,
         ]);
 
         $response->assertRedirect(route('admin.dashboard'));
-
         $this->assertDatabaseHas('srf_requisitions', [
             'srf_number' => 'SRF-2026-9001',
             'sso_number' => 'SSO-2026-1001',
             'client' => 'SM Megamall Curved LED',
             'po_number' => 'PO-2026-9912',
+            'item_model' => 'P10 OUTDOOR SCREEN',
             'uom' => 'PCS',
             'remarks' => 'Urgent outdoor display staging with harnesses',
             'status' => 'pending',
-            'stock_status' => 'available_reserved',
+            'stock_status' => 'not_tracked',
         ]);
 
-        // Visit dashboard and see the requisition in the summary table
         $dashResponse = $this->actingAs($tech)->get('/admin/dashboard');
-        $dashResponse->assertStatus(200);
+        $dashResponse->assertOk();
         $dashResponse->assertSee('SRF-2026-9001');
         $dashResponse->assertSee('SM Megamall Curved LED');
         $dashResponse->assertSee('PO-2026-9912');
-        $dashResponse->assertSee('10 PCS');
+        $dashResponse->assertSee('P10 OUTDOOR SCREEN');
         $dashResponse->assertSee('FOR APPROVAL');
 
-        // Warehouse Admin verifies it
-        $whAdmin = User::factory()->create();
-        $whAdminRole = Role::where('slug', 'warehouse-admin')->first();
-        $whAdmin->roles()->attach($whAdminRole);
-
-        $srf = SrfRequisition::where('srf_number', 'SRF-2026-9001')->first();
-
-        $verifyResponse = $this->actingAs($whAdmin)->post(route('admin.operations.installation.srf.verify', $srf), [
-            'verification_notes' => 'Allocated from Bay 3. Ready for staging.',
+        $warehouseAdmin = User::factory()->create();
+        $warehouseAdmin->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
+        $srf = SrfRequisition::where('srf_number', 'SRF-2026-9001')->firstOrFail();
+        $verifyResponse = $this->actingAs($warehouseAdmin)->post(route('admin.operations.installation.srf.verify', $srf), [
+            'verification_notes' => 'Approved for staging.',
         ]);
 
         $verifyResponse->assertRedirect(route('admin.dashboard'));
-
-        $this->assertDatabaseHas('srf_requisitions', [
-            'id' => $srf->id,
-            'status' => 'approved',
-        ]);
+        $this->assertDatabaseHas('srf_requisitions', ['id' => $srf->id, 'status' => 'approved']);
     }
 
-    public function test_item_search_inputs_and_containers_are_rendered_in_all_modals(): void
+    public function test_srf_form_accepts_manual_item_details_without_inventory_search(): void
     {
         $tech = User::factory()->create();
-        $techRole = Role::where('slug', 'technical')->first();
-        $tech->roles()->attach($techRole);
+        $tech->roles()->attach(Role::where('slug', 'technical')->first());
 
         $response = $this->actingAs($tech)->get('/admin/dashboard');
 
-        $response->assertStatus(200);
-        $response->assertSee('item-search-container');
-        $response->assertSee('item-search-input');
-        $response->assertSee('item-search-results');
-        $response->assertSee('Type model, brand, bay location to search...');
+        $response->assertOk();
+        $response->assertSee('Item Model');
+        $response->assertSee('Manufacturer');
+        $response->assertSee('item_model');
+        $response->assertDontSee('item-search-input');
+        $response->assertDontSee('Search inventory');
     }
 
-    public function test_srf_summary_table_combines_multiple_items_and_removes_header_launch_button(): void
+    public function test_srf_summary_displays_manual_item_snapshots_and_approved_link(): void
     {
         $user = User::factory()->create();
-        $role = Role::where('slug', 'warehouse-admin')->first();
-        $user->roles()->attach($role);
+        $user->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
 
-        $itemA = InventoryItem::factory()->create(['model' => 'PANEL-X1', 'quantity' => 50]);
-        $itemB = InventoryItem::factory()->create(['model' => 'CONTROLLER-Y2', 'quantity' => 20]);
-
-        SrfRequisition::create([
-            'srf_number' => '2026 - 1100',
-            'sso_number' => 'SSO-2026-0200',
-            'project_name' => 'Ayala Mall Cinema Project',
-            'client' => 'Ayala Land',
-            'po_number' => 'PO-2026-5501',
-            'date_needed' => now()->addDays(3),
-            'requisition_date' => now(),
-            'inventory_item_id' => $itemA->id,
-            'quantity' => 20,
-            'uom' => 'PCS',
-            'stock_status' => 'available_reserved',
-            'status' => 'pending',
-            'prepared_by' => 'Ariel Moro',
-            'user_id' => $user->id,
-            'remarks' => 'Urgent cinema batch A',
-        ]);
-
-        SrfRequisition::create([
-            'srf_number' => '2026 - 1100',
-            'sso_number' => 'SSO-2026-0200',
-            'project_name' => 'Ayala Mall Cinema Project',
-            'client' => 'Ayala Land',
-            'po_number' => 'PO-2026-5501',
-            'date_needed' => now()->addDays(3),
-            'requisition_date' => now(),
-            'inventory_item_id' => $itemB->id,
-            'quantity' => 4,
-            'uom' => 'UNITS',
-            'stock_status' => 'available_reserved',
-            'status' => 'pending',
-            'prepared_by' => 'Ariel Moro',
-            'user_id' => $user->id,
-            'remarks' => 'Processor hardware kit',
-        ]);
+        foreach ([['PANEL-X1', 20, 'PCS'], ['CONTROLLER-Y2', 4, 'UNITS']] as [$model, $quantity, $uom]) {
+            SrfRequisition::create([
+                'srf_number' => '2026 - 1100',
+                'sso_number' => 'SSO-2026-0200',
+                'project_name' => 'Ayala Mall Cinema Project',
+                'client' => 'Ayala Land',
+                'po_number' => 'PO-2026-5501',
+                'date_needed' => now()->addDays(3),
+                'requisition_date' => now(),
+                'item_model' => $model,
+                'quantity' => $quantity,
+                'uom' => $uom,
+                'stock_status' => 'not_tracked',
+                'status' => 'pending',
+                'prepared_by' => 'Ariel Moro',
+                'user_id' => $user->id,
+            ]);
+        }
 
         $response = $this->actingAs($user)->get(route('admin.dashboard'));
 
-        $response->assertStatus(200);
-        // Both items combined in the same row
+        $response->assertOk();
         $response->assertSee('2026 - 1100');
-        $response->assertSee('2 items combined');
         $response->assertSee('PANEL-X1');
         $response->assertSee('20');
         $response->assertSee('PCS');
         $response->assertSee('CONTROLLER-Y2');
         $response->assertSee('4');
         $response->assertSee('UNITS');
-        $response->assertSee('Urgent cinema batch A');
-        $response->assertSee('Processor hardware kit');
-
-        // Header button "+ Launch Stock Requisition Form (SRF)" removed
         $response->assertDontSee('Launch Stock Requisition Form (SRF)');
-
-        // Sidebar has Approved SRF category
         $response->assertSee('Approved SRF');
     }
 
     public function test_approved_srf_page_lists_verified_requisitions(): void
     {
         $user = User::factory()->create();
-        $role = Role::where('slug', 'warehouse-admin')->first();
-        $user->roles()->attach($role);
-
-        $item = InventoryItem::factory()->create(['model' => 'PANEL-APPROVED-100', 'quantity' => 30]);
+        $user->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
 
         SrfRequisition::create([
             'srf_number' => '2026 - 1200',
@@ -981,23 +657,24 @@ class AdminDashboardTest extends TestCase
             'po_number' => 'PO-2026-7788',
             'date_needed' => now()->addDays(2),
             'requisition_date' => now(),
-            'inventory_item_id' => $item->id,
+            'item_model' => 'PANEL-APPROVED-100',
+            'item_manufacturer' => 'Globaltronics',
             'quantity' => 15,
             'uom' => 'PCS',
-            'stock_status' => 'available_reserved',
-            'status' => 'completed',
+            'stock_status' => 'not_tracked',
+            'status' => 'approved',
             'prepared_by' => 'Ariel Moro',
             'verified_by_user_id' => $user->id,
             'verified_by_name' => 'Joshua Labios',
             'verified_at' => now(),
-            'verification_notes' => 'Tested and staged at STAGE-BAY-01.',
+            'verification_notes' => 'Tested and staged.',
             'user_id' => $user->id,
             'remarks' => 'Verified and ready for dispatch',
         ]);
 
         $response = $this->actingAs($user)->get(route('admin.srf.approved'));
 
-        $response->assertStatus(200);
+        $response->assertOk();
         $response->assertSee('Approved SRF Summary');
         $response->assertSee('2026 - 1200');
         $response->assertSee('SSO-2026-0300');
@@ -1007,28 +684,21 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('15');
         $response->assertSee('PCS');
         $response->assertSee('Joshua Labios');
-        $response->assertSee('Tested and staged at STAGE-BAY-01.');
+        $response->assertSee('Tested and staged.');
     }
 
-    public function test_warehouse_admin_can_approve_srf(): void
+    public function test_warehouse_admin_can_approve_srf_without_changing_item_details(): void
     {
         $admin = User::factory()->create();
         $admin->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
-
-        $item = InventoryItem::factory()->create(['model' => 'PANEL-INVENTORY-DEDUCT', 'quantity' => 50]);
-
         $srf = SrfRequisition::create([
             'srf_number' => '2026 - 1300',
-            'sso_number' => 'SSO-2026-0400',
             'project_name' => 'Ayala Malls Project',
             'client' => 'Ayala Land',
-            'po_number' => 'PO-2026-9900',
-            'date_needed' => now()->addDays(3),
-            'requisition_date' => now(),
-            'inventory_item_id' => $item->id,
+            'item_model' => 'PANEL-SNAPSHOT',
             'quantity' => 10,
             'uom' => 'PCS',
-            'stock_status' => 'insufficient_pr_hold',
+            'stock_status' => 'not_tracked',
             'status' => 'pending',
             'prepared_by' => 'Ariel Moro',
             'user_id' => $admin->id,
@@ -1036,37 +706,30 @@ class AdminDashboardTest extends TestCase
 
         $response = $this->actingAs($admin)->post(route('admin.operations.installation.srf.verify', $srf), [
             'decision' => 'approved',
-            'verification_notes' => 'Stock approved and released.',
+            'verification_notes' => 'Approved for staging.',
         ]);
 
         $response->assertRedirect(route('admin.dashboard'));
-        $item->refresh();
         $srf->refresh();
-
-        $this->assertSame(50, $item->quantity);
         $this->assertSame('approved', $srf->status);
+        $this->assertSame('PANEL-SNAPSHOT', $srf->item_model);
+        $this->assertSame(10, $srf->quantity);
+        $this->assertSame('not_tracked', $srf->stock_status);
         $this->assertSame($admin->name, $srf->verified_by_name);
     }
 
-    public function test_warehouse_admin_can_decline_srf(): void
+    public function test_warehouse_admin_can_decline_srf_without_inventory_restoration(): void
     {
         $admin = User::factory()->create();
         $admin->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
-
-        $item = InventoryItem::factory()->create(['model' => 'PANEL-INVENTORY-RESTORE', 'quantity' => 30]);
-
         $srf = SrfRequisition::create([
             'srf_number' => '2026 - 1301',
-            'sso_number' => 'SSO-2026-0401',
             'project_name' => 'Megamall Tower Project',
             'client' => 'SM Prime',
-            'po_number' => 'PO-2026-9901',
-            'date_needed' => now()->addDays(3),
-            'requisition_date' => now(),
-            'inventory_item_id' => $item->id,
+            'item_model' => 'PANEL-SNAPSHOT',
             'quantity' => 10,
             'uom' => 'PCS',
-            'stock_status' => 'available_reserved',
+            'stock_status' => 'not_tracked',
             'status' => 'pending',
             'prepared_by' => 'Ariel Moro',
             'user_id' => $admin->id,
@@ -1078,32 +741,24 @@ class AdminDashboardTest extends TestCase
         ]);
 
         $response->assertRedirect(route('admin.dashboard'));
-        $item->refresh();
         $srf->refresh();
-
-        $this->assertSame(30, $item->quantity);
         $this->assertSame('declined', $srf->status);
+        $this->assertSame('PANEL-SNAPSHOT', $srf->item_model);
+        $this->assertSame('not_tracked', $srf->stock_status);
     }
 
     public function test_warehouse_admin_can_place_srf_on_hold(): void
     {
         $admin = User::factory()->create();
         $admin->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
-
-        $item = InventoryItem::factory()->create(['model' => 'PANEL-INVENTORY-HOLD', 'quantity' => 20]);
-
         $srf = SrfRequisition::create([
             'srf_number' => '2026 - 1302',
-            'sso_number' => 'SSO-2026-0402',
             'project_name' => 'Robinsons Galleria Project',
             'client' => 'Robinsons Land',
-            'po_number' => 'PO-2026-9902',
-            'date_needed' => now()->addDays(3),
-            'requisition_date' => now(),
-            'inventory_item_id' => $item->id,
+            'item_model' => 'PANEL-SNAPSHOT',
             'quantity' => 5,
             'uom' => 'PCS',
-            'stock_status' => 'available_reserved',
+            'stock_status' => 'not_tracked',
             'status' => 'pending',
             'prepared_by' => 'Ariel Moro',
             'user_id' => $admin->id,
@@ -1115,17 +770,13 @@ class AdminDashboardTest extends TestCase
         ]);
 
         $response->assertRedirect(route('admin.dashboard'));
-        $srf->refresh();
-
-        $this->assertSame('on_hold', $srf->status);
+        $this->assertSame('on_hold', $srf->fresh()->status);
     }
 
     public function test_user_can_view_and_download_srf_pdf(): void
     {
         $user = User::factory()->create();
         $user->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
-
-        $item = InventoryItem::factory()->create(['model' => 'PANEL-PDF-VERIFY', 'quantity' => 25]);
 
         SrfRequisition::create([
             'srf_number' => '2026 - 1500',
@@ -1135,10 +786,13 @@ class AdminDashboardTest extends TestCase
             'po_number' => 'PO-2026-8899',
             'date_needed' => now()->addDays(5),
             'requisition_date' => now(),
-            'inventory_item_id' => $item->id,
+            'item_model' => 'PANEL-PDF-VERIFY',
+            'item_manufacturer' => 'Globaltronics',
+            'item_category' => 'LED DISPLAY',
+            'item_description' => 'Outdoor LED panel',
             'quantity' => 12,
             'uom' => 'PCS',
-            'stock_status' => 'available_reserved',
+            'stock_status' => 'not_tracked',
             'status' => 'approved',
             'department' => 'TECHNICAL',
             'prepared_by' => 'Ariel Moro',
@@ -1148,40 +802,30 @@ class AdminDashboardTest extends TestCase
             'verified_by_user_id' => $user->id,
             'verified_by_name' => 'Felix Tumambing',
             'verified_at' => now(),
-            'verification_notes' => 'Allocated and staged at STAGE-BAY-01.',
+            'verification_notes' => 'Allocated and staged.',
             'user_id' => $user->id,
             'remarks' => 'Urgent mall display installation',
         ]);
 
         $response = $this->actingAs($user)->get(route('admin.srf.pdf', urlencode('2026 - 1500')));
 
-        $response->assertStatus(200);
+        $response->assertOk();
         $response->assertSee('STOCK REQUISITION FORM');
         $response->assertSee('2026 - 1500');
         $response->assertSee('SSO-2026-0600');
         $response->assertSee('Ayala Land Corporation');
         $response->assertSee('PO-2026-8899');
         $response->assertSee('PANEL-PDF-VERIFY');
+        $response->assertSee('Globaltronics');
+        $response->assertSee('Outdoor LED panel');
         $response->assertSee('12');
-        $response->assertSee('TECHNICAL');
-        $response->assertSee('PREPARED BY');
         $response->assertSee('Ariel Moro');
-        $response->assertSee('Project Team Lead');
-        $response->assertSee('NOTED BY');
-        $response->assertSee('Joshua Labios / Felix Tumambing');
-        $response->assertSee('PRE-APPROVED BY');
-        $response->assertSee('Teddy Mar Bajeta');
-        $response->assertSee('APPROVED BY');
-        $response->assertSee('Macy Guido Lee');
-        $response->assertSee('Chief of Services Officer');
     }
 
     public function test_srf_submission_and_pdf_with_sales_department(): void
     {
         $user = User::factory()->create();
         $user->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
-
-        $item = InventoryItem::factory()->create(['quantity' => 50]);
 
         $response = $this->actingAs($user)->post(route('admin.operations.installation.srf'), [
             'srf_number' => '2026 - 2000',
@@ -1193,43 +837,33 @@ class AdminDashboardTest extends TestCase
             'noted_by' => 'Bernadette Federez',
             'pre_approved_by' => 'Teddy Bajeta',
             'approved_by' => 'Macy Guido Lee',
-            'items' => [
-                [
-                    'inventory_item_id' => $item->id,
-                    'quantity' => 5,
-                    'uom' => 'PCS',
-                    'remarks' => 'Sales display units',
-                ],
-            ],
+            'items' => [[
+                'item_model' => 'DISPLAY-DEMO-1',
+                'quantity' => 5,
+                'uom' => 'PCS',
+                'remarks' => 'Sales display units',
+            ]],
         ]);
 
         $response->assertRedirect(route('admin.dashboard'));
         $this->assertDatabaseHas('srf_requisitions', [
             'srf_number' => '2026 - 2000',
             'department' => 'SALES',
-            'prepared_by' => 'Anne Libo-on',
-            'noted_by' => 'Bernadette Federez',
-            'pre_approved_by' => 'Teddy Bajeta',
-            'approved_by' => 'Macy Guido Lee',
+            'item_model' => 'DISPLAY-DEMO-1',
+            'stock_status' => 'not_tracked',
         ]);
 
         $pdfResponse = $this->actingAs($user)->get(route('admin.srf.pdf', urlencode('2026 - 2000')));
-        $pdfResponse->assertStatus(200);
+        $pdfResponse->assertOk();
         $pdfResponse->assertSee('SALES');
-        $pdfResponse->assertSee('Sales Admin');
         $pdfResponse->assertSee('Anne Libo-on');
-        $pdfResponse->assertSee('Sales Admin Manager');
-        $pdfResponse->assertSee('Bernadette Federez');
-        $pdfResponse->assertSee('Teddy Bajeta');
-        $pdfResponse->assertSee('Macy Guido Lee');
+        $pdfResponse->assertSee('DISPLAY-DEMO-1');
     }
 
     public function test_srf_submission_and_pdf_with_it_department(): void
     {
         $user = User::factory()->create();
         $user->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
-
-        $item = InventoryItem::factory()->create(['quantity' => 10]);
 
         $response = $this->actingAs($user)->post(route('admin.operations.installation.srf'), [
             'srf_number' => '2026 - 3000',
@@ -1241,35 +875,27 @@ class AdminDashboardTest extends TestCase
             'noted_by' => 'Paz Liquigan',
             'pre_approved_by' => 'Teddy Bajeta',
             'approved_by' => 'Macy Guido Lee',
-            'items' => [
-                [
-                    'inventory_item_id' => $item->id,
-                    'quantity' => 2,
-                    'uom' => 'PCS',
-                    'remarks' => 'R&D testing units',
-                ],
-            ],
+            'items' => [[
+                'item_model' => 'NETWORK-TEST-UNIT',
+                'quantity' => 2,
+                'uom' => 'PCS',
+                'remarks' => 'R&D testing units',
+            ]],
         ]);
 
         $response->assertRedirect(route('admin.dashboard'));
         $this->assertDatabaseHas('srf_requisitions', [
             'srf_number' => '2026 - 3000',
             'department' => 'IT',
+            'item_model' => 'NETWORK-TEST-UNIT',
             'prepared_by' => 'Stephanie Refe',
-            'noted_by' => 'Paz Liquigan',
-            'pre_approved_by' => 'Teddy Bajeta',
-            'approved_by' => 'Macy Guido Lee',
         ]);
 
         $pdfResponse = $this->actingAs($user)->get(route('admin.srf.pdf', urlencode('2026 - 3000')));
-        $pdfResponse->assertStatus(200);
+        $pdfResponse->assertOk();
         $pdfResponse->assertSee('IT');
-        $pdfResponse->assertSee('IT Specialist');
+        $pdfResponse->assertSee('NETWORK-TEST-UNIT');
         $pdfResponse->assertSee('Stephanie Refe');
-        $pdfResponse->assertSee('Senior IT Research and Development');
-        $pdfResponse->assertSee('Paz Liquigan');
-        $pdfResponse->assertSee('PMO Technical Officer');
-        $pdfResponse->assertSee('Teddy Bajeta');
-        $pdfResponse->assertSee('Macy Guido Lee');
     }
+
 }

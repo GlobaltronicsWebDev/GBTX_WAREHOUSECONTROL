@@ -1383,12 +1383,12 @@
     // Close on Escape
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            ['createSalesModal', 'createUserModal', 'editUserModal', 'deleteUserModal', 'createRoleModal', 'editRoleModal', 'deleteRoleModal'].forEach(closeModal);
+            ['createUserModal', 'editUserModal', 'deleteUserModal', 'createRoleModal', 'editRoleModal', 'deleteRoleModal'].forEach(closeModal);
         }
     });
 
     // Close on backdrop click
-    ['createSalesModal', 'createUserModal', 'editUserModal', 'deleteUserModal', 'createRoleModal', 'editRoleModal', 'deleteRoleModal'].forEach(id => {
+    ['createUserModal', 'editUserModal', 'deleteUserModal', 'createRoleModal', 'editRoleModal', 'deleteRoleModal'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener('click', (e) => {
@@ -1398,10 +1398,6 @@
     });
 
     // User Modal Triggers
-    function openCreateSalesModal() {
-        openModal('createSalesModal');
-    }
-
     function openCreateUserModal() {
         openModal('createUserModal');
     }

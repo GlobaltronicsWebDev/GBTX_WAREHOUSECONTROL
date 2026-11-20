@@ -73,6 +73,8 @@ return new class extends Migration
             'content',
             'it',
             'accounting',
+            'inventory-supervisor',
+            'dispatch-officer',
         ];
 
         if (Schema::hasTable('roles') && Schema::hasTable('role_user')) {

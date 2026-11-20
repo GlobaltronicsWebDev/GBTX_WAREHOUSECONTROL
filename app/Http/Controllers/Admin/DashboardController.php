@@ -142,14 +142,14 @@ class DashboardController extends Controller
             ->max();
         $distinctSrfCount = SrfRequisition::distinct('srf_number')->count('srf_number');
 
-        $validated['srf_number'] = $validated['srf_number'] ?: date('Y').' - '.str_pad(max(956, $maxSequence) + 1, 4, '0', STR_PAD_LEFT);
-        $validated['sso_number'] = $validated['sso_number'] ?: 'SSO-'.date('Y').'-'.str_pad($distinctSrfCount + 101, 4, '0', STR_PAD_LEFT);
-        $validated['project_name'] = $validated['project_name'] ?: ($validated['client'] ?: 'Installation Project');
-        $validated['client'] = $validated['client'] ?: $validated['project_name'];
-        $validated['po_number'] = $validated['po_number'] ?: $validated['srf_number'];
-        $validated['requisition_date'] = $validated['requisition_date'] ?: date('Y-m-d');
-        $validated['department'] = $validated['department'] ?: 'GENERAL';
-        $validated['approved_by'] = $validated['approved_by'] ?: 'Macy Guido Lee';
+        $validated['srf_number'] = ($validated['srf_number'] ?? null) ?: date('Y').' - '.str_pad(max(956, $maxSequence) + 1, 4, '0', STR_PAD_LEFT);
+        $validated['sso_number'] = ($validated['sso_number'] ?? null) ?: 'SSO-'.date('Y').'-'.str_pad($distinctSrfCount + 101, 4, '0', STR_PAD_LEFT);
+        $validated['project_name'] = ($validated['project_name'] ?? null) ?: (($validated['client'] ?? null) ?: 'Installation Project');
+        $validated['client'] = ($validated['client'] ?? null) ?: $validated['project_name'];
+        $validated['po_number'] = ($validated['po_number'] ?? null) ?: $validated['srf_number'];
+        $validated['requisition_date'] = ($validated['requisition_date'] ?? null) ?: date('Y-m-d');
+        $validated['department'] = ($validated['department'] ?? null) ?: 'GENERAL';
+        $validated['approved_by'] = ($validated['approved_by'] ?? null) ?: 'Macy Guido Lee';
 
         DB::transaction(function () use ($validated, $request): void {
             foreach ($validated['items'] as $item) {
@@ -166,7 +166,7 @@ class DashboardController extends Controller
                     'item_category' => $item['item_category'] ?? null,
                     'item_description' => $item['item_description'] ?? null,
                     'quantity' => $item['quantity'],
-                    'uom' => $item['uom'] ?: 'PCS',
+                    'uom' => ($item['uom'] ?? null) ?: 'PCS',
                     'stock_status' => 'not_tracked',
                     'status' => 'pending',
                     'department' => $validated['department'],
