@@ -242,7 +242,15 @@
                             <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
                     </button>
-                    <span class="truncate text-[12px] text-slate-500">Workspace <span class="px-1 text-slate-300">/</span> <span class="font-medium text-slate-800">@yield('breadcrumb', 'My Dashboard')</span></span>
+                    <span class="truncate text-[12px] text-slate-500">
+                        @if (request()->routeIs('admin.settings.companies'))
+                            Settings <span class="px-1 text-slate-300">›</span> <span class="font-medium text-slate-800">@yield('breadcrumb', 'Companies')</span>
+                        @elseif (request()->routeIs('admin.reports.*'))
+                            <span class="font-medium text-slate-800">Reports</span>
+                        @else
+                            Workspace <span class="px-1 text-slate-300">/</span> <span class="font-medium text-slate-800">@yield('breadcrumb', 'My Dashboard')</span>
+                        @endif
+                    </span>
                 </div>
 
                 <div id="accountMenuRoot" class="relative shrink-0">
@@ -430,8 +438,14 @@
 
         const updateClock = () => {
             const now = new Date();
-            dateElement.textContent = dateFormatter.format(now).toUpperCase();
-            timeElement.textContent = timeFormatter.format(now);
+
+            if (dateElement) {
+                dateElement.textContent = dateFormatter.format(now).toUpperCase();
+            }
+
+            if (timeElement) {
+                timeElement.textContent = timeFormatter.format(now);
+            }
 
             if (greetingElement) {
                 const greeting = now.getHours() < 12 ? 'Good Day' : 'Good Afternoon';
