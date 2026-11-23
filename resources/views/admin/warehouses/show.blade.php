@@ -154,7 +154,7 @@
                                 <th scope="col" class="border border-[#E5E7EB] px-4 py-2">Particular</th>
                             </tr>
                         </thead>
-                        <tbody class="border-[#E5E7EB] [&>tr:not(:last-child)>td]:border-b [&>tr:not(:last-child)>td]:border-inherit">
+                        <tbody class="border-[#E5E7EB] [&>tr]:border-inherit [&>tr:not(:last-child)>td]:border-b [&>tr:not(:last-child)>td]:border-inherit">
                             @foreach ($items as $item)
                                 <tr>
                                     @if ($selectedSubLocation === null && Auth::user()->canDeleteInventoryItems())
