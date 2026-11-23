@@ -104,6 +104,30 @@ class InventoryCsvControllerTest extends TestCase
         $this->assertDatabaseMissing('inventory_item_histories', ['inventory_item_id' => $item->id, 'project' => 'Old client']);
     }
 
+    public function test_mixed_warehouse_csv_places_items_in_their_designated_locations(): void
+    {
+        $marikina = WarehouseLocation::factory()->create(['name' => 'Marikina', 'is_active' => true, 'navigation_enabled' => true]);
+        $ohaap = WarehouseLocation::factory()->create(['name' => 'Ohaap', 'is_active' => true, 'navigation_enabled' => true]);
+        $headers = $this->readCsv($this->actingAs($this->admin())->get(route('admin.inventory.export'))->streamedContent());
+        $record = array_fill_keys(self::CSV_FIELDS, '');
+        foreach (['on_hand', 'total_on_hand', 'per_panel_sqm', 'total_available_sqm', 'available_qty', 'available_sqm', 'reservation_qty', 'original_qty', 'status_qty'] as $field) {
+            $record[$field] = '0';
+        }
+        $ohaapFirst = array_replace($record, ['item_description' => 'Ohaap first item', 'warehouse_location_id' => (string) $ohaap->id, 'location' => 'Ohaap', 'sub_location' => '1st Flr']);
+        $marikinaItem = array_replace($record, ['item_description' => 'Marikina item', 'warehouse_location_id' => (string) $marikina->id, 'location' => 'Marikina', 'sub_location' => '2Floor']);
+        $ohaapSecond = array_replace($record, ['item_description' => 'Ohaap second item', 'warehouse_location_id' => (string) $ohaap->id, 'location' => 'Ohaap', 'sub_location' => '5th Flr']);
+
+        $this->post(route('admin.inventory.import'), ['csv_file' => $this->csvFile([
+            $headers[0], $headers[1], array_values($ohaapFirst), array_values($marikinaItem), array_values($ohaapSecond),
+        ])])->assertSessionHas('status', 'Imported 3 inventory item(s).');
+
+        $this->assertDatabaseHas('inventory_items', ['item_description' => 'Marikina item', 'warehouse_location_id' => $marikina->id, 'sub_location' => '2Floor']);
+        $this->assertDatabaseHas('inventory_items', ['item_description' => 'Ohaap first item', 'warehouse_location_id' => $ohaap->id, 'sub_location' => '1st Flr']);
+        $this->assertDatabaseHas('inventory_items', ['item_description' => 'Ohaap second item', 'warehouse_location_id' => $ohaap->id, 'sub_location' => '5th Flr']);
+        $this->get(route('admin.warehouses.show', $marikina))->assertSee('Marikina item')->assertDontSee('Ohaap first item')->assertDontSee('Ohaap second item');
+        $this->get(route('admin.warehouses.show', $ohaap))->assertSee('Ohaap first item')->assertSee('Ohaap second item')->assertDontSee('Marikina item');
+    }
+
     public function test_invalid_csv_record_rolls_back_all_changes(): void
     {
         $warehouse = WarehouseLocation::factory()->create(['name' => 'Marikina', 'is_active' => true, 'navigation_enabled' => true]);
