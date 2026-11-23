@@ -112,8 +112,8 @@
                 <p class="px-4 py-8 text-center text-[11px] text-slate-500">No items on this page.</p>
             @else
                 <div role="region" aria-label="Warehouse stock table" tabindex="0" class="max-h-[70vh] overflow-auto">
-                    <table class="min-w-[2200px] w-full border-collapse text-left text-[11px]">
-                        <thead class="sticky top-0 z-10 border-b border-[#E5E7EB] bg-[#F8F9FA] text-slate-500">
+                    <table class="min-w-[2200px] w-full border-separate border-spacing-0 text-left text-[11px]">
+                        <thead class="sticky top-0 z-10 border-b border-[#E5E7EB] bg-slate-100 text-slate-500">
                             <tr>
                                 @if ($selectedSubLocation === null && Auth::user()->canDeleteInventoryItems())
                                     <th rowspan="2" scope="col" class="px-4 py-2">
@@ -154,7 +154,7 @@
                                 <th scope="col" class="border border-[#E5E7EB] px-4 py-2">Particular</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-[#E5E7EB]">
+                        <tbody class="border-[#E5E7EB] [&>tr:not(:last-child)>td]:border-b [&>tr:not(:last-child)>td]:border-inherit">
                             @foreach ($items as $item)
                                 <tr>
                                     @if ($selectedSubLocation === null && Auth::user()->canDeleteInventoryItems())
