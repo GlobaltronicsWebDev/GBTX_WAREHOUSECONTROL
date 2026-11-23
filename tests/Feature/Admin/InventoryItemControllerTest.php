@@ -44,16 +44,23 @@ class InventoryItemControllerTest extends TestCase
         ]);
     }
 
-    public function test_users_without_warehouse_operations_access_cannot_add_an_inventory_item(): void
+    public function test_authenticated_users_can_add_an_inventory_item(): void
     {
         $user = User::factory()->create();
         $user->roles()->attach(Role::where('slug', 'it-admin')->first());
+        $warehouseLocation = WarehouseLocation::factory()->create([
+            'is_active' => true,
+            'navigation_enabled' => true,
+        ]);
 
         $this->actingAs($user)
-            ->post(route('admin.inventory.store'), $this->itemData())
-            ->assertForbidden();
+            ->post(route('admin.inventory.store'), $this->itemData($warehouseLocation->id))
+            ->assertRedirect(route('admin.inventory.index'));
 
-        $this->assertDatabaseCount('inventory_items', 0);
+        $this->assertDatabaseHas('inventory_items', [
+            'created_by' => $user->id,
+            'warehouse_location_id' => $warehouseLocation->id,
+        ]);
     }
 
     /**

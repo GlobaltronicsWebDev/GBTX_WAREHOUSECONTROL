@@ -26,8 +26,6 @@ class InventoryItemController extends Controller
 
     public function create(): View
     {
-        abort_unless(auth()->user()?->canViewWarehouseOperations(), 403);
-
         $warehouseLocations = WarehouseLocation::query()
             ->where('is_active', true)
             ->where('navigation_enabled', true)
@@ -39,8 +37,6 @@ class InventoryItemController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        abort_unless($request->user()?->canViewWarehouseOperations(), 403);
-
         $validated = $request->validate([
             'tag_number' => ['nullable', 'string', 'max:255'],
             'date_received' => ['nullable', 'date'],

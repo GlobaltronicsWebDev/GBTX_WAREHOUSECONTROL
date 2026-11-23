@@ -10,9 +10,7 @@
                 <h1 class="text-[20px] font-semibold tracking-tight text-slate-900">Inventory List</h1>
                 <p class="mt-1 text-[12px] text-slate-500">Track received stock, availability, reservations, and history.</p>
             </div>
-            @if (Auth::user()->canViewWarehouseOperations())
-                <a href="{{ route('admin.inventory.create') }}" class="inline-flex h-9 items-center justify-center rounded-sm bg-[#2563EB] px-3 text-[12px] font-medium text-white hover:bg-blue-700">Add Item</a>
-            @endif
+            <a href="{{ route('admin.inventory.create') }}" class="inline-flex h-9 items-center justify-center rounded-sm bg-[#2563EB] px-3 text-[12px] font-medium text-white hover:bg-blue-700">Add Item</a>
         </div>
 
         @if (session('status'))
