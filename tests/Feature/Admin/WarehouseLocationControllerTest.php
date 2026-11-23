@@ -56,7 +56,7 @@ class WarehouseLocationControllerTest extends TestCase
 
         $response->assertRedirect(route('admin.settings.locations'));
         $response->assertSessionHasErrors('name');
-        $this->assertDatabaseCount('warehouse_locations', 1);
+        $this->assertDatabaseCount('warehouse_locations', 3);
     }
 
     public function test_location_listing_filters_by_search_and_status(): void
@@ -148,13 +148,13 @@ class WarehouseLocationControllerTest extends TestCase
     {
         $this->seed(WarehouseLocationSeeder::class);
         $this->seed(WarehouseLocationSeeder::class);
-        $this->assertDatabaseCount('warehouse_locations', 4);
+        $this->assertDatabaseCount('warehouse_locations', 6);
 
         $admin = User::factory()->create();
         $admin->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
-        $response->assertSeeInOrder(['Globaltronics', 'Ohaap', 'Marikina', 'Carmona']);
+        $response->assertSeeInOrder(['A Juan', 'Clark Office', 'Globaltronics', 'Ohaap', 'Marikina', 'Carmona']);
     }
 
     public function test_guest_is_redirected_to_login_from_a_warehouse_dashboard(): void
