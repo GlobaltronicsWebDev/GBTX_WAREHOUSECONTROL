@@ -349,6 +349,12 @@
     @yield('modals')
 
     <script>
+        document.addEventListener('wheel', (event) => {
+            if (event.ctrlKey || event.metaKey) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
         const sidebar = document.getElementById('dashboardSidebar');
         const sidebarBackdrop = document.getElementById('dashboardSidebarBackdrop');
         const sidebarToggle = document.getElementById('sidebarToggle');
