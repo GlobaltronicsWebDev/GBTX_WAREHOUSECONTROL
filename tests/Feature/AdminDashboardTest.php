@@ -604,16 +604,16 @@ class AdminDashboardTest extends TestCase
         $response->assertDontSee(route('admin.settings.credentials'));
     }
 
-    public function test_removed_inventory_and_sales_modules_are_unavailable(): void
+    public function test_inventory_module_is_available_and_sales_modules_are_unavailable(): void
     {
         $user = User::factory()->create();
         $user->roles()->attach(Role::where('slug', 'it-admin')->first());
 
-        $this->actingAs($user)->get('/admin/inventory')->assertNotFound();
+        $this->actingAs($user)->get(route('admin.inventory.index'))->assertOk();
         $this->actingAs($user)->get('/admin/sales-orders')->assertNotFound();
         $this->actingAs($user)->get('/admin/sales-orders/reports')->assertNotFound();
 
-        $this->assertFalse(Schema::hasTable('inventory_items'));
+        $this->assertTrue(Schema::hasTable('inventory_items'));
         $this->assertFalse(Schema::hasTable('sales_orders'));
         $this->assertFalse(Schema::hasTable('order_logs'));
         $this->assertFalse(Schema::hasColumn('users', 'is_admin'));
