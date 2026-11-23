@@ -10,6 +10,7 @@ use Database\Seeders\RoleSeeder;
 use DOMDocument;
 use DOMXPath;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class InventoryItemControllerTest extends TestCase
@@ -510,6 +511,115 @@ class InventoryItemControllerTest extends TestCase
         }
 
         $this->assertDatabaseHas('inventory_items', ['id' => $item->id, 'deleted_at' => null]);
+    }
+
+    public function test_administrator_can_soft_delete_selected_warehouse_items_and_preserve_history(): void
+    {
+        $warehouse = WarehouseLocation::factory()->create(['name' => 'Marikina']);
+        $user = User::factory()->create();
+        $user->roles()->attach(Role::where('slug', 'warehouse-admin')->firstOrFail());
+        $first = InventoryItem::create(['item_description' => 'First panel', 'warehouse_location_id' => $warehouse->id]);
+        $first->histories()->create(['quantity' => 2, 'project' => 'Preserved project']);
+        $second = InventoryItem::create(['item_description' => 'Second panel', 'warehouse_location_id' => $warehouse->id]);
+        $unselected = InventoryItem::create(['item_description' => 'Unselected panel', 'warehouse_location_id' => $warehouse->id]);
+        $url = route('admin.warehouses.inventory.destroy-selected', $warehouse);
+
+        $this->actingAs($user)->get(route('admin.warehouses.show', $warehouse))
+            ->assertSee('aria-label="Delete selected items"', false)
+            ->assertSee('aria-label="Select First panel"', false)
+            ->assertSee('cannot be restored from the application');
+        $this->from(route('admin.warehouses.show', $warehouse))
+            ->delete($url, ['items' => [$first->id, $second->id]])
+            ->assertRedirect(route('admin.warehouses.show', $warehouse))
+            ->assertSessionHas('status', 'Deleted 2 selected inventory item(s).');
+
+        $this->assertSoftDeleted($first);
+        $this->assertSoftDeleted($second);
+        $this->assertNotSoftDeleted($unselected);
+        $this->assertDatabaseHas('inventory_item_histories', ['inventory_item_id' => $first->id, 'project' => 'Preserved project']);
+    }
+
+    public function test_selected_deletion_rejects_invalid_or_other_warehouse_items_atomically(): void
+    {
+        $warehouse = WarehouseLocation::factory()->create();
+        $otherWarehouse = WarehouseLocation::factory()->create();
+        $user = User::factory()->create();
+        $user->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        $item = InventoryItem::create(['item_description' => 'Panel', 'warehouse_location_id' => $warehouse->id]);
+        $other = InventoryItem::create(['item_description' => 'Other panel', 'warehouse_location_id' => $otherWarehouse->id]);
+        $url = route('admin.warehouses.inventory.destroy-selected', $warehouse);
+
+        $this->actingAs($user)->delete($url, ['items' => [$item->id, $other->id]])->assertSessionHasErrors('items');
+        $this->delete($url, ['items' => [$item->id, $item->id]])->assertSessionHasErrors('items.0');
+        $this->delete($url, [])->assertSessionHasErrors('items');
+
+        $this->assertNotSoftDeleted($item);
+        $this->assertNotSoftDeleted($other);
+    }
+
+    public function test_delete_all_requires_warehouse_name_and_only_soft_deletes_that_warehouse(): void
+    {
+        $warehouse = WarehouseLocation::factory()->create(['name' => 'Marikina']);
+        $otherWarehouse = WarehouseLocation::factory()->create();
+        $user = User::factory()->create();
+        $user->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        $items = collect();
+        for ($number = 1; $number <= 201; $number++) {
+            $items->push(InventoryItem::create(['item_description' => "Panel {$number}", 'warehouse_location_id' => $warehouse->id]));
+        }
+        $items->first()->histories()->create(['quantity' => 1, 'project' => 'Preserved project']);
+        $other = InventoryItem::create(['item_description' => 'Other panel', 'warehouse_location_id' => $otherWarehouse->id]);
+        $url = route('admin.warehouses.inventory.destroy-all', $warehouse);
+
+        $this->actingAs($user)->delete($url, ['confirmation' => 'Wrong name'])->assertSessionHasErrors('confirmation');
+        $this->assertNotSoftDeleted($items->first());
+        $this->from(route('admin.warehouses.show', $warehouse))->delete($url, ['confirmation' => 'Marikina'])
+            ->assertRedirect(route('admin.warehouses.show', $warehouse))
+            ->assertSessionHas('status', 'Deleted 201 inventory item(s) from Marikina.');
+
+        $this->assertSame(201, InventoryItem::onlyTrashed()->whereBelongsTo($warehouse, 'warehouseLocation')->count());
+        $this->assertNotSoftDeleted($other);
+        $this->assertDatabaseHas('inventory_item_histories', ['inventory_item_id' => $items->first()->id, 'project' => 'Preserved project']);
+    }
+
+    public function test_selected_deletion_rolls_back_when_an_item_cannot_be_deleted(): void
+    {
+        $warehouse = WarehouseLocation::factory()->create();
+        $user = User::factory()->create();
+        $user->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        $first = InventoryItem::create(['item_description' => 'First panel', 'warehouse_location_id' => $warehouse->id]);
+        $second = InventoryItem::create(['item_description' => 'Second panel', 'warehouse_location_id' => $warehouse->id]);
+        Event::listen('eloquent.deleting: '.InventoryItem::class, fn (InventoryItem $item) => $item->is($second) ? false : null);
+
+        try {
+            $this->actingAs($user)->delete(route('admin.warehouses.inventory.destroy-selected', $warehouse), [
+                'items' => [$first->id, $second->id],
+            ])->assertInternalServerError();
+        } finally {
+            Event::forget('eloquent.deleting: '.InventoryItem::class);
+        }
+
+        $this->assertNotSoftDeleted($first);
+        $this->assertNotSoftDeleted($second);
+    }
+
+    public function test_bulk_warehouse_deletion_is_restricted_to_administrators(): void
+    {
+        $warehouse = WarehouseLocation::factory()->create(['name' => 'Marikina']);
+        $item = InventoryItem::create(['item_description' => 'Panel', 'warehouse_location_id' => $warehouse->id]);
+        $selectedUrl = route('admin.warehouses.inventory.destroy-selected', $warehouse);
+        $allUrl = route('admin.warehouses.inventory.destroy-all', $warehouse);
+
+        $this->delete($selectedUrl, ['items' => [$item->id]])->assertRedirect(route('login'));
+        $this->delete($allUrl, ['confirmation' => 'Marikina'])->assertRedirect(route('login'));
+        $staff = User::factory()->create();
+        $staff->roles()->attach(Role::where('slug', 'warehouse-staff')->firstOrFail());
+        $this->actingAs($staff)->get(route('admin.warehouses.show', $warehouse))
+            ->assertDontSee('Delete selected items')
+            ->assertDontSee('Delete all warehouse items');
+        $this->delete($selectedUrl, ['items' => [$item->id]])->assertForbidden();
+        $this->delete($allUrl, ['confirmation' => 'Marikina'])->assertForbidden();
+        $this->assertNotSoftDeleted($item);
     }
 
     /**

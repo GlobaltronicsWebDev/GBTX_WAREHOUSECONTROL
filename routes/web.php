@@ -152,6 +152,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/inventory/import', [InventoryCsvController::class, 'import'])->name('inventory.import');
     Route::resource('inventory', InventoryItemController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::get('/warehouses/{location}', [WarehouseDashboardController::class, 'show'])->name('warehouses.show');
+    Route::delete('/warehouses/{location}/inventory/selected', [WarehouseDashboardController::class, 'destroySelected'])->name('warehouses.inventory.destroy-selected');
+    Route::delete('/warehouses/{location}/inventory/all', [WarehouseDashboardController::class, 'destroyAll'])->name('warehouses.inventory.destroy-all');
     Route::get('/reports', [DashboardController::class, 'reports'])->name('reports.index');
     Route::get('/reports/transactions', [DashboardController::class, 'transactionReport'])->name('reports.transactions');
 

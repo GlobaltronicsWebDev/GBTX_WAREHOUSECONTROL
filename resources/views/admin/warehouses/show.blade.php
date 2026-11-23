@@ -31,14 +31,54 @@
             </article>
         </section>
 
+        @if (session('status'))
+            <div role="status" class="border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{{ session('status') }}</div>
+        @endif
+        @if ($errors->any())
+            <div role="alert" class="border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">{{ $errors->first() }}</div>
+        @endif
+
         <section class="border border-[#E5E7EB] bg-white" aria-labelledby="warehouseStockHeading">
-            <div class="flex items-center justify-between border-b border-[#E5E7EB] px-4 py-3">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E7EB] px-4 py-3">
                 <div>
                     <h2 id="warehouseStockHeading" class="text-[13px] font-semibold text-slate-900">Stock overview</h2>
                     <p class="mt-1 text-[10px] text-slate-500">Stock records for {{ $location->name }}</p>
                 </div>
                 <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-medium text-emerald-700">{{ $items->total() }} item(s)</span>
             </div>
+
+            @if (Auth::user()->canDeleteInventoryItems() && $items->total() > 0)
+                <div class="flex flex-wrap items-start gap-3 border-b border-[#E5E7EB] px-4 py-3">
+                    @if ($items->isNotEmpty())
+                        <form id="delete-selected-items" method="POST" action="{{ route('admin.warehouses.inventory.destroy-selected', $location) }}" onsubmit="return confirm('Soft-delete the selected items? They cannot be restored from the application.')">
+                            @csrf
+                            @method('DELETE')
+                            <button id="delete-selected-button" type="submit" aria-label="Delete selected items" title="Delete selected items" class="inline-flex items-center gap-1 rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-slate-700 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/>
+                                </svg>
+                                Delete selected
+                            </button>
+                        </form>
+                    @endif
+                    <details>
+                        <summary class="cursor-pointer rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-slate-700">Delete all warehouse items</summary>
+                        <form method="POST" action="{{ route('admin.warehouses.inventory.destroy-all', $location) }}" onsubmit="return confirm('Soft-delete ALL items in this warehouse across every page? They cannot be restored from the application.')" class="mt-2 space-y-2">
+                            @csrf
+                            @method('DELETE')
+                            <p class="text-[11px] text-slate-600">This affects all {{ $items->total() }} items in {{ $location->name }}, not just this page. Deleted items cannot be restored from the application.</p>
+                            <label for="warehouse-delete-confirmation" class="block text-[11px] text-slate-700">Type {{ $location->name }} to confirm</label>
+                            <input id="warehouse-delete-confirmation" name="confirmation" type="text" required autocomplete="off" class="w-full rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px]">
+                            <button type="submit" class="inline-flex items-center gap-1 rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-slate-700 hover:text-red-600">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/>
+                                </svg>
+                                Delete all items
+                            </button>
+                        </form>
+                    </details>
+                </div>
+            @endif
 
             @if ($items->total() === 0)
                 <div class="flex min-h-44 flex-col items-center justify-center gap-2 px-4 py-8 text-center">
@@ -57,6 +97,11 @@
                     <table class="min-w-[2200px] w-full border-collapse text-left text-[11px]">
                         <thead class="sticky top-0 z-10 border-b border-[#E5E7EB] bg-[#F8F9FA] text-slate-500">
                             <tr>
+                                @if (Auth::user()->canDeleteInventoryItems())
+                                    <th rowspan="2" scope="col" class="px-4 py-2">
+                                        <input id="select-warehouse-page" type="checkbox" aria-label="Select all items on this page" hidden>
+                                    </th>
+                                @endif
                                 <th rowspan="2" scope="col" class="px-4 py-2">Tag #</th>
                                 <th rowspan="2" scope="col" class="px-4 py-2">Date Received</th>
                                 <th rowspan="2" scope="col" class="px-4 py-2">PO / SKU No.</th>
@@ -94,6 +139,11 @@
                         <tbody class="divide-y divide-[#E5E7EB]">
                             @foreach ($items as $item)
                                 <tr>
+                                    @if (Auth::user()->canDeleteInventoryItems())
+                                        <td class="px-4 py-2">
+                                            <input type="checkbox" name="items[]" value="{{ $item->id }}" form="delete-selected-items" aria-label="Select {{ $item->item_description }}" data-warehouse-item>
+                                        </td>
+                                    @endif
                                     <td class="px-4 py-2 font-medium">{{ $item->tag_number ?: '—' }}</td>
                                     <td class="px-4 py-2">{{ $item->date_received?->format('Y-m-d') ?: '—' }}</td>
                                     <td class="px-4 py-2">{{ $item->po_sku_number ?: '—' }}</td>
@@ -130,3 +180,26 @@
         </section>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        const selectWarehousePage = document.getElementById('select-warehouse-page');
+        if (selectWarehousePage) {
+            const warehouseItems = Array.from(document.querySelectorAll('[data-warehouse-item]'));
+            const deleteSelectedButton = document.getElementById('delete-selected-button');
+            const updateWarehouseSelection = () => {
+                const selectedCount = warehouseItems.filter((checkbox) => checkbox.checked).length;
+                selectWarehousePage.checked = selectedCount === warehouseItems.length;
+                selectWarehousePage.indeterminate = selectedCount > 0 && selectedCount < warehouseItems.length;
+                deleteSelectedButton.disabled = selectedCount === 0;
+            };
+            selectWarehousePage.hidden = false;
+            selectWarehousePage.addEventListener('change', () => {
+                warehouseItems.forEach((item) => { item.checked = selectWarehousePage.checked; });
+                updateWarehouseSelection();
+            });
+            warehouseItems.forEach((item) => item.addEventListener('change', updateWarehouseSelection));
+            updateWarehouseSelection();
+        }
+    </script>
+@endpush
