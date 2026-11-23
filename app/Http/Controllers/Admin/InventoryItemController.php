@@ -13,6 +13,27 @@ use Illuminate\View\View;
 
 class InventoryItemController extends Controller
 {
+    public function dashboard(): View
+    {
+        $counts = InventoryItem::query()
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('COUNT(CASE WHEN available_qty >= 6 THEN 1 END) as in_stock')
+            ->selectRaw('COUNT(CASE WHEN available_qty BETWEEN 2 AND 5 THEN 1 END) as low_stock')
+            ->selectRaw('COUNT(CASE WHEN available_qty = 1 THEN 1 END) as last_stock')
+            ->selectRaw('COUNT(CASE WHEN available_qty = 0 THEN 1 END) as out_of_stock')
+            ->firstOrFail();
+
+        $totalItems = (int) $counts->total;
+        $stockHealth = [
+            'In Stock' => (int) $counts->in_stock,
+            'Low Stock' => (int) $counts->low_stock,
+            'Last Stock' => (int) $counts->last_stock,
+            'Out of Stock' => (int) $counts->out_of_stock,
+        ];
+
+        return view('admin.inventory.dashboard', compact('totalItems', 'stockHealth'));
+    }
+
     public function index(Request $request): View
     {
         $items = InventoryItem::query()

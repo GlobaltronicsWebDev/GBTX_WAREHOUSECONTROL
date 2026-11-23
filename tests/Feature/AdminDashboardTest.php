@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use App\Models\Company;
 use App\Models\Department;
+use App\Models\InventoryItem;
 use App\Models\Role;
 use App\Models\SrfRequisition;
 use App\Models\TransactionNotification;
 use App\Models\User;
+use App\Models\WarehouseLocation;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -297,6 +299,58 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Today’s Movement');
         $response->assertSee('Stock Health');
         $response->assertSee('Recent Movement');
+    }
+
+    public function test_stock_health_shows_zero_counts_for_empty_inventory(): void
+    {
+        $response = $this->actingAs(User::factory()->create())->get(route('admin.inventory.dashboard'));
+
+        $response->assertViewHas('totalItems', 0);
+        $response->assertViewHas('stockHealth', [
+            'In Stock' => 0,
+            'Low Stock' => 0,
+            'Last Stock' => 0,
+            'Out of Stock' => 0,
+        ]);
+        $response->assertSee('0%');
+        $response->assertSee('href="'.route('admin.inventory.dashboard').'#stockHealthHeading"', false);
+        $response->assertDontSee('Stock figures are sample values');
+    }
+
+    public function test_stock_health_counts_available_quantities_across_warehouses_and_excludes_deleted_items(): void
+    {
+        $warehouses = WarehouseLocation::factory()->count(2)->create();
+        foreach ([0, 1, 2, 5, 6, 6, 6, 100] as $index => $quantity) {
+            InventoryItem::create([
+                'item_description' => 'Inventory item '.$index,
+                'available_qty' => $quantity,
+                'warehouse_location_id' => $warehouses[$index % 2]->id,
+            ]);
+        }
+        InventoryItem::create(['item_description' => 'Deleted item', 'available_qty' => 0])->delete();
+
+        $response = $this->actingAs(User::factory()->create())->get(route('admin.inventory.dashboard'));
+
+        $response->assertViewHas('totalItems', 8);
+        $response->assertViewHas('stockHealth', [
+            'In Stock' => 4,
+            'Low Stock' => 2,
+            'Last Stock' => 1,
+            'Out of Stock' => 1,
+        ]);
+        $response->assertSeeInOrder(['Total Items', 'In Stock', '4</dd>', '50%</dd>', 'Low Stock', '2</dd>', '25%</dd>', 'Last Stock', '1</dd>', '12.5%</dd>', 'Out of Stock', '1</dd>', '12.5%</dd>'], false);
+    }
+
+    public function test_stock_health_refresh_reflects_inventory_changes(): void
+    {
+        $item = InventoryItem::create(['item_description' => 'Panel', 'available_qty' => 1]);
+        $this->actingAs(User::factory()->create())->get(route('admin.inventory.dashboard'))
+            ->assertViewHas('stockHealth', ['In Stock' => 0, 'Low Stock' => 0, 'Last Stock' => 1, 'Out of Stock' => 0]);
+
+        $item->update(['available_qty' => 0]);
+        $response = $this->get(route('admin.inventory.dashboard'));
+
+        $response->assertViewHas('stockHealth', ['In Stock' => 0, 'Low Stock' => 0, 'Last Stock' => 0, 'Out of Stock' => 1]);
     }
 
     public function test_admin_can_create_user_with_roles(): void

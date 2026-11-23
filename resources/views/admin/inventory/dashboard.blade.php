@@ -155,13 +155,13 @@
             <section class="min-w-0 border border-[#E5E7EB] bg-white" aria-labelledby="stockHealthHeading">
                 <div class="flex items-center justify-between border-b border-[#E5E7EB] px-3 py-2.5">
                     <h2 id="stockHealthHeading" class="text-[12px] font-semibold text-slate-800">Stock Health</h2>
-                    <span class="border border-[#E5E7EB] px-2 py-1 text-[10px] text-slate-400" aria-label="Refresh disabled in prototype">Refresh</span>
+                    <a href="{{ route('admin.inventory.dashboard') }}#stockHealthHeading" class="border border-[#E5E7EB] px-2 py-1 text-[10px] text-slate-600 hover:text-[#2563EB]">Refresh</a>
                 </div>
                 <div class="flex flex-col gap-5 p-4 sm:flex-row sm:items-center sm:justify-around xl:flex-col xl:items-stretch 2xl:flex-row 2xl:items-center">
                     <div class="flex shrink-0 justify-center">
                         <div class="flex h-32 w-32 items-center justify-center rounded-full border-[10px] border-[#F1F3F5]">
                             <div class="text-center">
-                                <p class="font-mono text-[20px] font-semibold leading-6 tabular-nums">0</p>
+                                <p class="font-mono text-[20px] font-semibold leading-6 tabular-nums">{{ $totalItems }}</p>
                                 <p class="mt-1 text-[9px] uppercase tracking-wide text-slate-400">Total Items</p>
                             </div>
                         </div>
@@ -176,13 +176,13 @@
                             <div class="flex items-center gap-2 text-[11px]">
                                 <span class="h-2 w-2 shrink-0 rounded-full {{ $indicatorColor }}" aria-hidden="true"></span>
                                 <dt class="min-w-0 flex-1 truncate text-slate-600">{{ $status }}</dt>
-                                <dd class="w-6 text-right font-mono font-medium tabular-nums text-slate-800">0</dd>
-                                <dd class="w-9 text-right font-mono tabular-nums text-slate-500">0%</dd>
+                                <dd class="w-6 text-right font-mono font-medium tabular-nums text-slate-800">{{ $stockHealth[$status] }}</dd>
+                                <dd class="w-9 text-right font-mono tabular-nums text-slate-500">{{ $totalItems > 0 ? round($stockHealth[$status] / $totalItems * 100, 1) : 0 }}%</dd>
                             </div>
                         @endforeach
                     </dl>
                 </div>
-                <p class="border-t border-[#E5E7EB] px-3 py-2 text-[10px] text-slate-400">Stock figures are sample values; live inventory data is unavailable.</p>
+                <p class="border-t border-[#E5E7EB] px-3 py-2 text-[10px] text-slate-500">Based on available quantity: In Stock 6+, Low Stock 2–5, Last Stock 1, Out of Stock 0.</p>
             </section>
         </section>
     </div>
