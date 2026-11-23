@@ -38,7 +38,16 @@
                     <select id="warehouse_location_id" name="warehouse_location_id" required class="w-full rounded-sm border border-[#E5E7EB] bg-white px-3 py-2 text-[12px] outline-none focus:border-[#2563EB]">
                         <option value="">Select warehouse</option>
                         @foreach ($warehouseLocations as $warehouseLocation)
-                            <option value="{{ $warehouseLocation->id }}" @selected(old('warehouse_location_id', $item?->warehouse_location_id) == $warehouseLocation->id)>{{ $warehouseLocation->name }}</option>
+                            <option value="{{ $warehouseLocation->id }}" data-has-sub-locations="{{ $warehouseLocation->inventorySubLocations() ? '1' : '0' }}" @selected(old('warehouse_location_id', $item?->warehouse_location_id) == $warehouseLocation->id)>{{ $warehouseLocation->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div id="sub-location-container">
+                    <label for="sub_location" class="mb-1 block text-[11px] font-medium text-slate-700">Marikina Sub-location (optional)</label>
+                    <select id="sub_location" name="sub_location" class="w-full rounded-sm border border-[#E5E7EB] bg-white px-3 py-2 text-[12px] outline-none focus:border-[#2563EB]">
+                        <option value="">No sub-location</option>
+                        @foreach (\App\Models\WarehouseLocation::MARIKINA_SUB_LOCATIONS as $subLocation)
+                            <option value="{{ $subLocation }}" @selected(old('sub_location', $item?->sub_location) === $subLocation)>{{ $subLocation }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -100,3 +109,23 @@
         </form>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        const warehouseSelect = document.getElementById('warehouse_location_id');
+        const subLocationContainer = document.getElementById('sub-location-container');
+        const subLocationSelect = document.getElementById('sub_location');
+
+        const updateSubLocation = () => {
+            const hasSubLocations = warehouseSelect.selectedOptions[0]?.dataset.hasSubLocations === '1';
+            subLocationContainer.hidden = !hasSubLocations;
+            subLocationSelect.disabled = !hasSubLocations;
+            if (!hasSubLocations) {
+                subLocationSelect.value = '';
+            }
+        };
+
+        warehouseSelect.addEventListener('change', updateSubLocation);
+        updateSubLocation();
+    </script>
+@endpush

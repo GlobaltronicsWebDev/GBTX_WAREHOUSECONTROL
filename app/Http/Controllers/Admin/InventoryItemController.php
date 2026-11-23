@@ -121,6 +121,10 @@ class InventoryItemController extends Controller
         ]);
 
         $warehouseLocation = WarehouseLocation::query()->findOrFail($validated['warehouse_location_id']);
+        $subLocation = $request->validate([
+            'sub_location' => ['nullable', 'string', Rule::in($warehouseLocation->inventorySubLocations())],
+        ]);
+        $validated['sub_location'] = $subLocation['sub_location'] ?? null;
         $validated['location'] = $warehouseLocation->name;
 
         return $validated;

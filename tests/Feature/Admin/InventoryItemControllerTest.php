@@ -163,6 +163,77 @@ class InventoryItemControllerTest extends TestCase
         $this->put(route('admin.inventory.update', $item), [])->assertRedirect(route('login'));
     }
 
+    public function test_marikina_sub_locations_are_optional_and_displayed_with_items(): void
+    {
+        $user = User::factory()->create();
+        $marikina = WarehouseLocation::factory()->create(['name' => 'Marikina', 'is_active' => true, 'navigation_enabled' => true]);
+        $data = $this->itemData($marikina->id);
+
+        $this->actingAs($user)->get(route('admin.inventory.create'))
+            ->assertSeeInOrder(['1st Bldg', '2Floor', 'Main: 3Flr']);
+
+        foreach (['1st Bldg', '2Floor', 'Main: 3Flr'] as $subLocation) {
+            $data['sub_location'] = $subLocation;
+            $data['item_description'] = 'Panel '.$subLocation;
+            $this->post(route('admin.inventory.store'), $data)->assertSessionHasNoErrors();
+            $this->assertDatabaseHas('inventory_items', [
+                'warehouse_location_id' => $marikina->id,
+                'item_description' => 'Panel '.$subLocation,
+                'sub_location' => $subLocation,
+            ]);
+        }
+
+        unset($data['sub_location']);
+        $data['item_description'] = 'Unassigned panel';
+        $this->post(route('admin.inventory.store'), $data)->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('inventory_items', ['item_description' => 'Unassigned panel', 'sub_location' => null]);
+
+        $this->get(route('admin.inventory.index', ['search' => '2Floor']))->assertSee('Panel 2Floor')->assertDontSee('Panel 1st Bldg');
+        $this->get(route('admin.warehouses.show', $marikina))->assertSee('Sub-location')->assertSee('Main: 3Flr');
+    }
+
+    public function test_marikina_sub_location_can_be_edited_and_is_cleared_on_transfer(): void
+    {
+        $user = User::factory()->create();
+        $marikina = WarehouseLocation::factory()->create(['name' => 'Marikina', 'is_active' => true, 'navigation_enabled' => true]);
+        $otherWarehouse = WarehouseLocation::factory()->create(['name' => 'Carmona', 'is_active' => true, 'navigation_enabled' => true]);
+        $item = InventoryItem::create([
+            'item_description' => 'Panel',
+            'warehouse_location_id' => $marikina->id,
+            'sub_location' => '1st Bldg',
+        ]);
+        $data = $this->itemData($marikina->id);
+        $data['sub_location'] = '2Floor';
+
+        $this->actingAs($user)->get(route('admin.inventory.edit', $item))
+            ->assertSee('value="1st Bldg" selected', false);
+        $this->put(route('admin.inventory.update', $item), $data)->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('inventory_items', ['id' => $item->id, 'sub_location' => '2Floor']);
+
+        $data = $this->itemData($otherWarehouse->id);
+        $this->put(route('admin.inventory.update', $item), $data)->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('inventory_items', ['id' => $item->id, 'warehouse_location_id' => $otherWarehouse->id, 'sub_location' => null]);
+    }
+
+    public function test_invalid_or_other_warehouse_sub_locations_are_rejected(): void
+    {
+        $user = User::factory()->create();
+        $marikina = WarehouseLocation::factory()->create(['name' => 'Marikina', 'is_active' => true, 'navigation_enabled' => true]);
+        $otherWarehouse = WarehouseLocation::factory()->create(['name' => 'Carmona', 'is_active' => true, 'navigation_enabled' => true]);
+
+        foreach ([[$marikina, 'Unknown'], [$otherWarehouse, '1st Bldg']] as [$warehouse, $subLocation]) {
+            $data = $this->itemData($warehouse->id);
+            $data['sub_location'] = $subLocation;
+
+            $this->actingAs($user)->from(route('admin.inventory.create'))
+                ->post(route('admin.inventory.store'), $data)
+                ->assertRedirect(route('admin.inventory.create'))
+                ->assertSessionHasErrors('sub_location');
+        }
+
+        $this->assertDatabaseCount('inventory_items', 0);
+    }
+
     public function test_administrators_can_soft_delete_inventory_from_both_lists(): void
     {
         $warehouse = WarehouseLocation::factory()->create(['is_active' => true, 'navigation_enabled' => true]);

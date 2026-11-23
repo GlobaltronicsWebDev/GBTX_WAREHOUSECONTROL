@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'item_description',
     'location',
     'warehouse_location_id',
+    'sub_location',
     'on_hand',
     'total_on_hand',
     'per_panel_sqm',
@@ -74,7 +75,8 @@ class InventoryItem extends Model
                 ->orWhere('manufacturer', 'like', "%{$term}%")
                 ->orWhere('model_pixel_pitch', 'like', "%{$term}%")
                 ->orWhere('item_description', 'like', "%{$term}%")
-                ->orWhere('location', 'like', "%{$term}%");
+                ->orWhere('location', 'like', "%{$term}%")
+                ->orWhere('sub_location', 'like', "%{$term}%");
         });
     }
 
