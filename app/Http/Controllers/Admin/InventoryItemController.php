@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\InventoryItem;
+use App\Models\WarehouseLocation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class InventoryItemController extends Controller
@@ -13,6 +15,7 @@ class InventoryItemController extends Controller
     public function index(Request $request): View
     {
         $items = InventoryItem::query()
+            ->with('warehouseLocation')
             ->matching($request->string('search')->toString())
             ->latest()
             ->paginate(25)
@@ -23,7 +26,13 @@ class InventoryItemController extends Controller
 
     public function create(): View
     {
-        return view('admin.inventory.create');
+        $warehouseLocations = WarehouseLocation::query()
+            ->where('is_active', true)
+            ->where('navigation_enabled', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.inventory.create', compact('warehouseLocations'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -37,7 +46,10 @@ class InventoryItemController extends Controller
             'manufacturer' => ['nullable', 'string', 'max:255'],
             'model_pixel_pitch' => ['nullable', 'string', 'max:255'],
             'item_description' => ['required', 'string', 'max:10000'],
-            'location' => ['nullable', 'string', 'max:255'],
+            'warehouse_location_id' => [
+                'required',
+                Rule::exists('warehouse_locations', 'id')->where('is_active', true)->where('navigation_enabled', true),
+            ],
             'on_hand' => ['required', 'integer', 'min:0'],
             'total_on_hand' => ['required', 'integer', 'min:0'],
             'per_panel_sqm' => ['required', 'numeric', 'min:0'],
@@ -54,6 +66,8 @@ class InventoryItemController extends Controller
             'remarks' => ['nullable', 'string', 'max:10000'],
         ]);
 
+        $warehouseLocation = WarehouseLocation::query()->findOrFail($validated['warehouse_location_id']);
+        $validated['location'] = $warehouseLocation->name;
         $validated['created_by'] = $request->user()->id;
         InventoryItem::create($validated);
 

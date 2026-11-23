@@ -37,10 +37,11 @@
                     <h2 id="warehouseStockHeading" class="text-[13px] font-semibold text-slate-900">Stock overview</h2>
                     <p class="mt-1 text-[10px] text-slate-500">Stock records for {{ $location->name }}</p>
                 </div>
-                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-medium text-slate-600">Not configured</span>
+                <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-medium text-emerald-700">{{ $items->count() }} item(s)</span>
             </div>
 
-            <div class="flex min-h-44 flex-col items-center justify-center gap-2 px-4 py-8 text-center">
+            @if ($items->isEmpty())
+                <div class="flex min-h-44 flex-col items-center justify-center gap-2 px-4 py-8 text-center">
                 <span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500" aria-hidden="true">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
                         <path stroke-linejoin="round" d="m3 7 9-4 9 4-9 4-9-4Z"/><path stroke-linejoin="round" d="M3 7v10l9 4 9-4V7M12 11v10"/>
@@ -48,7 +49,28 @@
                 </span>
                 <h3 class="text-[12px] font-medium text-slate-800">Stock tracking is not configured</h3>
                 <p class="max-w-md text-[10px] leading-5 text-slate-500">This location is ready, but stock records are not available yet. No inventory totals or item rows are being shown.</p>
-            </div>
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="min-w-[900px] w-full text-left text-[11px]">
+                        <thead class="border-b border-[#E5E7EB] bg-[#F8F9FA] text-slate-500">
+                            <tr><th class="px-4 py-2">Tag #</th><th class="px-4 py-2">Manufacturer</th><th class="px-4 py-2">Model</th><th class="px-4 py-2">Description</th><th class="px-4 py-2">Available Qty</th><th class="px-4 py-2">Status</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#E5E7EB]">
+                            @foreach ($items as $item)
+                                <tr>
+                                    <td class="px-4 py-2 font-medium">{{ $item->tag_number ?: '—' }}</td>
+                                    <td class="px-4 py-2">{{ $item->manufacturer ?: '—' }}</td>
+                                    <td class="px-4 py-2">{{ $item->model_pixel_pitch ?: '—' }}</td>
+                                    <td class="px-4 py-2">{{ $item->item_description }}</td>
+                                    <td class="px-4 py-2">{{ $item->available_qty }}</td>
+                                    <td class="px-4 py-2">{{ $item->status_particular ?: '—' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </section>
     </div>
 @endsection

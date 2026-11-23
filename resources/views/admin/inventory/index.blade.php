@@ -52,7 +52,7 @@
                             <td class="px-3 py-2">{{ $item->manufacturer ?: '—' }}</td>
                             <td class="px-3 py-2">{{ $item->model_pixel_pitch ?: '—' }}</td>
                             <td class="max-w-xs px-3 py-2">{{ $item->item_description }}</td>
-                            <td class="px-3 py-2">{{ $item->location ?: '—' }}</td>
+                            <td class="px-3 py-2">{{ $item->warehouseLocation?->name ?: $item->location ?: '—' }}</td>
                             <td class="px-3 py-2">{{ $item->total_on_hand }}</td>
                             <td class="px-3 py-2">{{ $item->available_qty }}</td>
                             <td class="px-3 py-2">{{ $item->reservation_qty }}</td>

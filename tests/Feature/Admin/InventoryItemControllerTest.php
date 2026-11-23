@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Models\WarehouseLocation;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -22,8 +23,13 @@ class InventoryItemControllerTest extends TestCase
     {
         $user = User::factory()->create();
         $user->roles()->attach(Role::where('slug', 'warehouse-admin')->first());
+        $warehouseLocation = WarehouseLocation::factory()->create([
+            'name' => 'Main Warehouse',
+            'is_active' => true,
+            'navigation_enabled' => true,
+        ]);
 
-        $response = $this->actingAs($user)->post(route('admin.inventory.store'), $this->itemData());
+        $response = $this->actingAs($user)->post(route('admin.inventory.store'), $this->itemData($warehouseLocation->id));
 
         $response
             ->assertRedirect(route('admin.inventory.index'))
@@ -34,6 +40,7 @@ class InventoryItemControllerTest extends TestCase
             'item_description' => 'LED panel',
             'total_on_hand' => 12,
             'created_by' => $user->id,
+            'warehouse_location_id' => $warehouseLocation->id,
         ]);
     }
 
@@ -52,7 +59,7 @@ class InventoryItemControllerTest extends TestCase
     /**
      * @return array<string, int|string>
      */
-    private function itemData(): array
+    private function itemData(?int $warehouseLocationId = null): array
     {
         return [
             'tag_number' => 'TAG-001',
@@ -62,6 +69,7 @@ class InventoryItemControllerTest extends TestCase
             'model_pixel_pitch' => 'P2.5',
             'item_description' => 'LED panel',
             'location' => 'Main Warehouse',
+            'warehouse_location_id' => $warehouseLocationId,
             'on_hand' => 12,
             'total_on_hand' => 12,
             'per_panel_sqm' => 0.25,

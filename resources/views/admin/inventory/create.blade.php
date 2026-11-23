@@ -24,13 +24,21 @@
                     'po_sku_number' => 'PO / SKU No.',
                     'manufacturer' => 'Manufacturer',
                     'model_pixel_pitch' => 'Model / Pixel Pitch',
-                    'location' => 'Location',
                 ] as $field => $label)
                     <div>
                         <label for="{{ $field }}" class="mb-1 block text-[11px] font-medium text-slate-700">{{ $label }}</label>
                         <input id="{{ $field }}" name="{{ $field }}" value="{{ old($field) }}" type="{{ $field === 'date_received' ? 'date' : 'text' }}" class="w-full rounded-sm border border-[#E5E7EB] px-3 py-2 text-[12px] outline-none focus:border-[#2563EB]">
                     </div>
                 @endforeach
+                <div>
+                    <label for="warehouse_location_id" class="mb-1 block text-[11px] font-medium text-slate-700">Warehouse Location <span class="text-red-500">*</span></label>
+                    <select id="warehouse_location_id" name="warehouse_location_id" required class="w-full rounded-sm border border-[#E5E7EB] bg-white px-3 py-2 text-[12px] outline-none focus:border-[#2563EB]">
+                        <option value="">Select warehouse</option>
+                        @foreach ($warehouseLocations as $warehouseLocation)
+                            <option value="{{ $warehouseLocation->id }}" @selected(old('warehouse_location_id') == $warehouseLocation->id)>{{ $warehouseLocation->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
 
             <div>

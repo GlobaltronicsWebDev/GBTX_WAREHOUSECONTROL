@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\InventoryItem;
 use App\Models\WarehouseLocation;
 use Illuminate\View\View;
 
@@ -12,6 +13,11 @@ class WarehouseDashboardController extends Controller
     {
         abort_unless($location->is_active && $location->navigation_enabled, 404);
 
-        return view('admin.warehouses.show', compact('location'));
+        $items = InventoryItem::query()
+            ->whereBelongsTo($location, 'warehouseLocation')
+            ->latest()
+            ->get();
+
+        return view('admin.warehouses.show', compact('location', 'items'));
     }
 }

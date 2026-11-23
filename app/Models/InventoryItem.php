@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\InventoryItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'model_pixel_pitch',
     'item_description',
     'location',
+    'warehouse_location_id',
     'on_hand',
     'total_on_hand',
     'per_panel_sqm',
@@ -35,7 +37,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class InventoryItem extends Model
 {
-    /** @use HasFactory<\Database\Factories\InventoryItemFactory> */
+    /** @use HasFactory<InventoryItemFactory> */
     use HasFactory;
 
     /**
@@ -80,5 +82,13 @@ class InventoryItem extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * The warehouse where the item is stored.
+     */
+    public function warehouseLocation(): BelongsTo
+    {
+        return $this->belongsTo(WarehouseLocation::class);
     }
 }
