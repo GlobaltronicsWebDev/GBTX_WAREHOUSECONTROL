@@ -177,9 +177,9 @@ class WarehouseLocationControllerTest extends TestCase
         InventoryItem::create(['item_description' => 'Other warehouse panel', 'warehouse_location_id' => $otherWarehouse->id, 'sub_location' => 'A JUAN MAIN 1ST FLOOR']);
         $firstFloorUrl = route('admin.warehouses.show', ['location' => $warehouse, 'sub_location' => 'A JUAN MAIN 1ST FLOOR']);
 
-        $this->actingAs($admin)->get($firstFloorUrl)
+        $response = $this->actingAs($admin)->get($firstFloorUrl);
+        $response
             ->assertSee($firstFloorUrl)
-            ->assertSee('href="'.$firstFloorUrl.'" aria-current="page"', false)
             ->assertSee('A JUAN MAIN 3RD FLOOR')
             ->assertSee('11 item(s)')
             ->assertSee('First floor panel 11')
@@ -192,6 +192,10 @@ class WarehouseLocationControllerTest extends TestCase
             ->assertDontSee('Delete all warehouse items')
             ->assertDontSee('aria-label="Delete First floor panel', false)
             ->assertSee('sub_location=A%20JUAN%20MAIN%201ST%20FLOOR&amp;page=2', false);
+        $document = new \DOMDocument;
+        $document->loadHTML($response->getContent(), LIBXML_NOERROR | LIBXML_NOWARNING);
+        $activeLinks = (new \DOMXPath($document))->query('//a[@aria-current="page"]');
+        $this->assertSame($firstFloorUrl, $activeLinks->item(0)->getAttribute('href'));
 
         $this->get(route('admin.warehouses.show', ['location' => $warehouse, 'sub_location' => 'A JUAN MAIN 1ST FLOOR', 'page' => 2]))
             ->assertSee('First floor panel 01')
