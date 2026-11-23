@@ -129,6 +129,51 @@ class InventoryItemControllerTest extends TestCase
         $this->assertSame(['20', '6', 'Working', 'Checked', '2Floor'], array_slice($cellValues, 16, 5));
     }
 
+    public function test_warehouse_stock_is_paginated_by_ten_items_with_a_stable_order(): void
+    {
+        $this->freezeTime();
+        $warehouse = WarehouseLocation::factory()->create(['name' => 'Marikina']);
+        $otherWarehouse = WarehouseLocation::factory()->create();
+        for ($number = 1; $number <= 21; $number++) {
+            $item = InventoryItem::create([
+                'item_description' => sprintf('Panel %02d', $number),
+                'warehouse_location_id' => $warehouse->id,
+            ]);
+            if ($number === 11) {
+                $item->histories()->create(['quantity' => 3, 'project' => 'Second page project']);
+            }
+        }
+        InventoryItem::create(['item_description' => 'Other warehouse panel', 'warehouse_location_id' => $otherWarehouse->id]);
+        InventoryItem::create(['item_description' => 'Deleted panel', 'warehouse_location_id' => $warehouse->id])->delete();
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('admin.warehouses.show', $warehouse))
+            ->assertSee('21 item(s)')
+            ->assertSee('>Panel 21</td>', false)
+            ->assertSee('>Panel 12</td>', false)
+            ->assertDontSee('>Panel 11</td>', false)
+            ->assertDontSee('Other warehouse panel')
+            ->assertDontSee('Deleted panel')
+            ->assertSee('?page=2');
+
+        $this->get(route('admin.warehouses.show', ['location' => $warehouse, 'page' => 2]))
+            ->assertSee('21 item(s)')
+            ->assertSee('>Panel 11</td>', false)
+            ->assertSee('>Panel 02</td>', false)
+            ->assertSee('Second page project')
+            ->assertDontSee('>Panel 12</td>', false)
+            ->assertDontSee('>Panel 01</td>', false);
+
+        $this->get(route('admin.warehouses.show', ['location' => $warehouse, 'page' => 3]))
+            ->assertSee('>Panel 01</td>', false)
+            ->assertDontSee('>Panel 02</td>', false);
+
+        $this->get(route('admin.warehouses.show', ['location' => $warehouse, 'page' => 4]))
+            ->assertSee('No items on this page.')
+            ->assertDontSee('Stock tracking is not configured')
+            ->assertSee('?page=3');
+    }
+
     public function test_item_can_be_edited_from_inventory_and_warehouse_lists(): void
     {
         $creator = User::factory()->create();

@@ -17,7 +17,9 @@ class WarehouseDashboardController extends Controller
             ->with('histories')
             ->whereBelongsTo($location, 'warehouseLocation')
             ->latest()
-            ->get();
+            ->orderByDesc('id')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.warehouses.show', compact('location', 'items'));
     }
