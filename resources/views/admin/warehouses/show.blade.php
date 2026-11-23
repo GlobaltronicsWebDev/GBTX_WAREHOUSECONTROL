@@ -52,7 +52,7 @@
                 </div>
             @else
                 <div class="overflow-x-auto">
-                    <table class="min-w-[2200px] w-full text-left text-[11px]">
+                    <table class="min-w-[2200px] w-full border-collapse text-left text-[11px]">
                         <thead class="border-b border-[#E5E7EB] bg-[#F8F9FA] text-slate-500">
                             <tr>
                                 <th rowspan="2" scope="col" class="px-4 py-2">Tag #</th>
@@ -62,12 +62,12 @@
                                 <th rowspan="2" scope="col" class="px-4 py-2">Model / Pixel Pitch</th>
                                 <th rowspan="2" scope="col" class="px-4 py-2">Item Description</th>
                                 <th rowspan="2" scope="col" class="px-4 py-2">Location</th>
-                                <th colspan="4" scope="colgroup" class="px-4 py-2 text-center">Inventory</th>
-                                <th colspan="2" scope="colgroup" class="px-4 py-2 text-center">Available Qty</th>
-                                <th colspan="2" scope="colgroup" class="px-4 py-2 text-center">Reservation</th>
-                                <th colspan="2" scope="colgroup" class="px-4 py-2 text-center">History</th>
+                                <th colspan="4" scope="colgroup" class="border border-[#E5E7EB] px-4 py-2 text-center">Inventory</th>
+                                <th colspan="2" scope="colgroup" class="border border-[#E5E7EB] px-4 py-2 text-center">Available Qty</th>
+                                <th colspan="2" scope="colgroup" class="border border-[#E5E7EB] px-4 py-2 text-center">Reservation</th>
+                                <th colspan="2" scope="colgroup" class="border border-[#E5E7EB] px-4 py-2 text-center">History</th>
                                 <th rowspan="2" scope="col" class="px-4 py-2">Original Qty</th>
-                                <th colspan="2" scope="colgroup" class="px-4 py-2 text-center">Status</th>
+                                <th colspan="2" scope="colgroup" class="border border-[#E5E7EB] px-4 py-2 text-center">Status</th>
                                 <th rowspan="2" scope="col" class="px-4 py-2">Remarks</th>
                                 @if ($location->inventorySubLocations())
                                     <th rowspan="2" scope="col" class="px-4 py-2">Sub-location</th>
@@ -75,18 +75,18 @@
                                 <th rowspan="2" scope="col" class="px-4 py-2">Actions</th>
                             </tr>
                             <tr>
-                                <th scope="col" class="px-4 py-2">On-hand</th>
-                                <th scope="col" class="px-4 py-2">Total On-hand</th>
-                                <th scope="col" class="px-4 py-2">Per Panel SQM</th>
-                                <th scope="col" class="px-4 py-2">Total Available SQM</th>
-                                <th scope="col" class="px-4 py-2">Qty</th>
-                                <th scope="col" class="px-4 py-2">SQM</th>
-                                <th scope="col" class="px-4 py-2">Qty</th>
-                                <th scope="col" class="px-4 py-2">Project Details</th>
-                                <th scope="col" class="w-16 px-4 py-2">Qty</th>
-                                <th scope="col" class="px-4 py-2">Project</th>
-                                <th scope="col" class="px-4 py-2">Qty</th>
-                                <th scope="col" class="px-4 py-2">Particular</th>
+                                <th scope="col" class="border border-[#E5E7EB] px-4 py-2">On-hand</th>
+                                <th scope="col" class="border border-[#E5E7EB] px-4 py-2">Total On-hand</th>
+                                <th scope="col" class="border border-[#E5E7EB] px-4 py-2">Per Panel SQM</th>
+                                <th scope="col" class="border border-[#E5E7EB] px-4 py-2">Total Available SQM</th>
+                                <th scope="col" class="border border-[#E5E7EB] px-4 py-2">Qty</th>
+                                <th scope="col" class="border border-[#E5E7EB] px-4 py-2">SQM</th>
+                                <th scope="col" class="border border-[#E5E7EB] px-4 py-2">Qty</th>
+                                <th scope="col" class="border border-[#E5E7EB] px-4 py-2">Project Details</th>
+                                <th scope="col" class="w-16 border border-[#E5E7EB] px-4 py-2">Qty</th>
+                                <th scope="col" class="border border-[#E5E7EB] px-4 py-2">Project</th>
+                                <th scope="col" class="border border-[#E5E7EB] px-4 py-2">Qty</th>
+                                <th scope="col" class="border border-[#E5E7EB] px-4 py-2">Particular</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#E5E7EB]">
