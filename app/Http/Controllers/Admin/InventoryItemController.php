@@ -78,7 +78,8 @@ class InventoryItemController extends Controller
     private function validatedItem(Request $request, ?InventoryItem $item = null): array
     {
         $warehouseRule = Rule::exists('warehouse_locations', 'id');
-        if ($item?->warehouse_location_id === null || (string) $request->input('warehouse_location_id') !== (string) $item->warehouse_location_id) {
+        $requestedWarehouseId = $request->input('warehouse_location_id');
+        if ($item?->warehouse_location_id === null || ! is_scalar($requestedWarehouseId) || (string) $requestedWarehouseId !== (string) $item->warehouse_location_id) {
             $warehouseRule->where('is_active', true)->where('navigation_enabled', true);
         }
 
@@ -91,6 +92,7 @@ class InventoryItemController extends Controller
             'item_description' => ['required', 'string', 'max:10000'],
             'warehouse_location_id' => [
                 'required',
+                'integer',
                 $warehouseRule,
             ],
             'on_hand' => ['required', 'integer', 'min:0'],
