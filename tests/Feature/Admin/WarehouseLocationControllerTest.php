@@ -221,6 +221,67 @@ class WarehouseLocationControllerTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_warehouse_search_filters_inventory_within_sub_location_and_preserves_pagination(): void
+    {
+        $this->freezeTime();
+        $warehouse = WarehouseLocation::where('name', 'A Juan')->firstOrFail();
+        $otherWarehouse = WarehouseLocation::factory()->create();
+        $user = User::factory()->create();
+        $user->roles()->attach(Role::where('slug', 'warehouse-admin')->firstOrFail());
+        for ($number = 1; $number <= 11; $number++) {
+            InventoryItem::create([
+                'tag_number' => sprintf('MATCH-%02d', $number),
+                'item_description' => sprintf('Panel %02d', $number),
+                'warehouse_location_id' => $warehouse->id,
+                'sub_location' => 'A JUAN MAIN 1ST FLOOR',
+            ]);
+        }
+        InventoryItem::create(['tag_number' => 'MATCH-OTHER-FLOOR', 'item_description' => 'Other floor', 'warehouse_location_id' => $warehouse->id, 'sub_location' => 'A JUAN MAIN 3RD FLOOR']);
+        InventoryItem::create(['tag_number' => 'MATCH-OTHER-WAREHOUSE', 'item_description' => 'Other warehouse', 'warehouse_location_id' => $otherWarehouse->id]);
+        $params = ['location' => $warehouse, 'sub_location' => 'A JUAN MAIN 1ST FLOOR', 'search' => 'MATCH'];
+        $clearUrl = route('admin.warehouses.show', ['location' => $warehouse, 'sub_location' => 'A JUAN MAIN 1ST FLOOR']);
+
+        $this->actingAs($user)->get(route('admin.warehouses.show', $params))
+            ->assertSee('11 item(s)')
+            ->assertSee('Panel 11')
+            ->assertDontSee('Panel 01')
+            ->assertDontSee('Other floor')
+            ->assertDontSee('Other warehouse')
+            ->assertSee('name="sub_location" value="A JUAN MAIN 1ST FLOOR"', false)
+            ->assertSee('name="search" value="MATCH"', false)
+            ->assertSee('href="'.$clearUrl.'"', false)
+            ->assertSee('sub_location=A%20JUAN%20MAIN%201ST%20FLOOR&amp;search=MATCH&amp;page=2', false)
+            ->assertDontSee('Delete all warehouse items');
+        $this->get(route('admin.warehouses.show', array_merge($params, ['page' => 2])))
+            ->assertSee('Panel 01')
+            ->assertDontSee('Panel 02');
+    }
+
+    public function test_warehouse_search_handles_no_matches_and_keeps_bulk_delete_safely_scoped(): void
+    {
+        $warehouse = WarehouseLocation::where('name', 'A Juan')->firstOrFail();
+        $user = User::factory()->create();
+        $user->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        InventoryItem::create(['item_description' => 'Panel 0', 'warehouse_location_id' => $warehouse->id]);
+        InventoryItem::create(['item_description' => 'Other panel', 'warehouse_location_id' => $warehouse->id]);
+
+        $this->actingAs($user)->get(route('admin.warehouses.show', ['location' => $warehouse, 'search' => '0']))
+            ->assertSee('Panel 0')
+            ->assertDontSee('Other panel')
+            ->assertSee('1 item(s)')
+            ->assertSee('Delete selected items')
+            ->assertDontSee('Delete all warehouse items');
+        $this->get(route('admin.warehouses.show', ['location' => $warehouse, 'search' => 'missing']))
+            ->assertSee('No inventory items match your search.')
+            ->assertDontSee('Stock tracking is not configured');
+        $this->get(route('admin.warehouses.show', ['location' => $warehouse, 'search' => '<script>']))
+            ->assertSee('value="&lt;script&gt;"', false);
+        $this->from(route('admin.warehouses.show', $warehouse))
+            ->get(route('admin.warehouses.show', ['location' => $warehouse, 'search' => ['invalid']]))
+            ->assertSessionHasErrors('search');
+        $this->get(route('admin.warehouses.show', $warehouse))->assertSee('Delete all warehouse items');
+    }
+
     public function test_guest_is_redirected_to_login_from_a_warehouse_dashboard(): void
     {
         $location = WarehouseLocation::factory()->create();

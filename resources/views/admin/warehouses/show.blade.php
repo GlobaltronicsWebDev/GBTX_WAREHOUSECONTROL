@@ -47,7 +47,19 @@
                 <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-medium text-emerald-700">{{ $items->total() }} item(s)</span>
             </div>
 
-            @if ($selectedSubLocation === null && Auth::user()->canDeleteInventoryItems() && $items->total() > 0)
+            <form method="GET" action="{{ route('admin.warehouses.show', $location) }}" class="flex flex-wrap gap-2 border-b border-[#E5E7EB] px-4 py-3" role="search">
+                @if ($selectedSubLocation !== null)
+                    <input type="hidden" name="sub_location" value="{{ $selectedSubLocation }}">
+                @endif
+                <label for="warehouse-search" class="sr-only">Search warehouse inventory</label>
+                <input id="warehouse-search" name="search" value="{{ $search }}" maxlength="255" placeholder="Search tag, PO/SKU, manufacturer, model, item or location" class="min-w-0 flex-1 rounded-sm border border-[#E5E7EB] px-3 py-2 text-[12px] outline-none focus:border-[#2563EB]">
+                <button type="submit" class="rounded-sm border border-[#E5E7EB] px-3 py-2 text-[12px] text-slate-700 hover:bg-[#F8F9FA]">Search</button>
+                @if ($search !== '')
+                    <a href="{{ route('admin.warehouses.show', ['location' => $location, 'sub_location' => $selectedSubLocation]) }}" class="rounded-sm border border-[#E5E7EB] px-3 py-2 text-[12px] text-slate-700 hover:bg-[#F8F9FA]">Clear</a>
+                @endif
+            </form>
+
+            @if ($selectedSubLocation === null && Auth::user()->canDeleteInventoryItems() && $items->total() > 0 && ($items->isNotEmpty() || $search === ''))
                 <div class="flex flex-wrap items-start gap-3 border-b border-[#E5E7EB] px-4 py-3">
                     @if ($items->isNotEmpty())
                         <form id="delete-selected-items" method="POST" action="{{ route('admin.warehouses.inventory.destroy-selected', $location) }}" onsubmit="return confirm('Soft-delete the selected items? They cannot be restored from the application.')">
@@ -61,26 +73,30 @@
                             </button>
                         </form>
                     @endif
-                    <details>
-                        <summary class="cursor-pointer rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-red-600 hover:text-red-700">Delete all warehouse items</summary>
-                        <form method="POST" action="{{ route('admin.warehouses.inventory.destroy-all', $location) }}" onsubmit="return confirm('Soft-delete ALL items in this warehouse across every page? They cannot be restored from the application.')" class="mt-2 space-y-2">
-                            @csrf
-                            @method('DELETE')
-                            <p class="text-[11px] text-slate-600">This affects all {{ $items->total() }} items in {{ $location->name }}, not just this page. Deleted items cannot be restored from the application.</p>
-                            <label for="warehouse-delete-confirmation" class="block text-[11px] text-slate-700">Type {{ $location->name }} to confirm</label>
-                            <input id="warehouse-delete-confirmation" name="confirmation" type="text" required autocomplete="off" class="w-full rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px]">
-                            <button type="submit" class="inline-flex items-center gap-1 rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-red-600 hover:text-red-700">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/>
-                                </svg>
-                                Delete all items
-                            </button>
-                        </form>
-                    </details>
+                    @if ($search === '')
+                        <details>
+                            <summary class="cursor-pointer rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-red-600 hover:text-red-700">Delete all warehouse items</summary>
+                            <form method="POST" action="{{ route('admin.warehouses.inventory.destroy-all', $location) }}" onsubmit="return confirm('Soft-delete ALL items in this warehouse across every page? They cannot be restored from the application.')" class="mt-2 space-y-2">
+                                @csrf
+                                @method('DELETE')
+                                <p class="text-[11px] text-slate-600">This affects all {{ $items->total() }} items in {{ $location->name }}, not just this page. Deleted items cannot be restored from the application.</p>
+                                <label for="warehouse-delete-confirmation" class="block text-[11px] text-slate-700">Type {{ $location->name }} to confirm</label>
+                                <input id="warehouse-delete-confirmation" name="confirmation" type="text" required autocomplete="off" class="w-full rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px]">
+                                <button type="submit" class="inline-flex items-center gap-1 rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-red-600 hover:text-red-700">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/>
+                                    </svg>
+                                    Delete all items
+                                </button>
+                            </form>
+                        </details>
+                    @endif
                 </div>
             @endif
 
-            @if ($items->total() === 0 && $selectedSubLocation !== null)
+            @if ($items->total() === 0 && $search !== '')
+                <p class="px-4 py-8 text-center text-[11px] text-slate-500">No inventory items match your search.</p>
+            @elseif ($items->total() === 0 && $selectedSubLocation !== null)
                 <p class="px-4 py-8 text-center text-[11px] text-slate-500">No items found in this sub-location.</p>
             @elseif ($items->total() === 0)
                 <div class="flex min-h-44 flex-col items-center justify-center gap-2 px-4 py-8 text-center">

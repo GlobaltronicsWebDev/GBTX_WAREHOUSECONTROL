@@ -23,17 +23,20 @@ class WarehouseDashboardController extends Controller
         if ($selectedSubLocation !== null) {
             abort_unless(is_string($selectedSubLocation) && in_array($selectedSubLocation, $location->inventorySubLocations(), true), 404);
         }
+        $validated = $request->validate(['search' => ['nullable', 'string', 'max:255']]);
+        $search = trim($validated['search'] ?? '');
 
         $items = InventoryItem::query()
             ->with('histories')
             ->whereBelongsTo($location, 'warehouseLocation')
             ->when($selectedSubLocation !== null, fn ($query) => $query->where('sub_location', $selectedSubLocation))
+            ->matching($search)
             ->latest()
             ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.warehouses.show', compact('location', 'items', 'selectedSubLocation'));
+        return view('admin.warehouses.show', compact('location', 'items', 'selectedSubLocation', 'search'));
     }
 
     public function destroySelected(Request $request, WarehouseLocation $location): RedirectResponse
