@@ -7,6 +7,8 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\WarehouseLocation;
 use Database\Seeders\RoleSeeder;
+use DOMDocument;
+use DOMXPath;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -293,6 +295,39 @@ class InventoryItemControllerTest extends TestCase
         unset($data['histories']);
         $this->put(route('admin.inventory.update', $item), $data)->assertSessionHasNoErrors();
         $this->assertDatabaseCount('inventory_item_histories', 0);
+    }
+
+    public function test_inventory_and_warehouse_lists_collapse_additional_histories_per_item(): void
+    {
+        $warehouse = WarehouseLocation::factory()->create(['is_active' => true, 'navigation_enabled' => true]);
+        $multiple = InventoryItem::create(['item_description' => 'Multiple panel', 'warehouse_location_id' => $warehouse->id]);
+        $multiple->histories()->createMany([
+            ['quantity' => 15, 'project' => 'Client Alpha'],
+            ['quantity' => 36, 'project' => 'Client Beta'],
+            ['quantity' => 0, 'project' => 'Client Gamma'],
+        ]);
+        $single = InventoryItem::create(['item_description' => 'Single panel', 'warehouse_location_id' => $warehouse->id]);
+        $single->histories()->create(['quantity' => 9, 'project' => 'Client Solo']);
+        InventoryItem::create(['item_description' => 'Empty panel', 'warehouse_location_id' => $warehouse->id]);
+        $this->actingAs(User::factory()->create());
+
+        foreach ([route('admin.inventory.index'), route('admin.warehouses.show', $warehouse)] as $url) {
+            $response = $this->get($url);
+            $response->assertOk();
+            $document = new DOMDocument;
+            $document->loadHTML($response->getContent(), LIBXML_NOERROR | LIBXML_NOWARNING);
+            $xpath = new DOMXPath($document);
+
+            $details = $xpath->query('//tr[td[contains(., "Multiple panel")]]//details[not(@open)]');
+            $this->assertCount(1, $details);
+            $this->assertStringContainsString('Additional histories (2)', $details->item(0)->textContent);
+            $this->assertStringContainsString('Client Beta', $details->item(0)->textContent);
+            $this->assertStringContainsString('Client Gamma', $details->item(0)->textContent);
+            $this->assertStringNotContainsString('Client Alpha', $details->item(0)->textContent);
+            $this->assertCount(1, $xpath->query('//tr[td[contains(., "Multiple panel")]]//details/preceding-sibling::div[contains(., "Client Alpha")]'));
+            $this->assertCount(0, $xpath->query('//tr[td[contains(., "Single panel") or contains(., "Empty panel")]]//details'));
+            $response->assertSee('Client Solo');
+        }
     }
 
     public function test_invalid_history_update_preserves_item_and_existing_history(): void

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\CredentialController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\InventoryCsvController;
 use App\Http\Controllers\Admin\InventoryItemController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
@@ -147,6 +148,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/inventory/dashboard', [InventoryItemController::class, 'dashboard'])->name('inventory.dashboard');
+    Route::get('/inventory/export', [InventoryCsvController::class, 'export'])->name('inventory.export');
+    Route::post('/inventory/import', [InventoryCsvController::class, 'import'])->name('inventory.import');
     Route::resource('inventory', InventoryItemController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::get('/warehouses/{location}', [WarehouseDashboardController::class, 'show'])->name('warehouses.show');
     Route::get('/reports', [DashboardController::class, 'reports'])->name('reports.index');

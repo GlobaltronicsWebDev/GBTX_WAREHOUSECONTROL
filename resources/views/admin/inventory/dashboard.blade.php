@@ -18,8 +18,37 @@
                     <p class="mt-1 max-w-3xl text-[12px] leading-5 text-slate-500">Stock movement, item activity, and stock health overview.</p>
                 </div>
             </div>
-            <span class="inline-flex w-fit shrink-0 items-center border border-[#E5E7EB] bg-[#F8F9FA] px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-500">UI prototype · BETA</span>
+            <div class="flex flex-wrap items-start gap-2">
+                <a href="{{ route('admin.inventory.export') }}" class="rounded-sm border border-[#E5E7EB] px-3 py-2 text-[11px] text-slate-700 hover:bg-[#F8F9FA]">Export CSV</a>
+                @if (Auth::user()->isAdmin())
+                    <details class="relative">
+                        <summary class="cursor-pointer rounded-sm bg-[#2563EB] px-3 py-2 text-[11px] font-medium text-white">Import CSV</summary>
+                        <form method="POST" action="{{ route('admin.inventory.import') }}" enctype="multipart/form-data" class="absolute right-0 z-10 mt-2 w-72 space-y-3 border border-[#E5E7EB] bg-white p-3 shadow-lg">
+                            @csrf
+                            <label for="csv_file" class="block text-[11px] font-medium text-slate-700">Inventory CSV file</label>
+                            <input id="csv_file" type="file" name="csv_file" accept=".csv,text/csv" required class="block w-full text-[11px] text-slate-700">
+                            <p class="text-[10px] text-slate-500">Use the exported CSV as a template. Existing IDs update items; leave ID blank to add. Fill all quantity and SQM fields (use 0 if needed). Histories are replaced. Maximum 5 MB and 5,000 records.</p>
+                            <p class="text-[10px] text-slate-500">Set histories to a JSON list, for example: <code>[{"quantity":2,"project":"Client"}]</code>. Use [] for no history.</p>
+                            <p class="text-[10px] text-slate-500">Active warehouse IDs:
+                                @forelse ($warehouseLocations as $warehouseLocation)
+                                    {{ $warehouseLocation->id }}: {{ $warehouseLocation->name }}{{ $loop->last ? '' : ',' }}
+                                @empty
+                                    None available.
+                                @endforelse
+                            </p>
+                            <button type="submit" class="rounded-sm bg-[#2563EB] px-3 py-2 text-[11px] text-white">Upload CSV</button>
+                        </form>
+                    </details>
+                @endif
+            </div>
         </section>
+
+        @if (session('status'))
+            <div role="status" class="border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{{ session('status') }}</div>
+        @endif
+        @if ($errors->any())
+            <div role="alert" class="border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">{{ $errors->first() }}</div>
+        @endif
 
         <section class="-mx-3 flex flex-col gap-3 border-y border-[#E5E7EB] px-3 py-2.5 sm:-mx-5 sm:px-5 xl:flex-row xl:items-center xl:justify-between" aria-label="Inventory actions and telemetry">
             <div class="flex shrink-0 items-center gap-2 text-[10px] uppercase tracking-wide text-slate-500">

@@ -295,7 +295,8 @@ class AdminDashboardTest extends TestCase
         $response->assertOk();
         $response->assertSee('Inventory Management');
         $response->assertSee('Inventory / Dashboard');
-        $response->assertSee('UI prototype');
+        $response->assertDontSee('UI prototype · BETA');
+        $response->assertSee('Export CSV');
         $response->assertSee('Today’s Movement');
         $response->assertSee('Stock Health');
         $response->assertSee('Recent Movement');
