@@ -123,7 +123,7 @@ class InventoryItemControllerTest extends TestCase
         $cellValues = array_map(fn ($cell) => trim($cell->textContent), iterator_to_array($cells, false));
         $this->assertSame([
             'TAG-27', '2026-11-20', 'PO-27', 'Maker', 'P2.5', 'Warehouse panel', 'Marikina',
-            '11', '12', '1.25', '8.75', '7', '8.75', '4', 'Reserved client',
+            '11', '12', '1.25', '8.75', '7 PCS', '8.75 SQM', '4', 'Reserved client',
         ], array_slice($cellValues, 0, 15));
         $this->assertStringContainsString('History client', $cells->item(15)->textContent);
         $this->assertSame(['20', '6', 'Working', 'Checked', '2Floor'], array_slice($cellValues, 16, 5));
