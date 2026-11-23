@@ -67,17 +67,18 @@ class InventoryItemControllerTest extends TestCase
     public function test_inventory_list_displays_original_quantity_after_history(): void
     {
         $user = User::factory()->create();
-        InventoryItem::create([
+        $item = InventoryItem::create([
             'item_description' => 'LED panel',
             'history_qty' => 17,
             'history_project' => 'Project Alpha',
             'original_qty' => 42,
         ]);
+        $item->histories()->create(['quantity' => 17, 'project' => 'Project Alpha']);
 
         $response = $this->actingAs($user)->get(route('admin.inventory.index'));
 
         $response->assertSeeInOrder(['History Qty', 'History Project', 'Original Qty', 'Status']);
-        $response->assertSeeInOrder(['>17</td>', '>Project Alpha</td>', '>42</td>'], false);
+        $response->assertSeeInOrder(['>17</span>', '>Project Alpha</span>', '>42</td>'], false);
     }
 
     public function test_item_can_be_edited_from_inventory_and_warehouse_lists(): void
@@ -232,6 +233,98 @@ class InventoryItemControllerTest extends TestCase
         }
 
         $this->assertDatabaseCount('inventory_items', 0);
+    }
+
+    public function test_ohaap_floor_options_are_saved_and_other_warehouse_choices_are_rejected(): void
+    {
+        $user = User::factory()->create();
+        $ohaap = WarehouseLocation::factory()->create(['name' => 'Ohaap', 'is_active' => true, 'navigation_enabled' => true]);
+        $marikina = WarehouseLocation::factory()->create(['name' => 'Marikina', 'is_active' => true, 'navigation_enabled' => true]);
+        $data = $this->itemData($ohaap->id);
+
+        $this->actingAs($user)->get(route('admin.inventory.create'))
+            ->assertSeeInOrder(['1st Flr', '2nd Flr', '3rd Flr', '4th Flr', '5th Flr']);
+
+        foreach (['1st Flr', '2nd Flr', '3rd Flr', '4th Flr', '5th Flr'] as $floor) {
+            $data['sub_location'] = $floor;
+            $data['item_description'] = 'Ohaap panel '.$floor;
+            $this->post(route('admin.inventory.store'), $data)->assertSessionHasNoErrors();
+            $this->assertDatabaseHas('inventory_items', ['item_description' => 'Ohaap panel '.$floor, 'sub_location' => $floor]);
+        }
+
+        $this->get(route('admin.warehouses.show', $ohaap))->assertSee('Sub-location')->assertSee('Ohaap panel 3rd Flr');
+        $item = InventoryItem::where('item_description', 'Ohaap panel 3rd Flr')->firstOrFail();
+        $this->get(route('admin.inventory.edit', $item))->assertSee('value="3rd Flr" selected', false);
+        $data = $this->itemData($marikina->id);
+        $data['sub_location'] = '3rd Flr';
+        $this->from(route('admin.inventory.edit', $item))
+            ->put(route('admin.inventory.update', $item), $data)
+            ->assertSessionHasErrors('sub_location');
+        $this->assertDatabaseHas('inventory_items', ['id' => $item->id, 'warehouse_location_id' => $ohaap->id, 'sub_location' => '3rd Flr']);
+    }
+
+    public function test_multiple_project_histories_can_be_added_edited_and_viewed_in_every_warehouse(): void
+    {
+        $user = User::factory()->create();
+        $warehouse = WarehouseLocation::factory()->create(['is_active' => true, 'navigation_enabled' => true]);
+        $data = $this->itemData($warehouse->id);
+        $data['history_submitted'] = '1';
+        $data['histories'] = [
+            ['quantity' => 15, 'project' => 'Client Alpha'],
+            ['quantity' => 36, 'project' => 'Client Beta'],
+            ['quantity' => 0, 'project' => 'Client Gamma'],
+        ];
+
+        $this->actingAs($user)->post(route('admin.inventory.store'), $data)->assertSessionHasNoErrors();
+        $item = InventoryItem::where('item_description', 'LED panel')->firstOrFail();
+        $this->assertDatabaseHas('inventory_item_histories', ['inventory_item_id' => $item->id, 'quantity' => 15, 'project' => 'Client Alpha']);
+        $this->assertDatabaseHas('inventory_item_histories', ['inventory_item_id' => $item->id, 'quantity' => 36, 'project' => 'Client Beta']);
+        $this->assertDatabaseHas('inventory_item_histories', ['inventory_item_id' => $item->id, 'quantity' => 0, 'project' => 'Client Gamma']);
+        $this->get(route('admin.inventory.index'))->assertSeeInOrder(['Client Alpha', 'Client Beta', 'Client Gamma']);
+        $this->get(route('admin.warehouses.show', $warehouse))->assertSeeInOrder(['Client Alpha', 'Client Beta', 'Client Gamma']);
+        $this->get(route('admin.inventory.edit', $item))->assertSee('Client Beta');
+
+        $data['histories'] = [['quantity' => 22, 'project' => 'Updated client']];
+        $this->put(route('admin.inventory.update', $item), $data)->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('inventory_item_histories', 1);
+        $this->assertDatabaseHas('inventory_item_histories', ['inventory_item_id' => $item->id, 'quantity' => 22, 'project' => 'Updated client']);
+        $this->assertDatabaseHas('inventory_items', ['id' => $item->id, 'history_qty' => 22, 'history_project' => 'Updated client']);
+
+        unset($data['histories']);
+        $this->put(route('admin.inventory.update', $item), $data)->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('inventory_item_histories', 0);
+    }
+
+    public function test_invalid_history_update_preserves_item_and_existing_history(): void
+    {
+        $user = User::factory()->create();
+        $warehouse = WarehouseLocation::factory()->create(['is_active' => true, 'navigation_enabled' => true]);
+        $item = InventoryItem::create(['item_description' => 'Original', 'warehouse_location_id' => $warehouse->id]);
+        $item->histories()->create(['quantity' => 4, 'project' => 'Existing client']);
+        $data = $this->itemData($warehouse->id);
+        $data['history_submitted'] = '1';
+        $data['histories'] = [['quantity' => -1, 'project' => 'Invalid client']];
+
+        $this->actingAs($user)->from(route('admin.inventory.edit', $item))
+            ->put(route('admin.inventory.update', $item), $data)
+            ->assertSessionHasErrors('histories.0.quantity');
+
+        $this->assertDatabaseHas('inventory_items', ['id' => $item->id, 'item_description' => 'Original']);
+        $this->assertDatabaseHas('inventory_item_histories', ['inventory_item_id' => $item->id, 'quantity' => 4, 'project' => 'Existing client']);
+    }
+
+    public function test_existing_inventory_histories_are_preserved_by_migration(): void
+    {
+        $migration = require database_path('migrations/2026_11_23_140000_create_inventory_item_histories_table.php');
+        $migration->down();
+        $item = InventoryItem::create(['item_description' => 'Legacy panel', 'history_qty' => 15, 'history_project' => 'Legacy client']);
+        $deleted = InventoryItem::create(['item_description' => 'Deleted panel', 'history_qty' => 36, 'history_project' => 'Deleted client']);
+        $deleted->delete();
+
+        $migration->up();
+
+        $this->assertDatabaseHas('inventory_item_histories', ['inventory_item_id' => $item->id, 'quantity' => 15, 'project' => 'Legacy client']);
+        $this->assertDatabaseHas('inventory_item_histories', ['inventory_item_id' => $deleted->id, 'quantity' => 36, 'project' => 'Deleted client']);
     }
 
     public function test_administrators_can_soft_delete_inventory_from_both_lists(): void

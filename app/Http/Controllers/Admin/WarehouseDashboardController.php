@@ -14,6 +14,7 @@ class WarehouseDashboardController extends Controller
         abort_unless($location->is_active && $location->navigation_enabled, 404);
 
         $items = InventoryItem::query()
+            ->with('histories')
             ->whereBelongsTo($location, 'warehouseLocation')
             ->latest()
             ->get();

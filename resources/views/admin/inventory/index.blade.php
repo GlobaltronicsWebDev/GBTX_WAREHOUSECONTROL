@@ -63,8 +63,7 @@
                             <td class="px-3 py-2">{{ $item->total_on_hand }}</td>
                             <td class="px-3 py-2">{{ $item->available_qty }}</td>
                             <td class="px-3 py-2">{{ $item->reservation_qty }}</td>
-                            <td class="px-3 py-2">{{ $item->history_qty }}</td>
-                            <td class="max-w-xs px-3 py-2">{{ $item->history_project ?: '—' }}</td>
+                            <td colspan="2" class="max-w-xs px-3 py-2">@include('admin.inventory._history_entries', ['item' => $item])</td>
                             <td class="px-3 py-2">{{ $item->original_qty }}</td>
                             <td class="px-3 py-2">{{ $item->status_particular ?: '—' }}</td>
                             <td class="max-w-xs px-3 py-2">{{ $item->remarks ?: '—' }}</td>

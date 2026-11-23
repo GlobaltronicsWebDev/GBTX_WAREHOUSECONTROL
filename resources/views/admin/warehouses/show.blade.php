@@ -54,7 +54,7 @@
                 <div class="overflow-x-auto">
                     <table class="min-w-[900px] w-full text-left text-[11px]">
                         <thead class="border-b border-[#E5E7EB] bg-[#F8F9FA] text-slate-500">
-                            <tr><th class="px-4 py-2">Tag #</th><th class="px-4 py-2">Manufacturer</th><th class="px-4 py-2">Model</th><th class="px-4 py-2">Description</th>@if ($location->inventorySubLocations())<th class="px-4 py-2">Sub-location</th>@endif<th class="px-4 py-2">Available Qty</th><th class="px-4 py-2">Status</th><th class="px-4 py-2">Actions</th></tr>
+                            <tr><th class="px-4 py-2">Tag #</th><th class="px-4 py-2">Manufacturer</th><th class="px-4 py-2">Model</th><th class="px-4 py-2">Description</th>@if ($location->inventorySubLocations())<th class="px-4 py-2">Sub-location</th>@endif<th class="px-4 py-2">Available Qty</th><th class="px-4 py-2">History Qty / Project</th><th class="px-4 py-2">Status</th><th class="px-4 py-2">Actions</th></tr>
                         </thead>
                         <tbody class="divide-y divide-[#E5E7EB]">
                             @foreach ($items as $item)
@@ -67,6 +67,7 @@
                                         <td class="px-4 py-2">{{ $item->sub_location ?: '—' }}</td>
                                     @endif
                                     <td class="px-4 py-2">{{ $item->available_qty }}</td>
+                                    <td class="max-w-xs px-4 py-2">@include('admin.inventory._history_entries', ['item' => $item])</td>
                                     <td class="px-4 py-2">{{ $item->status_particular ?: '—' }}</td>
                                     <td class="px-4 py-2">@include('admin.inventory._actions', ['item' => $item])</td>
                                 </tr>

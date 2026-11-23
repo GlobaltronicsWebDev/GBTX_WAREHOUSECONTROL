@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
@@ -41,6 +42,7 @@ class InventoryItem extends Model
 {
     /** @use HasFactory<InventoryItemFactory> */
     use HasFactory;
+
     use SoftDeletes;
 
     /**
@@ -94,5 +96,13 @@ class InventoryItem extends Model
     public function warehouseLocation(): BelongsTo
     {
         return $this->belongsTo(WarehouseLocation::class);
+    }
+
+    /**
+     * @return HasMany<InventoryItemHistory, $this>
+     */
+    public function histories(): HasMany
+    {
+        return $this->hasMany(InventoryItemHistory::class)->orderBy('id');
     }
 }

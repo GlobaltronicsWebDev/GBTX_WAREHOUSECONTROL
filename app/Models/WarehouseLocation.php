@@ -10,6 +10,8 @@ class WarehouseLocation extends Model
 {
     public const MARIKINA_SUB_LOCATIONS = ['1st Bldg', '2Floor', 'Main: 3Flr'];
 
+    public const OHAAP_SUB_LOCATIONS = ['1st Flr', '2nd Flr', '3rd Flr', '4th Flr', '5th Flr'];
+
     /** @use HasFactory<WarehouseLocationFactory> */
     use HasFactory;
 
@@ -33,6 +35,10 @@ class WarehouseLocation extends Model
      */
     public function inventorySubLocations(): array
     {
-        return strtolower(trim($this->name)) === 'marikina' ? self::MARIKINA_SUB_LOCATIONS : [];
+        return match (strtolower(trim($this->name))) {
+            'marikina' => self::MARIKINA_SUB_LOCATIONS,
+            'ohaap' => self::OHAAP_SUB_LOCATIONS,
+            default => [],
+        };
     }
 }

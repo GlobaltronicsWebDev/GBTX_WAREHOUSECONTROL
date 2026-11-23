@@ -7,6 +7,7 @@ use App\Models\InventoryItem;
 use App\Models\WarehouseLocation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -15,7 +16,7 @@ class InventoryItemController extends Controller
     public function index(Request $request): View
     {
         $items = InventoryItem::query()
-            ->with('warehouseLocation')
+            ->with(['warehouseLocation', 'histories'])
             ->matching($request->string('search')->toString())
             ->latest()
             ->paginate(25)
@@ -31,7 +32,7 @@ class InventoryItemController extends Controller
 
     public function edit(InventoryItem $inventory): View
     {
-        return $this->itemForm($inventory);
+        return $this->itemForm($inventory->load('histories'));
     }
 
     private function itemForm(?InventoryItem $item = null): View
@@ -56,7 +57,7 @@ class InventoryItemController extends Controller
     {
         $validated = $this->validatedItem($request);
         $validated['created_by'] = $request->user()->id;
-        InventoryItem::create($validated);
+        DB::transaction(fn () => $this->saveItem(new InventoryItem, $validated));
 
         return redirect()
             ->route('admin.inventory.index')
@@ -65,7 +66,8 @@ class InventoryItemController extends Controller
 
     public function update(Request $request, InventoryItem $inventory): RedirectResponse
     {
-        $inventory->update($this->validatedItem($request, $inventory));
+        $validated = $this->validatedItem($request, $inventory);
+        DB::transaction(fn () => $this->saveItem($inventory, $validated));
 
         return redirect()
             ->route('admin.inventory.index')
@@ -79,6 +81,28 @@ class InventoryItemController extends Controller
         abort_unless($inventory->delete(), 500, 'The inventory item could not be deleted.');
 
         return back()->with('status', 'Inventory item deleted successfully.');
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    private function saveItem(InventoryItem $item, array $validated): void
+    {
+        $historiesSubmitted = ($validated['history_submitted'] ?? false) || array_key_exists('histories', $validated);
+        $histories = array_values(array_filter($validated['histories'] ?? [], fn (array $history): bool => ($history['quantity'] ?? null) !== null || ($history['project'] ?? null) !== null));
+        unset($validated['histories'], $validated['history_submitted']);
+
+        if ($historiesSubmitted) {
+            $validated['history_qty'] = $histories[0]['quantity'] ?? 0;
+            $validated['history_project'] = $histories[0]['project'] ?? null;
+        }
+
+        $item->fill($validated)->saveOrFail();
+
+        if ($historiesSubmitted) {
+            $item->histories()->delete();
+            $item->histories()->createMany($histories);
+        }
     }
 
     /**
@@ -112,8 +136,11 @@ class InventoryItemController extends Controller
             'available_sqm' => ['required', 'numeric', 'min:0'],
             'reservation_qty' => ['required', 'integer', 'min:0'],
             'reservation_project_details' => ['nullable', 'string', 'max:10000'],
-            'history_qty' => ['required', 'integer', 'min:0'],
-            'history_project' => ['nullable', 'string', 'max:10000'],
+            'history_submitted' => ['sometimes', 'boolean'],
+            'histories' => ['sometimes', 'array'],
+            'histories.*' => ['array:quantity,project'],
+            'histories.*.quantity' => ['nullable', 'integer', 'min:0', 'max:4294967295'],
+            'histories.*.project' => ['nullable', 'string', 'max:10000'],
             'original_qty' => ['required', 'integer', 'min:0'],
             'status_qty' => ['required', 'integer', 'min:0'],
             'status_particular' => ['nullable', 'string', 'max:255'],
