@@ -21,6 +21,19 @@ class WarehouseLocationControllerTest extends TestCase
         $this->seed(RoleSeeder::class);
     }
 
+    public function test_temporary_sticky_header_snapshot(): void
+    {
+        $warehouse = WarehouseLocation::where('name', 'A Juan')->firstOrFail();
+        for ($number = 1; $number <= 10; $number++) {
+            $item = InventoryItem::create(['item_description' => 'Panel '.$number, 'warehouse_location_id' => $warehouse->id]);
+            $item->histories()->create(['quantity' => $number, 'project' => str_repeat("A project detail\n", 8)]);
+        }
+        $response = $this->actingAs(User::factory()->create())->get(route('admin.warehouses.show', $warehouse));
+        $response->assertOk();
+        $html = str_replace(config('app.url'), 'http://127.0.0.1:9', $response->getContent());
+        file_put_contents(getenv('WAREHOUSE_RENDER_SNAPSHOT'), $html);
+    }
+
     public function test_it_admin_can_create_a_warehouse_location(): void
     {
         $admin = User::factory()->create();
