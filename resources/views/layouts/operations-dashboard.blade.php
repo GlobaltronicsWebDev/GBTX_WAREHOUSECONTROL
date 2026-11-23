@@ -89,7 +89,7 @@
                     </button>
                     <div id="inventoryMenu" class="sidebar-subnav pb-1 pl-8 {{ request()->routeIs('admin.inventory.dashboard') ? '' : 'hidden' }}">
                         <a href="{{ route('admin.inventory.dashboard') }}" class="block h-7 w-full text-left text-[12px] {{ request()->routeIs('admin.inventory.dashboard') ? 'font-medium text-[#2563EB]' : 'text-slate-500 hover:text-slate-700' }}" @if (request()->routeIs('admin.inventory.dashboard')) aria-current="page" @endif>Dashboard</a>
-                        <button type="button" disabled title="Prototype navigation only" class="block h-7 w-full cursor-not-allowed text-left text-[12px] text-slate-400">Inventory List</button>
+                        <a href="{{ route('admin.inventory.index') }}" class="block h-7 w-full text-left text-[12px] {{ request()->routeIs('admin.inventory.index', 'admin.inventory.create') ? 'font-medium text-[#2563EB]' : 'text-slate-500 hover:text-slate-700' }}">Inventory List</a>
                     </div>
 
                     <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="warehouseMenu" aria-expanded="{{ request()->routeIs('admin.warehouses.*') ? 'true' : 'false' }}" aria-controls="warehouseMenu">
