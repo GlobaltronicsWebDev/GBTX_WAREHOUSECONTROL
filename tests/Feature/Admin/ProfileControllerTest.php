@@ -18,6 +18,17 @@ class ProfileControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_profile_and_account_menu_provide_dark_mode_controls(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get(route('admin.settings.profile'))
+            ->assertSee('Appearance')
+            ->assertSee('Choose the theme for this browser.')
+            ->assertSee('data-theme-toggle aria-label="Dark mode" aria-pressed="false"', false)
+            ->assertSee('data-theme-icon="light"', false)
+            ->assertSee('data-theme-icon="dark"', false);
+    }
+
     public function test_user_can_view_and_update_their_profile(): void
     {
         $department = Department::factory()->create(['name' => 'MIS']);

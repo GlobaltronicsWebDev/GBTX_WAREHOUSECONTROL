@@ -21,6 +21,16 @@
             <div role="alert" class="border border-red-200 bg-red-50 px-3 py-2 text-[11px] text-red-700">{{ $errors->first() }}</div>
         @endif
 
+        <section class="flex flex-wrap items-center justify-between gap-3 border border-[#E5E7EB] bg-white px-4 py-3" aria-labelledby="appearanceHeading">
+            <div>
+                <h2 id="appearanceHeading" class="text-[12px] font-semibold text-slate-900">Appearance</h2>
+                <p class="mt-1 text-[11px] text-slate-500">Choose the theme for this browser.</p>
+            </div>
+            <button type="button" data-theme-toggle aria-label="Dark mode" aria-pressed="false" class="inline-flex items-center gap-2 rounded-sm border border-[#E5E7EB] px-3 py-2 text-[11px] text-slate-700 hover:bg-[#F8F9FA]">
+                Dark mode <span data-theme-state class="font-medium">Off</span>
+            </button>
+        </section>
+
         <section class="flex flex-col gap-5 py-3 sm:flex-row sm:items-center">
             @if ($user->profile_photo_path)
                 <img id="profileSummaryPhoto" src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($user->profile_photo_path) }}" alt="Profile photo" class="h-20 w-20 shrink-0 rounded-full border-4 border-white object-cover shadow-md">

@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Operations Overview') | Globaltronics</title>
+    <script>
+        (() => {
+            const savedTheme = localStorage.getItem('whms-theme');
+            const prefersDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.classList.toggle('dark', savedTheme === 'dark' || (savedTheme === null && prefersDarkTheme));
+        })();
+    </script>
     <link rel="icon" type="image/png" href="{{ asset('assets/images/logo/globaltronics_logo.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,6 +31,28 @@
         .tabular-nums {
             font-variant-numeric: tabular-nums;
         }
+
+        html.dark { color-scheme: dark; background-color: #0f172a; color: #e2e8f0; }
+        html.dark body { background-color: #0f172a; color: #e2e8f0; }
+        html.dark :is(.bg-white, .bg-slate-50, [class~="bg-[#F8F9FA]"]) { background-color: #1e293b; }
+        html.dark :is(.bg-slate-100, .bg-slate-200, [class~="bg-[#EAECEF]"], [class~="bg-[#F1F3F5]"]) { background-color: #334155; }
+        html.dark :is(.border-slate-100, .border-slate-200, .border-slate-300, [class~="border-[#E5E7EB]"], [class~="border-[#F1F3F5]"]) { border-color: #475569; }
+        html.dark :is(.text-slate-900, .text-slate-800, .text-slate-700, .text-slate-600) { color: #e2e8f0; }
+        html.dark :is(.text-slate-500, .text-slate-400, .text-slate-300) { color: #b6c4d7; }
+        html.dark :is(.text-blue-600, .text-blue-700, [class~="text-[#2563EB]"]) { color: #93c5fd; }
+        html.dark :is(.bg-blue-50, .bg-blue-100, .bg-sky-50, .bg-sky-100, .bg-indigo-50, .bg-indigo-100) { background-color: #172f50; }
+        html.dark :is(.bg-emerald-50, .bg-emerald-100, .bg-green-50, .bg-green-100) { background-color: #123d32; }
+        html.dark :is(.bg-amber-50, .bg-amber-100, .bg-orange-50, .bg-orange-100) { background-color: #4a3214; }
+        html.dark :is(.bg-red-50, .bg-red-100, .bg-rose-50, .bg-rose-100) { background-color: #4c2029; }
+        html.dark :is(.bg-purple-50, .bg-purple-100, .bg-violet-50, .bg-violet-100) { background-color: #38254c; }
+        html.dark :is(.text-emerald-600, .text-emerald-700, .text-emerald-800, .text-green-600, .text-green-700) { color: #6ee7b7; }
+        html.dark :is(.text-amber-600, .text-amber-700, .text-amber-800, .text-amber-900, .text-orange-600, .text-orange-700) { color: #fcd34d; }
+        html.dark :is(.text-red-600, .text-red-700, .text-red-800, .text-rose-600, .text-rose-700) { color: #fda4af; }
+        html.dark :is(.text-purple-700, .text-violet-700, .text-indigo-700, .text-sky-700) { color: #c4b5fd; }
+        html.dark :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea) { background-color: #0f172a; color: #e2e8f0; border-color: #475569; }
+        html.dark :is([class~="hover:bg-[#F8F9FA]"], [class~="hover:bg-[#EAECEF]"], [class~="hover:bg-slate-50"], [class~="hover:bg-slate-100"]):hover { background-color: #334155; }
+        html.dark :is([class~="hover:text-slate-900"], [class~="hover:text-slate-700"]):hover { color: #f8fafc; }
+        html.dark :is([class~="hover:text-blue-700"], [class~="hover:text-[#2563EB]"]):hover { color: #bfdbfe; }
 
         @media (min-width: 1024px) {
             #dashboardSidebar.is-collapsed {
@@ -283,11 +312,14 @@
                                 <p class="truncate text-[12px] font-medium text-slate-900">{{ Auth::user()->name }}</p>
                                 <p class="truncate text-[10px] text-slate-500">{{ Auth::user()->email }}</p>
                             </div>
-                            <span class="flex h-7 w-7 shrink-0 items-center justify-center text-amber-500" title="Light theme active" aria-label="Light theme active">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                            <button type="button" data-theme-toggle class="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm text-amber-500 hover:bg-[#F8F9FA]" aria-label="Dark mode" aria-pressed="false" title="Dark mode">
+                                <svg data-theme-icon="light" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                                     <circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>
                                 </svg>
-                            </span>
+                                <svg data-theme-icon="dark" hidden class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z"/>
+                                </svg>
+                            </button>
                         </div>
 
                         <div class="border-t border-[#E5E7EB] py-1">
@@ -361,6 +393,37 @@
         const accountMenuRoot = document.getElementById('accountMenuRoot');
         const accountMenu = document.getElementById('accountMenu');
         const accountMenuToggle = document.getElementById('accountMenuToggle');
+
+        const syncThemeControls = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+                toggle.setAttribute('aria-pressed', String(isDark));
+                toggle.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+                toggle.querySelectorAll('[data-theme-icon]').forEach((icon) => {
+                    icon.hidden = icon.dataset.themeIcon !== (isDark ? 'dark' : 'light');
+                });
+                const state = toggle.querySelector('[data-theme-state]');
+                if (state) {
+                    state.textContent = isDark ? 'On' : 'Off';
+                }
+            });
+        };
+
+        document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+            toggle.addEventListener('click', () => {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('whms-theme', isDark ? 'dark' : 'light');
+                syncThemeControls();
+            });
+        });
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'whms-theme') {
+                const isDark = event.newValue === 'dark' || (event.newValue === null && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.classList.toggle('dark', isDark);
+                syncThemeControls();
+            }
+        });
+        syncThemeControls();
 
         const closeMobileSidebar = () => {
             sidebar.classList.add('-translate-x-full');
