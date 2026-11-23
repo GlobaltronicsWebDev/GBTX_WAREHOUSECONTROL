@@ -8,7 +8,7 @@
         <form method="POST" action="{{ route('admin.inventory.destroy', $item) }}" onsubmit="return confirm('Delete this inventory item?')">
             @csrf
             @method('DELETE')
-            <button type="submit" aria-label="Delete {{ $item->item_description }}" title="Delete" class="inline-flex p-1 text-slate-500 hover:text-red-600">
+            <button type="submit" aria-label="Delete {{ $item->item_description }}" title="Delete" class="inline-flex p-1 text-red-600 hover:text-red-700">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/>
                 </svg>

@@ -53,7 +53,7 @@
                         <form id="delete-selected-items" method="POST" action="{{ route('admin.warehouses.inventory.destroy-selected', $location) }}" onsubmit="return confirm('Soft-delete the selected items? They cannot be restored from the application.')">
                             @csrf
                             @method('DELETE')
-                            <button id="delete-selected-button" type="submit" aria-label="Delete selected items" title="Delete selected items" class="inline-flex items-center gap-1 rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-slate-700 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50">
+                            <button id="delete-selected-button" type="submit" aria-label="Delete selected items" title="Delete selected items" class="inline-flex items-center gap-1 rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50">
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/>
                                 </svg>
@@ -62,14 +62,14 @@
                         </form>
                     @endif
                     <details>
-                        <summary class="cursor-pointer rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-slate-700">Delete all warehouse items</summary>
+                        <summary class="cursor-pointer rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-red-600 hover:text-red-700">Delete all warehouse items</summary>
                         <form method="POST" action="{{ route('admin.warehouses.inventory.destroy-all', $location) }}" onsubmit="return confirm('Soft-delete ALL items in this warehouse across every page? They cannot be restored from the application.')" class="mt-2 space-y-2">
                             @csrf
                             @method('DELETE')
                             <p class="text-[11px] text-slate-600">This affects all {{ $items->total() }} items in {{ $location->name }}, not just this page. Deleted items cannot be restored from the application.</p>
                             <label for="warehouse-delete-confirmation" class="block text-[11px] text-slate-700">Type {{ $location->name }} to confirm</label>
                             <input id="warehouse-delete-confirmation" name="confirmation" type="text" required autocomplete="off" class="w-full rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px]">
-                            <button type="submit" class="inline-flex items-center gap-1 rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-slate-700 hover:text-red-600">
+                            <button type="submit" class="inline-flex items-center gap-1 rounded-sm border border-[#E5E7EB] px-2 py-1 text-[11px] text-red-600 hover:text-red-700">
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/>
                                 </svg>
