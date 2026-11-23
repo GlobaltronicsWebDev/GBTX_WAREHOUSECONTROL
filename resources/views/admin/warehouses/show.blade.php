@@ -65,7 +65,7 @@
                                     <td class="px-4 py-2">{{ $item->item_description }}</td>
                                     <td class="px-4 py-2">{{ $item->available_qty }}</td>
                                     <td class="px-4 py-2">{{ $item->status_particular ?: '—' }}</td>
-                                    <td class="px-4 py-2"><a href="{{ route('admin.inventory.edit', $item) }}" aria-label="Edit {{ $item->item_description }}" class="text-[#2563EB] hover:underline">Edit</a></td>
+                                    <td class="px-4 py-2">@include('admin.inventory._actions', ['item' => $item])</td>
                                 </tr>
                             @endforeach
                         </tbody>

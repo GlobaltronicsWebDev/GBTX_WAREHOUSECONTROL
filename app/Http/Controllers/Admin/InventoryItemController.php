@@ -72,6 +72,15 @@ class InventoryItemController extends Controller
             ->with('status', 'Inventory item updated successfully.');
     }
 
+    public function destroy(Request $request, InventoryItem $inventory): RedirectResponse
+    {
+        abort_unless($request->user()->canDeleteInventoryItems(), 403);
+
+        abort_unless($inventory->delete(), 500, 'The inventory item could not be deleted.');
+
+        return back()->with('status', 'Inventory item deleted successfully.');
+    }
+
     /**
      * @return array<string, mixed>
      */

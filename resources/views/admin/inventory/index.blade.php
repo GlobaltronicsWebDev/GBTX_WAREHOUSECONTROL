@@ -63,7 +63,7 @@
                             <td class="px-3 py-2">{{ $item->original_qty }}</td>
                             <td class="px-3 py-2">{{ $item->status_particular ?: '—' }}</td>
                             <td class="max-w-xs px-3 py-2">{{ $item->remarks ?: '—' }}</td>
-                            <td class="px-3 py-2"><a href="{{ route('admin.inventory.edit', $item) }}" aria-label="Edit {{ $item->item_description }}" class="text-[#2563EB] hover:underline">Edit</a></td>
+                            <td class="px-3 py-2">@include('admin.inventory._actions', ['item' => $item])</td>
                         </tr>
                     @empty
                         <tr>

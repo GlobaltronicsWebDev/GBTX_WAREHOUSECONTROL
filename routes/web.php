@@ -147,7 +147,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::view('/inventory/dashboard', 'admin.inventory.dashboard')->name('inventory.dashboard');
-    Route::resource('inventory', InventoryItemController::class)->only(['index', 'create', 'store', 'edit', 'update']);
+    Route::resource('inventory', InventoryItemController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::get('/warehouses/{location}', [WarehouseDashboardController::class, 'show'])->name('warehouses.show');
     Route::get('/reports', [DashboardController::class, 'reports'])->name('reports.index');
     Route::get('/reports/transactions', [DashboardController::class, 'transactionReport'])->name('reports.transactions');

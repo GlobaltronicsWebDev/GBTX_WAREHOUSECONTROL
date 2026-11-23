@@ -80,6 +80,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasRole(['it-admin', 'warehouse-admin', 'admin']);
     }
 
+    public function canDeleteInventoryItems(): bool
+    {
+        return $this->isAdmin();
+    }
+
     /**
      * Determine if the user is an IT Administrator.
      */

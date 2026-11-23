@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'tag_number',
@@ -39,6 +40,7 @@ class InventoryItem extends Model
 {
     /** @use HasFactory<InventoryItemFactory> */
     use HasFactory;
+    use SoftDeletes;
 
     /**
      * @return array<string, string>
