@@ -163,6 +163,62 @@ class InventoryItemControllerTest extends TestCase
         $this->put(route('admin.inventory.update', $item), [])->assertRedirect(route('login'));
     }
 
+    public function test_administrators_can_soft_delete_inventory_from_both_lists(): void
+    {
+        $warehouse = WarehouseLocation::factory()->create(['is_active' => true, 'navigation_enabled' => true]);
+
+        foreach (['warehouse-admin', 'it-admin'] as $role) {
+            $user = User::factory()->create();
+            $user->roles()->attach(Role::where('slug', $role)->firstOrFail());
+            $item = InventoryItem::create([
+                'item_description' => 'Panel '.$role,
+                'warehouse_location_id' => $warehouse->id,
+            ]);
+
+            $this->actingAs($user)->get(route('admin.inventory.index'))
+                ->assertSee('action="'.route('admin.inventory.destroy', $item).'"', false)
+                ->assertSee('aria-label="Delete Panel '.$role.'"', false);
+            $this->get(route('admin.warehouses.show', $warehouse))
+                ->assertSee('action="'.route('admin.inventory.destroy', $item).'"', false)
+                ->assertSee('aria-label="Edit Panel '.$role.'"', false);
+            $this->from(route('admin.warehouses.show', $warehouse))
+                ->delete(route('admin.inventory.destroy', $item))
+                ->assertRedirect(route('admin.warehouses.show', $warehouse))
+                ->assertSessionHas('status', 'Inventory item deleted successfully.');
+
+            $this->assertSoftDeleted($item);
+            $this->get(route('admin.inventory.index'))->assertDontSee('Panel '.$role);
+            $this->get(route('admin.warehouses.show', $warehouse))->assertDontSee('Panel '.$role);
+            $this->get(route('admin.inventory.edit', $item))->assertNotFound();
+            $this->assertTrue(InventoryItem::withTrashed()->findOrFail($item->id)->restore());
+        }
+    }
+
+    public function test_non_administrators_and_guests_cannot_delete_inventory(): void
+    {
+        $warehouse = WarehouseLocation::factory()->create(['is_active' => true, 'navigation_enabled' => true]);
+        $item = InventoryItem::create([
+            'item_description' => 'Restricted panel',
+            'warehouse_location_id' => $warehouse->id,
+        ]);
+
+        $this->delete(route('admin.inventory.destroy', $item))->assertRedirect(route('login'));
+
+        foreach (['warehouse-staff', 'technical'] as $role) {
+            $user = User::factory()->create();
+            $user->roles()->attach(Role::where('slug', $role)->firstOrFail());
+
+            $this->actingAs($user)->get(route('admin.inventory.index'))
+                ->assertDontSee('action="'.route('admin.inventory.destroy', $item).'"', false)
+                ->assertSee('aria-label="Edit Restricted panel"', false);
+            $this->get(route('admin.warehouses.show', $warehouse))
+                ->assertDontSee('action="'.route('admin.inventory.destroy', $item).'"', false);
+            $this->delete(route('admin.inventory.destroy', $item))->assertForbidden();
+        }
+
+        $this->assertDatabaseHas('inventory_items', ['id' => $item->id, 'deleted_at' => null]);
+    }
+
     /**
      * @return array<string, int|string>
      */
