@@ -4,7 +4,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4L16.5 3.5Z"/>
         </svg>
     </a>
-    @if (Auth::user()->canDeleteInventoryItems())
+    @if (($allowDelete ?? true) && Auth::user()->canDeleteInventoryItems())
         <form method="POST" action="{{ route('admin.inventory.destroy', $item) }}" onsubmit="return confirm('Delete this inventory item?')">
             @csrf
             @method('DELETE')

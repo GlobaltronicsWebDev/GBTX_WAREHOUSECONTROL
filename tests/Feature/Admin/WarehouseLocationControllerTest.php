@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\InventoryItem;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\WarehouseLocation;
@@ -155,6 +156,65 @@ class WarehouseLocationControllerTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
         $response->assertSeeInOrder(['A Juan', 'Clark Office', 'Globaltronics', 'Ohaap', 'Marikina', 'Carmona']);
+    }
+
+    public function test_sub_location_menu_filters_items_and_preserves_pagination(): void
+    {
+        $this->freezeTime();
+        $warehouse = WarehouseLocation::where('name', 'A Juan')->firstOrFail();
+        $otherWarehouse = WarehouseLocation::factory()->create(['name' => 'Marikina']);
+        $admin = User::factory()->create();
+        $admin->roles()->attach(Role::where('slug', 'warehouse-admin')->firstOrFail());
+        for ($number = 1; $number <= 11; $number++) {
+            InventoryItem::create([
+                'item_description' => sprintf('First floor panel %02d', $number),
+                'warehouse_location_id' => $warehouse->id,
+                'sub_location' => 'A JUAN MAIN 1ST FLOOR',
+            ]);
+        }
+        InventoryItem::create(['item_description' => 'Third floor panel', 'warehouse_location_id' => $warehouse->id, 'sub_location' => 'A JUAN MAIN 3RD FLOOR']);
+        InventoryItem::create(['item_description' => 'Unassigned panel', 'warehouse_location_id' => $warehouse->id]);
+        InventoryItem::create(['item_description' => 'Other warehouse panel', 'warehouse_location_id' => $otherWarehouse->id, 'sub_location' => 'A JUAN MAIN 1ST FLOOR']);
+        $firstFloorUrl = route('admin.warehouses.show', ['location' => $warehouse, 'sub_location' => 'A JUAN MAIN 1ST FLOOR']);
+
+        $this->actingAs($admin)->get($firstFloorUrl)
+            ->assertSee($firstFloorUrl)
+            ->assertSee('href="'.$firstFloorUrl.'" aria-current="page"', false)
+            ->assertSee('A JUAN MAIN 3RD FLOOR')
+            ->assertSee('11 item(s)')
+            ->assertSee('First floor panel 11')
+            ->assertSee('First floor panel 02')
+            ->assertDontSee('First floor panel 01')
+            ->assertDontSee('Third floor panel')
+            ->assertDontSee('Unassigned panel')
+            ->assertDontSee('Other warehouse panel')
+            ->assertDontSee('Delete selected items')
+            ->assertDontSee('Delete all warehouse items')
+            ->assertDontSee('aria-label="Delete First floor panel', false)
+            ->assertSee('sub_location=A%20JUAN%20MAIN%201ST%20FLOOR&amp;page=2', false);
+
+        $this->get(route('admin.warehouses.show', ['location' => $warehouse, 'sub_location' => 'A JUAN MAIN 1ST FLOOR', 'page' => 2]))
+            ->assertSee('First floor panel 01')
+            ->assertDontSee('First floor panel 02');
+
+        $this->get(route('admin.warehouses.show', $warehouse))
+            ->assertSee('13 item(s)')
+            ->assertSee('Third floor panel')
+            ->assertSee('Unassigned panel')
+            ->assertSee('Delete all warehouse items');
+    }
+
+    public function test_sub_location_filter_rejects_unknown_locations_and_shows_empty_locations(): void
+    {
+        $warehouse = WarehouseLocation::where('name', 'A Juan')->firstOrFail();
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('admin.warehouses.show', ['location' => $warehouse, 'sub_location' => 'A JUAN MAIN 3RD FLOOR']))
+            ->assertSee('No items found in this sub-location.');
+        $this->get(route('admin.warehouses.show', ['location' => $warehouse, 'sub_location' => 'Unknown']))
+            ->assertNotFound();
+        $this->get(route('admin.warehouses.show', ['location' => $warehouse, 'sub_location' => ['A JUAN MAIN 1ST FLOOR']]))
+            ->assertNotFound();
     }
 
     public function test_guest_is_redirected_to_login_from_a_warehouse_dashboard(): void

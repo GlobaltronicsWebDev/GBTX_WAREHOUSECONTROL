@@ -130,11 +130,23 @@
                     </button>
                     <div id="warehouseMenu" class="sidebar-subnav pb-1 pl-8 {{ request()->routeIs('admin.warehouses.*') ? '' : 'hidden' }}">
                         @forelse ($warehouseNavigationLocations as $warehouseNavigationLocation)
-                            <a
-                                href="{{ route('admin.warehouses.show', $warehouseNavigationLocation) }}"
-                                @if (request()->routeIs('admin.warehouses.show') && request()->route('location')?->is($warehouseNavigationLocation)) aria-current="page" @endif
-                                class="block h-7 w-full truncate text-left text-[12px] {{ request()->routeIs('admin.warehouses.show') && request()->route('location')?->is($warehouseNavigationLocation) ? 'font-medium text-[#2563EB]' : 'text-[#7891B8] hover:text-[#2563EB]' }}"
-                            >{{ $warehouseNavigationLocation->name }}</a>
+                            @php
+                                $isCurrentWarehouse = request()->routeIs('admin.warehouses.show') && request()->route('location')?->is($warehouseNavigationLocation);
+                                $subLocations = $warehouseNavigationLocation->inventorySubLocations();
+                            @endphp
+                            @if ($subLocations)
+                                <details @if ($isCurrentWarehouse) open @endif>
+                                    <summary class="cursor-pointer py-1 text-[12px] {{ $isCurrentWarehouse ? 'font-medium text-[#2563EB]' : 'text-[#7891B8] hover:text-[#2563EB]' }}">{{ $warehouseNavigationLocation->name }}</summary>
+                                    <div class="space-y-1 pb-1 pl-3">
+                                        <a href="{{ route('admin.warehouses.show', $warehouseNavigationLocation) }}" @if ($isCurrentWarehouse && request()->query('sub_location') === null) aria-current="page" @endif class="block text-[11px] {{ $isCurrentWarehouse && request()->query('sub_location') === null ? 'font-medium text-[#2563EB]' : 'text-[#7891B8] hover:text-[#2563EB]' }}">All items</a>
+                                        @foreach ($subLocations as $subLocation)
+                                            <a href="{{ route('admin.warehouses.show', ['location' => $warehouseNavigationLocation, 'sub_location' => $subLocation]) }}" @if ($isCurrentWarehouse && request()->query('sub_location') === $subLocation) aria-current="page" @endif class="block break-words text-[11px] {{ $isCurrentWarehouse && request()->query('sub_location') === $subLocation ? 'font-medium text-[#2563EB]' : 'text-[#7891B8] hover:text-[#2563EB]' }}">{{ $subLocation }}</a>
+                                        @endforeach
+                                    </div>
+                                </details>
+                            @else
+                                <a href="{{ route('admin.warehouses.show', $warehouseNavigationLocation) }}" @if ($isCurrentWarehouse) aria-current="page" @endif class="block h-7 w-full truncate text-left text-[12px] {{ $isCurrentWarehouse ? 'font-medium text-[#2563EB]' : 'text-[#7891B8] hover:text-[#2563EB]' }}">{{ $warehouseNavigationLocation->name }}</a>
+                            @endif
                         @empty
                             <span class="block py-1 text-[11px] text-slate-400">No locations configured</span>
                         @endforelse

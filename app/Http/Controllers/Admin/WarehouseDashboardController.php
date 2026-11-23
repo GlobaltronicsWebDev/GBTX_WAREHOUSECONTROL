@@ -15,19 +15,25 @@ use RuntimeException;
 
 class WarehouseDashboardController extends Controller
 {
-    public function show(WarehouseLocation $location): View
+    public function show(Request $request, WarehouseLocation $location): View
     {
         abort_unless($location->is_active && $location->navigation_enabled, 404);
+
+        $selectedSubLocation = $request->query('sub_location');
+        if ($selectedSubLocation !== null) {
+            abort_unless(is_string($selectedSubLocation) && in_array($selectedSubLocation, $location->inventorySubLocations(), true), 404);
+        }
 
         $items = InventoryItem::query()
             ->with('histories')
             ->whereBelongsTo($location, 'warehouseLocation')
+            ->when($selectedSubLocation !== null, fn ($query) => $query->where('sub_location', $selectedSubLocation))
             ->latest()
             ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.warehouses.show', compact('location', 'items'));
+        return view('admin.warehouses.show', compact('location', 'items', 'selectedSubLocation'));
     }
 
     public function destroySelected(Request $request, WarehouseLocation $location): RedirectResponse

@@ -1,7 +1,7 @@
 @extends('layouts.operations-dashboard')
 
 @section('title', $location->name.' Warehouse')
-@section('breadcrumb', $location->name)
+@section('breadcrumb', $selectedSubLocation ? $location->name.' / '.$selectedSubLocation : $location->name)
 
 @section('content')
     <div class="space-y-4 px-3 py-4 sm:px-5">
@@ -14,7 +14,7 @@
                 </span>
                 <div>
                     <h1 class="text-[18px] font-semibold leading-6 text-slate-900">{{ $location->name }} Warehouse</h1>
-                    <p class="mt-1 text-[11px] text-slate-500">Warehouse overview and stock list</p>
+                    <p class="mt-1 text-[11px] text-slate-500">{{ $selectedSubLocation ?? 'Warehouse overview and stock list' }}</p>
                 </div>
             </div>
             <span class="w-fit rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-medium text-emerald-700">Active location</span>
@@ -42,12 +42,12 @@
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E7EB] px-4 py-3">
                 <div>
                     <h2 id="warehouseStockHeading" class="text-[13px] font-semibold text-slate-900">Stock overview</h2>
-                    <p class="mt-1 text-[10px] text-slate-500">Stock records for {{ $location->name }}</p>
+                    <p class="mt-1 text-[10px] text-slate-500">Stock records for {{ $location->name }}@if ($selectedSubLocation) / {{ $selectedSubLocation }}@endif</p>
                 </div>
                 <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-medium text-emerald-700">{{ $items->total() }} item(s)</span>
             </div>
 
-            @if (Auth::user()->canDeleteInventoryItems() && $items->total() > 0)
+            @if ($selectedSubLocation === null && Auth::user()->canDeleteInventoryItems() && $items->total() > 0)
                 <div class="flex flex-wrap items-start gap-3 border-b border-[#E5E7EB] px-4 py-3">
                     @if ($items->isNotEmpty())
                         <form id="delete-selected-items" method="POST" action="{{ route('admin.warehouses.inventory.destroy-selected', $location) }}" onsubmit="return confirm('Soft-delete the selected items? They cannot be restored from the application.')">
@@ -80,7 +80,9 @@
                 </div>
             @endif
 
-            @if ($items->total() === 0)
+            @if ($items->total() === 0 && $selectedSubLocation !== null)
+                <p class="px-4 py-8 text-center text-[11px] text-slate-500">No items found in this sub-location.</p>
+            @elseif ($items->total() === 0)
                 <div class="flex min-h-44 flex-col items-center justify-center gap-2 px-4 py-8 text-center">
                 <span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500" aria-hidden="true">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
@@ -97,7 +99,7 @@
                     <table class="min-w-[2200px] w-full border-collapse text-left text-[11px]">
                         <thead class="sticky top-0 z-10 border-b border-[#E5E7EB] bg-[#F8F9FA] text-slate-500">
                             <tr>
-                                @if (Auth::user()->canDeleteInventoryItems())
+                                @if ($selectedSubLocation === null && Auth::user()->canDeleteInventoryItems())
                                     <th rowspan="2" scope="col" class="px-4 py-2">
                                         <input id="select-warehouse-page" type="checkbox" aria-label="Select all items on this page" hidden>
                                     </th>
@@ -139,7 +141,7 @@
                         <tbody class="divide-y divide-[#E5E7EB]">
                             @foreach ($items as $item)
                                 <tr>
-                                    @if (Auth::user()->canDeleteInventoryItems())
+                                    @if ($selectedSubLocation === null && Auth::user()->canDeleteInventoryItems())
                                         <td class="px-4 py-2">
                                             <input type="checkbox" name="items[]" value="{{ $item->id }}" form="delete-selected-items" aria-label="Select {{ $item->item_description }}" data-warehouse-item>
                                         </td>
@@ -167,7 +169,7 @@
                                     @if ($location->inventorySubLocations())
                                         <td class="px-4 py-2">{{ $item->sub_location ?: '—' }}</td>
                                     @endif
-                                    <td class="px-4 py-2">@include('admin.inventory._actions', ['item' => $item])</td>
+                                    <td class="px-4 py-2">@include('admin.inventory._actions', ['item' => $item, 'allowDelete' => $selectedSubLocation === null])</td>
                                 </tr>
                             @endforeach
                         </tbody>
