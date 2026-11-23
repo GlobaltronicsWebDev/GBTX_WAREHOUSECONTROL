@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Role;
+use App\Models\InventoryItem;
 use App\Models\User;
 use App\Models\WarehouseLocation;
 use Database\Seeders\RoleSeeder;
@@ -61,6 +62,22 @@ class InventoryItemControllerTest extends TestCase
             'created_by' => $user->id,
             'warehouse_location_id' => $warehouseLocation->id,
         ]);
+    }
+
+    public function test_inventory_list_displays_original_quantity_after_history(): void
+    {
+        $user = User::factory()->create();
+        InventoryItem::create([
+            'item_description' => 'LED panel',
+            'history_qty' => 17,
+            'history_project' => 'Project Alpha',
+            'original_qty' => 42,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.inventory.index'));
+
+        $response->assertSeeInOrder(['History Qty', 'History Project', 'Original Qty', 'Status']);
+        $response->assertSeeInOrder(['>17</td>', '>Project Alpha</td>', '>42</td>'], false);
     }
 
     /**
