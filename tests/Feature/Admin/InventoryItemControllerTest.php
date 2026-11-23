@@ -83,6 +83,52 @@ class InventoryItemControllerTest extends TestCase
         $response->assertSeeInOrder(['>17</span>', '>Project Alpha</span>', '>42</td>'], false);
     }
 
+    public function test_warehouse_stock_table_displays_grouped_columns_and_item_values(): void
+    {
+        $warehouse = WarehouseLocation::factory()->create(['name' => 'Marikina', 'is_active' => true, 'navigation_enabled' => true]);
+        $item = InventoryItem::create([
+            'tag_number' => 'TAG-27',
+            'date_received' => '2026-11-20',
+            'po_sku_number' => 'PO-27',
+            'manufacturer' => 'Maker',
+            'model_pixel_pitch' => 'P2.5',
+            'item_description' => 'Warehouse panel',
+            'warehouse_location_id' => $warehouse->id,
+            'sub_location' => '2Floor',
+            'on_hand' => 11,
+            'total_on_hand' => 12,
+            'per_panel_sqm' => 1.25,
+            'total_available_sqm' => 8.75,
+            'available_qty' => 7,
+            'available_sqm' => 8.75,
+            'reservation_qty' => 4,
+            'reservation_project_details' => 'Reserved client',
+            'original_qty' => 20,
+            'status_qty' => 6,
+            'status_particular' => 'Working',
+            'remarks' => 'Checked',
+        ]);
+        $item->histories()->create(['quantity' => 3, 'project' => 'History client']);
+
+        $response = $this->actingAs(User::factory()->create())->get(route('admin.warehouses.show', $warehouse));
+
+        $response->assertOk()->assertSeeInOrder([
+            'Tag #', 'Date Received', 'PO / SKU No.', 'Manufacturer', 'Model / Pixel Pitch', 'Item Description',
+            'Location', 'Inventory', 'Available Qty', 'Reservation', 'History', 'Original Qty', 'Status', 'Remarks',
+        ]);
+        $document = new DOMDocument;
+        $document->loadHTML($response->getContent(), LIBXML_NOERROR | LIBXML_NOWARNING);
+        $xpath = new DOMXPath($document);
+        $cells = $xpath->query('//table/tbody/tr[td[contains(., "Warehouse panel")]]/td');
+        $cellValues = array_map(fn ($cell) => trim($cell->textContent), iterator_to_array($cells, false));
+        $this->assertSame([
+            'TAG-27', '2026-11-20', 'PO-27', 'Maker', 'P2.5', 'Warehouse panel', 'Marikina',
+            '11', '12', '1.25', '8.75', '7', '8.75', '4', 'Reserved client',
+        ], array_slice($cellValues, 0, 15));
+        $this->assertStringContainsString('History client', $cells->item(15)->textContent);
+        $this->assertSame(['20', '6', 'Working', 'Checked', '2Floor'], array_slice($cellValues, 16, 5));
+    }
+
     public function test_item_can_be_edited_from_inventory_and_warehouse_lists(): void
     {
         $creator = User::factory()->create();

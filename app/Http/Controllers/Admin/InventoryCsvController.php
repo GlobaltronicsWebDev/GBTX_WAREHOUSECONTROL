@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\InventoryItem;
+use App\Models\WarehouseLocation;
 use App\Support\InventoryItemValidator;
 use App\Support\InventoryItemWriter;
 use Illuminate\Http\RedirectResponse;
@@ -17,7 +18,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InventoryCsvController extends Controller
 {
-    private const HEADERS = [
+    private const LEGACY_HEADERS = [
         'id', 'tag_number', 'date_received', 'po_sku_number', 'manufacturer', 'model_pixel_pitch',
         'item_description', 'warehouse_location_id', 'location', 'sub_location', 'on_hand', 'total_on_hand',
         'per_panel_sqm', 'total_available_sqm', 'available_qty', 'available_sqm', 'reservation_qty',
@@ -25,9 +26,38 @@ class InventoryCsvController extends Controller
         'remarks', 'csv_format',
     ];
 
+    private const COLUMNS = [
+        'tag_number' => ['TAG #', ''],
+        'date_received' => ['DATE RECEIVED', ''],
+        'po_sku_number' => ['PO / SKU No.', ''],
+        'manufacturer' => ['MANUFACTURER', ''],
+        'model_pixel_pitch' => ['MODEL / PIXEL PITCH', ''],
+        'item_description' => ['ITEM DESCRIPTION', ''],
+        'location' => ['LOCATION', ''],
+        'on_hand' => ['INVENTORY', 'ON-HAND'],
+        'total_on_hand' => ['', 'TOTAL ON-HAND'],
+        'per_panel_sqm' => ['', 'PER PANEL SQM'],
+        'total_available_sqm' => ['', 'TOTAL AVAILABLE SQM'],
+        'available_qty' => ['AVAILABLE QTY', 'QTY'],
+        'available_sqm' => ['', 'SQM'],
+        'reservation_qty' => ['RESERVATION', 'QTY'],
+        'reservation_project_details' => ['', 'PROJECT DETAILS'],
+        'history_qty' => ['HISTORY', 'QTY'],
+        'history_project' => ['', 'PROJECT'],
+        'original_qty' => ['ORIGINAL QTY', ''],
+        'status_qty' => ['STATUS', 'QTY'],
+        'status_particular' => ['', 'PARTICULAR'],
+        'remarks' => ['REMARKS', ''],
+        'id' => ['ITEM ID', ''],
+        'warehouse_location_id' => ['WAREHOUSE ID', ''],
+        'sub_location' => ['SUB-LOCATION', ''],
+        'additional_histories' => ['ADDITIONAL HISTORIES', ''],
+        'csv_format' => ['CSV FORMAT', ''],
+    ];
+
     private const TEXT_FIELDS = [
         'tag_number', 'po_sku_number', 'manufacturer', 'model_pixel_pitch', 'item_description',
-        'location', 'sub_location', 'reservation_project_details', 'status_particular', 'remarks',
+        'location', 'sub_location', 'reservation_project_details', 'history_project', 'status_particular', 'remarks',
     ];
 
     public function export(): StreamedResponse
@@ -39,15 +69,19 @@ class InventoryCsvController extends Controller
             }
 
             fwrite($stream, "\xEF\xBB\xBF");
-            fputcsv($stream, self::HEADERS, ',', '"', '');
-            InventoryItem::query()->with('histories')->orderBy('id')->chunkById(200, function ($items) use ($stream): void {
+            fputcsv($stream, array_column(self::COLUMNS, 0), ',', '"', '');
+            fputcsv($stream, array_column(self::COLUMNS, 1), ',', '"', '');
+            InventoryItem::query()->with(['histories', 'warehouseLocation'])->orderBy('id')->chunkById(200, function ($items) use ($stream): void {
                 foreach ($items as $item) {
-                    $data = $item->only(self::HEADERS);
+                    $data = $item->only(array_keys(self::COLUMNS));
                     $data['date_received'] = $item->date_received?->format('Y-m-d');
-                    $data['histories'] = json_encode($item->histories->map(fn ($history) => [
+                    $data['location'] = $item->warehouseLocation?->name ?? $item->location;
+                    $data['history_qty'] = $item->histories->first()?->quantity;
+                    $data['history_project'] = $item->histories->first()?->project;
+                    $data['additional_histories'] = json_encode($item->histories->skip(1)->map(fn ($history) => [
                         'quantity' => $history->quantity,
                         'project' => $history->project,
-                    ])->all(), JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+                    ])->values()->all(), JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
                     $data['csv_format'] = 'spreadsheet-safe-v1';
                     foreach (self::TEXT_FIELDS as $field) {
                         $value = $data[$field] ?? '';
@@ -55,7 +89,7 @@ class InventoryCsvController extends Controller
                             $data[$field] = "'".$value;
                         }
                     }
-                    fputcsv($stream, array_map(fn ($field) => $data[$field] ?? '', self::HEADERS), ',', '"', '');
+                    fputcsv($stream, array_map(fn ($field) => $data[$field] ?? '', array_keys(self::COLUMNS)), ',', '"', '');
                 }
             });
             fclose($stream);
@@ -73,48 +107,53 @@ class InventoryCsvController extends Controller
         }
 
         try {
-            $header = fgetcsv($stream, 0, ',', '"', '');
-            if (is_array($header)) {
-                $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', $header[0]);
+            if (fread($stream, 3) !== "\xEF\xBB\xBF") {
+                rewind($stream);
             }
-            if ($header !== self::HEADERS) {
+            $header = fgetcsv($stream, 0, ',', '"', '');
+            $legacy = $header === self::LEGACY_HEADERS;
+            if (! $legacy && ($header !== array_column(self::COLUMNS, 0) || fgetcsv($stream, 0, ',', '"', '') !== array_column(self::COLUMNS, 1))) {
                 throw ValidationException::withMessages(['csv_file' => 'Invalid CSV columns. Download the inventory CSV and use its column headers.']);
             }
 
-            $count = DB::transaction(function () use ($stream, $request, $itemValidator, $writer): int {
-                $record = 1;
+            $count = DB::transaction(function () use ($stream, $request, $itemValidator, $writer, $legacy): int {
+                $record = $legacy ? 1 : 2;
                 $imported = 0;
                 $seenIds = [];
+                $fields = $legacy ? self::LEGACY_HEADERS : array_keys(self::COLUMNS);
                 while (($row = fgetcsv($stream, 0, ',', '"', '')) !== false) {
                     $record++;
                     if ($row === [null]) {
                         continue;
                     }
-                    if ($record > 5001 || count($row) !== count(self::HEADERS)) {
+                    if ($imported >= 5000 || count($row) !== count($fields)) {
                         throw ValidationException::withMessages(['csv_file' => "CSV record {$record} has an invalid number of columns or exceeds the 5,000-record limit."]);
                     }
                     if (! mb_check_encoding($row, 'UTF-8')) {
                         throw ValidationException::withMessages(['csv_file' => "CSV record {$record} must use UTF-8 encoding."]);
                     }
-                    $data = array_combine(self::HEADERS, $row);
+                    $data = array_combine($fields, $row);
                     if (! in_array($data['csv_format'], ['', 'spreadsheet-safe-v1'], true)) {
                         throw ValidationException::withMessages(['csv_file' => "CSV record {$record} has an unsupported format."]);
                     }
                     if ($data['csv_format'] === 'spreadsheet-safe-v1') {
                         foreach (self::TEXT_FIELDS as $field) {
-                            if (preg_match('/^\'(?:[\'\t\r\n]|[ \t\r\n]*[=+\-@])/', $data[$field])) {
+                            if (isset($data[$field]) && preg_match('/^\'(?:[\'\t\r\n]|[ \t\r\n]*[=+\-@])/', $data[$field])) {
                                 $data[$field] = substr($data[$field], 1);
                             }
                         }
                     }
                     $data = array_map(fn ($value) => $value === '' ? null : $value, $data);
                     try {
-                        $histories = json_decode($data['histories'] ?? '[]', true, 512, JSON_THROW_ON_ERROR);
+                        $histories = json_decode(($legacy ? $data['histories'] : $data['additional_histories']) ?? '[]', true, 512, JSON_THROW_ON_ERROR);
                     } catch (JsonException $exception) {
                         throw ValidationException::withMessages(['csv_file' => "CSV record {$record} has invalid project history JSON."]);
                     }
                     if (! is_array($histories) || ! array_is_list($histories)) {
                         throw ValidationException::withMessages(['csv_file' => "CSV record {$record} must have a list of project histories."]);
+                    }
+                    if (! $legacy && ($data['history_qty'] !== null || $data['history_project'] !== null)) {
+                        array_unshift($histories, ['quantity' => $data['history_qty'], 'project' => $data['history_project']]);
                     }
                     $data['histories'] = array_map(
                         fn ($history) => is_array($history) ? array_map(fn ($value) => $value === '' ? null : $value, $history) : $history,
@@ -124,6 +163,7 @@ class InventoryCsvController extends Controller
                     try {
                         Validator::make($data, [
                             'id' => ['nullable', 'integer', 'min:1'],
+                            'warehouse_location_id' => ['nullable', 'integer', 'min:1'],
                             'on_hand' => ['required', 'integer', 'min:0', 'max:4294967295'],
                             'total_on_hand' => ['required', 'integer', 'min:0', 'max:4294967295'],
                             'available_qty' => ['required', 'integer', 'min:0', 'max:4294967295'],
@@ -144,6 +184,12 @@ class InventoryCsvController extends Controller
                             $item = InventoryItem::query()->lockForUpdate()->find($id);
                             if ($item === null) {
                                 throw ValidationException::withMessages(['id' => 'Item ID was not found or has been deleted.']);
+                            }
+                        }
+                        if (! $legacy && $data['warehouse_location_id'] !== null && $data['location'] !== null) {
+                            $warehouse = WarehouseLocation::query()->find($data['warehouse_location_id']);
+                            if ($warehouse !== null && $data['location'] !== $warehouse->name) {
+                                throw ValidationException::withMessages(['location' => 'Location must match the selected warehouse ID.']);
                             }
                         }
                         $validated = $itemValidator->validate($data, $item, true);
