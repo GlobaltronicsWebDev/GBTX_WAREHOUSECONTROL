@@ -43,10 +43,17 @@
             </div>
 
             <div class="flex min-w-0 items-center gap-2 overflow-x-auto pb-1 xl:justify-end xl:pb-0" aria-label="Quick actions">
-                <button type="button" disabled title="Prototype navigation only" class="flex h-12 w-[58px] shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linejoin="round" d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h4"/></svg>
-                    <span>Item Entry</span>
-                </button>
+                @if ($user->canViewWarehouseOperations())
+                    <a href="{{ route('admin.inventory.create') }}" class="flex h-12 w-[58px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-[#2563EB] hover:text-blue-700">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linejoin="round" d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h4"/></svg>
+                        <span>Item Entry</span>
+                    </a>
+                @else
+                    <button type="button" disabled title="Item entry is restricted to warehouse users" class="flex h-12 w-[58px] shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linejoin="round" d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h4"/></svg>
+                        <span>Item Entry</span>
+                    </button>
+                @endif
                 <button type="button" disabled title="Prototype navigation only" class="flex h-12 w-[58px] shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v14m-5-5 5 5 5-5M4 20h16"/></svg>
                     <span>Stock In</span>

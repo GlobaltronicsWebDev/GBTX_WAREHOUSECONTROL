@@ -26,6 +26,8 @@ class InventoryItemController extends Controller
 
     public function create(): View
     {
+        abort_unless(auth()->user()?->canViewWarehouseOperations(), 403);
+
         $warehouseLocations = WarehouseLocation::query()
             ->where('is_active', true)
             ->where('navigation_enabled', true)
