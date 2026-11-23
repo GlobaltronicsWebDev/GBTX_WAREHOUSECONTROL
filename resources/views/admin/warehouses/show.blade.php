@@ -54,7 +54,7 @@
                 <div class="overflow-x-auto">
                     <table class="min-w-[900px] w-full text-left text-[11px]">
                         <thead class="border-b border-[#E5E7EB] bg-[#F8F9FA] text-slate-500">
-                            <tr><th class="px-4 py-2">Tag #</th><th class="px-4 py-2">Manufacturer</th><th class="px-4 py-2">Model</th><th class="px-4 py-2">Description</th><th class="px-4 py-2">Available Qty</th><th class="px-4 py-2">Status</th></tr>
+                            <tr><th class="px-4 py-2">Tag #</th><th class="px-4 py-2">Manufacturer</th><th class="px-4 py-2">Model</th><th class="px-4 py-2">Description</th><th class="px-4 py-2">Available Qty</th><th class="px-4 py-2">Status</th><th class="px-4 py-2">Actions</th></tr>
                         </thead>
                         <tbody class="divide-y divide-[#E5E7EB]">
                             @foreach ($items as $item)
@@ -65,6 +65,7 @@
                                     <td class="px-4 py-2">{{ $item->item_description }}</td>
                                     <td class="px-4 py-2">{{ $item->available_qty }}</td>
                                     <td class="px-4 py-2">{{ $item->status_particular ?: '—' }}</td>
+                                    <td class="px-4 py-2"><a href="{{ route('admin.inventory.edit', $item) }}" aria-label="Edit {{ $item->item_description }}" class="text-[#2563EB] hover:underline">Edit</a></td>
                                 </tr>
                             @endforeach
                         </tbody>

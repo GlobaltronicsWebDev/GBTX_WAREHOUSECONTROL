@@ -26,17 +26,62 @@ class InventoryItemController extends Controller
 
     public function create(): View
     {
+        return $this->itemForm();
+    }
+
+    public function edit(InventoryItem $inventory): View
+    {
+        return $this->itemForm($inventory);
+    }
+
+    private function itemForm(?InventoryItem $item = null): View
+    {
         $warehouseLocations = WarehouseLocation::query()
-            ->where('is_active', true)
-            ->where('navigation_enabled', true)
+            ->where(function ($query) use ($item): void {
+                $query->where(function ($query): void {
+                    $query->where('is_active', true)->where('navigation_enabled', true);
+                });
+
+                if ($item?->warehouse_location_id !== null) {
+                    $query->orWhere('id', $item->warehouse_location_id);
+                }
+            })
             ->orderBy('name')
             ->get();
 
-        return view('admin.inventory.create', compact('warehouseLocations'));
+        return view('admin.inventory.create', compact('warehouseLocations', 'item'));
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $validated = $this->validatedItem($request);
+        $validated['created_by'] = $request->user()->id;
+        InventoryItem::create($validated);
+
+        return redirect()
+            ->route('admin.inventory.index')
+            ->with('status', 'Inventory item added successfully.');
+    }
+
+    public function update(Request $request, InventoryItem $inventory): RedirectResponse
+    {
+        $inventory->update($this->validatedItem($request, $inventory));
+
+        return redirect()
+            ->route('admin.inventory.index')
+            ->with('status', 'Inventory item updated successfully.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validatedItem(Request $request, ?InventoryItem $item = null): array
+    {
+        $warehouseRule = Rule::exists('warehouse_locations', 'id');
+        if ($item?->warehouse_location_id === null || (string) $request->input('warehouse_location_id') !== (string) $item->warehouse_location_id) {
+            $warehouseRule->where('is_active', true)->where('navigation_enabled', true);
+        }
+
         $validated = $request->validate([
             'tag_number' => ['nullable', 'string', 'max:255'],
             'date_received' => ['nullable', 'date'],
@@ -46,7 +91,7 @@ class InventoryItemController extends Controller
             'item_description' => ['required', 'string', 'max:10000'],
             'warehouse_location_id' => [
                 'required',
-                Rule::exists('warehouse_locations', 'id')->where('is_active', true)->where('navigation_enabled', true),
+                $warehouseRule,
             ],
             'on_hand' => ['required', 'integer', 'min:0'],
             'total_on_hand' => ['required', 'integer', 'min:0'],
@@ -66,11 +111,7 @@ class InventoryItemController extends Controller
 
         $warehouseLocation = WarehouseLocation::query()->findOrFail($validated['warehouse_location_id']);
         $validated['location'] = $warehouseLocation->name;
-        $validated['created_by'] = $request->user()->id;
-        InventoryItem::create($validated);
 
-        return redirect()
-            ->route('admin.inventory.index')
-            ->with('status', 'Inventory item added successfully.');
+        return $validated;
     }
 }

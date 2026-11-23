@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\Role;
 use App\Models\InventoryItem;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\WarehouseLocation;
 use Database\Seeders\RoleSeeder;
@@ -78,6 +78,89 @@ class InventoryItemControllerTest extends TestCase
 
         $response->assertSeeInOrder(['History Qty', 'History Project', 'Original Qty', 'Status']);
         $response->assertSeeInOrder(['>17</td>', '>Project Alpha</td>', '>42</td>'], false);
+    }
+
+    public function test_item_can_be_edited_from_inventory_and_warehouse_lists(): void
+    {
+        $creator = User::factory()->create();
+        $editor = User::factory()->create();
+        $warehouse = WarehouseLocation::factory()->create(['is_active' => true, 'navigation_enabled' => true]);
+        $destination = WarehouseLocation::factory()->create(['is_active' => true, 'navigation_enabled' => true]);
+        $item = InventoryItem::create([
+            'item_description' => 'Original panel',
+            'date_received' => '2025-07-29',
+            'warehouse_location_id' => $warehouse->id,
+            'location' => $warehouse->name,
+            'created_by' => $creator->id,
+            'original_qty' => 42,
+        ]);
+
+        $this->actingAs($editor)->get(route('admin.inventory.index'))->assertSee(route('admin.inventory.edit', $item));
+        $this->get(route('admin.warehouses.show', $warehouse))->assertSee(route('admin.inventory.edit', $item));
+        $this->get(route('admin.inventory.edit', $item))
+            ->assertSee('Edit Inventory Item')
+            ->assertSee('value="2025-07-29"', false)
+            ->assertSee('>Original panel</textarea>', false)
+            ->assertSee('value="42"', false);
+
+        $data = $this->itemData($destination->id);
+        $data['item_description'] = 'Updated panel';
+        $this->put(route('admin.inventory.update', $item), $data)
+            ->assertRedirect(route('admin.inventory.index'))
+            ->assertSessionHas('status', 'Inventory item updated successfully.');
+
+        $this->assertDatabaseHas('inventory_items', [
+            'id' => $item->id,
+            'item_description' => 'Updated panel',
+            'warehouse_location_id' => $destination->id,
+            'location' => $destination->name,
+            'created_by' => $creator->id,
+        ]);
+        $this->get(route('admin.warehouses.show', $warehouse))->assertDontSee('Updated panel');
+        $this->get(route('admin.warehouses.show', $destination))->assertSee('Updated panel');
+    }
+
+    public function test_item_update_rejects_inactive_warehouse_and_invalid_fields(): void
+    {
+        $user = User::factory()->create();
+        $warehouse = WarehouseLocation::factory()->create(['is_active' => true, 'navigation_enabled' => true]);
+        $inactive = WarehouseLocation::factory()->create(['is_active' => false]);
+        $item = InventoryItem::create(['item_description' => 'Original panel', 'warehouse_location_id' => $warehouse->id]);
+        $data = $this->itemData($inactive->id);
+        $data['item_description'] = '';
+        $data['original_qty'] = -1;
+
+        $this->actingAs($user)->from(route('admin.inventory.edit', $item))
+            ->put(route('admin.inventory.update', $item), $data)
+            ->assertRedirect(route('admin.inventory.edit', $item))
+            ->assertSessionHasErrors(['warehouse_location_id', 'item_description', 'original_qty']);
+
+        $this->assertDatabaseHas('inventory_items', [
+            'id' => $item->id,
+            'item_description' => 'Original panel',
+            'warehouse_location_id' => $warehouse->id,
+        ]);
+    }
+
+    public function test_existing_inactive_warehouse_can_be_retained_when_editing(): void
+    {
+        $user = User::factory()->create();
+        $warehouse = WarehouseLocation::factory()->create(['is_active' => false, 'navigation_enabled' => false]);
+        $item = InventoryItem::create(['item_description' => 'Original panel', 'warehouse_location_id' => $warehouse->id]);
+
+        $this->actingAs($user)->get(route('admin.inventory.edit', $item))->assertSee($warehouse->name);
+        $this->put(route('admin.inventory.update', $item), $this->itemData($warehouse->id))
+            ->assertRedirect(route('admin.inventory.index'))
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('inventory_items', ['id' => $item->id, 'warehouse_location_id' => $warehouse->id]);
+    }
+
+    public function test_guests_cannot_edit_inventory(): void
+    {
+        $item = InventoryItem::create(['item_description' => 'Original panel']);
+
+        $this->get(route('admin.inventory.edit', $item))->assertRedirect(route('login'));
+        $this->put(route('admin.inventory.update', $item), [])->assertRedirect(route('login'));
     }
 
     /**
