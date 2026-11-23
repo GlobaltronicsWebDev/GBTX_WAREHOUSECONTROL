@@ -75,7 +75,7 @@
                 ] as $field => $label)
                     <div>
                         <label for="{{ $field }}" class="mb-1 block text-[11px] font-medium text-slate-700">{{ $label }}</label>
-                        <input id="{{ $field }}" name="{{ $field }}" value="{{ old($field, $item?->{$field} ?? 0) }}" type="number" min="0" required class="w-full rounded-sm border border-[#E5E7EB] px-3 py-2 text-[12px] outline-none focus:border-[#2563EB]">
+                        <input id="{{ $field }}" name="{{ $field }}" value="{{ old($field, $item?->{$field} ?? 0) }}" type="number" min="{{ $field === 'status_qty' ? '-4294967295' : '0' }}" required class="w-full rounded-sm border border-[#E5E7EB] px-3 py-2 text-[12px] outline-none focus:border-[#2563EB]">
                     </div>
                 @endforeach
                 @foreach ([

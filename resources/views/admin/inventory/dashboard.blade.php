@@ -28,6 +28,7 @@
                             <label for="csv_file" class="block text-[11px] font-medium text-slate-700">Inventory CSV file</label>
                             <input id="csv_file" type="file" name="csv_file" accept=".csv,text/csv" required class="block w-full text-[11px] text-slate-700">
                             <p class="text-[10px] text-slate-500">Use the exported CSV as a template. Existing IDs update items; leave ID blank to add. Fill all quantity and SQM fields (use 0 if needed). Histories are replaced. Maximum 5 MB and 5,000 records.</p>
+                            <p class="text-[10px] text-slate-500">The centralized LED inventory spreadsheet is also supported. Each upload creates new items; importing it again creates duplicates. Blank quantities become zero, negative availability becomes zero, and per-panel SQM is rounded to two decimals. Multiple received dates are preserved in history.</p>
                             <p class="text-[10px] text-slate-500">Enter the first history under History Qty and Project. Additional Histories is a JSON list, for example: <code>[{"quantity":2,"project":"Client"}]</code>. Use [] for none.</p>
                             <p class="text-[10px] text-slate-500">Keep both header rows. Location must match the Warehouse ID; use the ID below to select a warehouse.</p>
                             <p class="text-[10px] text-slate-500">Active warehouse IDs:

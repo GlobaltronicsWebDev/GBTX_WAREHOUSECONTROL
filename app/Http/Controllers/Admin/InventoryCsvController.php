@@ -7,6 +7,7 @@ use App\Models\InventoryItem;
 use App\Models\WarehouseLocation;
 use App\Support\InventoryItemValidator;
 use App\Support\InventoryItemWriter;
+use App\Support\InventorySpreadsheetImporter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -96,7 +97,7 @@ class InventoryCsvController extends Controller
         }, 'inventory.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
-    public function import(Request $request, InventoryItemValidator $itemValidator, InventoryItemWriter $writer): RedirectResponse
+    public function import(Request $request, InventoryItemValidator $itemValidator, InventoryItemWriter $writer, InventorySpreadsheetImporter $spreadsheetImporter): RedirectResponse
     {
         abort_unless($request->user()->isAdmin(), 403);
         $request->validate(['csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:5120']]);
@@ -112,11 +113,15 @@ class InventoryCsvController extends Controller
             }
             $header = fgetcsv($stream, 0, ',', '"', '');
             $legacy = $header === self::LEGACY_HEADERS;
-            if (! $legacy && ($header !== array_column(self::COLUMNS, 0) || fgetcsv($stream, 0, ',', '"', '') !== array_column(self::COLUMNS, 1))) {
+            $spreadsheet = $spreadsheetImporter->matchesTitle($header);
+            if (! $legacy && ! $spreadsheet && ($header !== array_column(self::COLUMNS, 0) || fgetcsv($stream, 0, ',', '"', '') !== array_column(self::COLUMNS, 1))) {
                 throw ValidationException::withMessages(['csv_file' => 'Invalid CSV columns. Download the inventory CSV and use its column headers.']);
             }
 
-            $count = DB::transaction(function () use ($stream, $request, $itemValidator, $writer, $legacy): int {
+            $count = DB::transaction(function () use ($stream, $request, $itemValidator, $writer, $legacy, $spreadsheet, $spreadsheetImporter): int {
+                if ($spreadsheet) {
+                    return $spreadsheetImporter->import($stream, $request->user(), $itemValidator, $writer);
+                }
                 $record = $legacy ? 1 : 2;
                 $imported = 0;
                 $seenIds = [];
@@ -169,7 +174,7 @@ class InventoryCsvController extends Controller
                             'available_qty' => ['required', 'integer', 'min:0', 'max:4294967295'],
                             'reservation_qty' => ['required', 'integer', 'min:0', 'max:4294967295'],
                             'original_qty' => ['required', 'integer', 'min:0', 'max:4294967295'],
-                            'status_qty' => ['required', 'integer', 'min:0', 'max:4294967295'],
+                            'status_qty' => ['required', 'integer', 'min:-4294967295', 'max:4294967295'],
                             'per_panel_sqm' => ['required', 'numeric', 'min:0', 'max:99999999.99', 'decimal:0,2'],
                             'total_available_sqm' => ['required', 'numeric', 'min:0', 'max:9999999999.99', 'decimal:0,2'],
                             'available_sqm' => ['required', 'numeric', 'min:0', 'max:9999999999.99', 'decimal:0,2'],

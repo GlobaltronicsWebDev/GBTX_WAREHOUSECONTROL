@@ -45,7 +45,7 @@ class InventoryItemValidator
             'histories.*.quantity' => ['nullable', 'integer', 'min:0', 'max:4294967295'],
             'histories.*.project' => ['nullable', 'string', 'max:10000'],
             'original_qty' => ['required', 'integer', 'min:0'],
-            'status_qty' => ['required', 'integer', 'min:0'],
+            'status_qty' => ['required', 'integer', 'min:-4294967295', 'max:4294967295'],
             'status_particular' => ['nullable', 'string', 'max:255'],
             'remarks' => ['nullable', 'string', 'max:10000'],
         ])->validate();

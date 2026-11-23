@@ -154,6 +154,7 @@ class InventoryItemControllerTest extends TestCase
 
         $data = $this->itemData($destination->id);
         $data['item_description'] = 'Updated panel';
+        $data['status_qty'] = -166;
         $this->put(route('admin.inventory.update', $item), $data)
             ->assertRedirect(route('admin.inventory.index'))
             ->assertSessionHas('status', 'Inventory item updated successfully.');
@@ -163,8 +164,10 @@ class InventoryItemControllerTest extends TestCase
             'item_description' => 'Updated panel',
             'warehouse_location_id' => $destination->id,
             'location' => $destination->name,
+            'status_qty' => -166,
             'created_by' => $creator->id,
         ]);
+        $this->get(route('admin.inventory.edit', $item))->assertSee('value="-166" type="number" min="-4294967295"', false);
         $this->get(route('admin.warehouses.show', $warehouse))->assertDontSee('Updated panel');
         $this->get(route('admin.warehouses.show', $destination))->assertSee('Updated panel');
     }

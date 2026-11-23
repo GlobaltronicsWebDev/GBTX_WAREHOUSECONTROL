@@ -12,6 +12,8 @@ class WarehouseLocation extends Model
 
     public const OHAAP_SUB_LOCATIONS = ['1st Flr', '2nd Flr', '3rd Flr', '4th Flr', '5th Flr'];
 
+    public const A_JUAN_SUB_LOCATIONS = ['A JUAN MAIN 1ST FLOOR', 'A JUAN MAIN 3RD FLOOR'];
+
     /** @use HasFactory<WarehouseLocationFactory> */
     use HasFactory;
 
@@ -38,6 +40,7 @@ class WarehouseLocation extends Model
         return match (strtolower(trim($this->name))) {
             'marikina' => self::MARIKINA_SUB_LOCATIONS,
             'ohaap' => self::OHAAP_SUB_LOCATIONS,
+            'a juan' => self::A_JUAN_SUB_LOCATIONS,
             default => [],
         };
     }

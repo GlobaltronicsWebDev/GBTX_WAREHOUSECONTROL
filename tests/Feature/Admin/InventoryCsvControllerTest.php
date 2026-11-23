@@ -79,6 +79,7 @@ class InventoryCsvControllerTest extends TestCase
             'warehouse_location_id' => $warehouse->id,
             'sub_location' => '1st Bldg',
             'available_qty' => 5,
+            'status_qty' => -6,
             'created_by' => $creator->id,
         ]);
         $item->histories()->create(['quantity' => 2, 'project' => 'Old client']);
@@ -98,7 +99,7 @@ class InventoryCsvControllerTest extends TestCase
             ->assertRedirect(route('admin.inventory.dashboard'))
             ->assertSessionHas('status', 'Imported 2 inventory item(s).');
 
-        $this->assertDatabaseHas('inventory_items', ['id' => $item->id, 'item_description' => '=original', 'available_qty' => 8, 'created_by' => $creator->id]);
+        $this->assertDatabaseHas('inventory_items', ['id' => $item->id, 'item_description' => '=original', 'available_qty' => 8, 'status_qty' => -6, 'created_by' => $creator->id]);
         $this->assertDatabaseHas('inventory_items', ['item_description' => 'New panel', 'sub_location' => '2Floor', 'created_by' => $admin->id]);
         $this->assertSame(['=First client', 'Second client'], $item->fresh()->histories->pluck('project')->all());
         $this->assertDatabaseMissing('inventory_item_histories', ['inventory_item_id' => $item->id, 'project' => 'Old client']);
@@ -261,6 +262,125 @@ class InventoryCsvControllerTest extends TestCase
         $this->actingAs($staff)->post(route('admin.inventory.import'))->assertForbidden();
         $this->get(route('admin.inventory.dashboard'))->assertDontSee('Import CSV')->assertSee('Export CSV');
         $this->actingAs($this->admin())->get(route('admin.inventory.dashboard'))->assertSee('Import CSV');
+    }
+
+    public function test_centralized_spreadsheet_import_preserves_histories_and_assigns_warehouses(): void
+    {
+        $marikina = WarehouseLocation::factory()->create(['name' => 'Marikina']);
+        $globaltronics = WarehouseLocation::factory()->create(['name' => 'Globaltronics']);
+        $juan = WarehouseLocation::where('name', 'A Juan')->firstOrFail();
+        $clark = WarehouseLocation::where('name', 'Clark Office')->firstOrFail();
+        $rows = $this->spreadsheetHeaders();
+        $rows[] = $this->spreadsheetRow([
+            1 => '10/15/2025', 5 => 'First panel', 6 => 'A JUAN - 1ST FLR', 7 => '1,234 pcs',
+            9 => '1.2345 sqm', 11 => '-5 pcs', 12 => '-4.61 sqm',
+            15 => '4 pcs', 16 => 'First project', 18 => '-6',
+        ]);
+        $rows[] = $this->spreadsheetRow([
+            2 => 'PO-123', 6 => 'DEFECTIVE', 7 => '2 pcs', 13 => '1 pcs',
+            14 => 'Reserved project', 15 => '2', 16 => 'Second project', 20 => 'Damaged',
+        ]);
+        $rows[] = $this->spreadsheetRow([16 => 'Third project']);
+        $rows[] = $this->spreadsheetRow([1 => "9-4-2026\n9-7-2026", 5 => 'Third floor panel', 6 => "A JUAN MAIN\n3RD FLOOR"]);
+        $rows[] = $this->spreadsheetRow([1 => '12/15-16/25', 5 => 'Marikina panel', 6 => "MARIKINA\nWAREHOUSE"]);
+        $rows[] = $this->spreadsheetRow([5 => 'Global panel', 6 => 'GLOBALTRONICS WAREHOUSE']);
+        $rows[] = $this->spreadsheetRow([5 => 'Clark panel', 6 => 'CLARK OFFICE']);
+        $rows[] = $this->spreadsheetRow([5 => 'TOTAL COUNT', 7 => '1234']);
+
+        $this->actingAs($this->admin())->post(route('admin.inventory.import'), ['csv_file' => $this->csvFile($rows)])
+            ->assertSessionHas('status', 'Imported 5 inventory item(s).');
+
+        $first = InventoryItem::where('item_description', 'First panel')->firstOrFail();
+        $this->assertSame($juan->id, $first->warehouse_location_id);
+        $this->assertSame('A JUAN MAIN 1ST FLOOR', $first->sub_location);
+        $this->assertSame('2025-10-15', $first->date_received->format('Y-m-d'));
+        $this->assertSame(1234, $first->on_hand);
+        $this->assertSame('1.23', $first->per_panel_sqm);
+        $this->assertSame(0, $first->available_qty);
+        $this->assertSame('0.00', $first->available_sqm);
+        $this->assertSame(-6, $first->status_qty);
+        $this->assertSame('First project', $first->histories[0]->project);
+        $this->assertSame(2, $first->histories[1]->quantity);
+        $this->assertStringContainsString("Second project\nPO / SKU: PO-123\nLocation: DEFECTIVE\nOn-hand: 2 pcs", $first->histories[1]->project);
+        $this->assertStringContainsString("Reservation qty: 1 pcs\nReservation project details: Reserved project\nRemarks: Damaged", $first->histories[1]->project);
+        $this->assertSame(0, $first->histories[2]->quantity);
+        $thirdFloor = InventoryItem::where('item_description', 'Third floor panel')->firstOrFail();
+        $this->assertNull($thirdFloor->date_received);
+        $this->assertSame("Date received: 9-4-2026\n9-7-2026", $thirdFloor->histories[0]->project);
+        $this->assertSame('A JUAN MAIN 3RD FLOOR', $thirdFloor->sub_location);
+        $range = InventoryItem::where('item_description', 'Marikina panel')->firstOrFail();
+        $this->assertSame($marikina->id, $range->warehouse_location_id);
+        $this->assertNull($range->date_received);
+        $this->assertSame('Date received: 12/15-16/25', $range->histories[0]->project);
+        $this->assertDatabaseHas('inventory_items', ['item_description' => 'Global panel', 'warehouse_location_id' => $globaltronics->id]);
+        $this->assertDatabaseHas('inventory_items', ['item_description' => 'Clark panel', 'warehouse_location_id' => $clark->id]);
+        $this->assertDatabaseMissing('inventory_items', ['item_description' => 'TOTAL COUNT']);
+        $this->get(route('admin.warehouses.show', $juan))->assertSee('First panel')->assertDontSee('Marikina panel');
+    }
+
+    public function test_spreadsheet_import_rejects_invalid_rows_atomically(): void
+    {
+        WarehouseLocation::factory()->create(['name' => 'Marikina']);
+        $rows = $this->spreadsheetHeaders();
+        $rows[] = $this->spreadsheetRow([5 => 'Valid panel', 6 => 'MARIKINA']);
+        $rows[] = $this->spreadsheetRow([5 => 'Invalid panel', 6 => 'UNKNOWN']);
+
+        $this->actingAs($this->admin())->post(route('admin.inventory.import'), ['csv_file' => $this->csvFile($rows)])
+            ->assertSessionHasErrors('csv_file');
+        $this->assertDatabaseMissing('inventory_items', ['item_description' => 'Valid panel']);
+
+        $rows[6] = $this->spreadsheetRow([1 => '02/30/2025', 5 => 'Invalid date', 6 => 'MARIKINA']);
+        $this->post(route('admin.inventory.import'), ['csv_file' => $this->csvFile($rows)])
+            ->assertSessionHasErrors('csv_file');
+        $this->assertDatabaseMissing('inventory_items', ['item_description' => 'Valid panel']);
+
+        $rows[6] = $this->spreadsheetRow([5 => 'Invalid number', 6 => 'MARIKINA', 7 => '5 sqm']);
+        $this->post(route('admin.inventory.import'), ['csv_file' => $this->csvFile($rows)])
+            ->assertSessionHasErrors('csv_file');
+        $this->assertDatabaseMissing('inventory_items', ['item_description' => 'Valid panel']);
+    }
+
+    public function test_spreadsheet_rejects_ambiguous_warehouse_names(): void
+    {
+        WarehouseLocation::factory()->create(['name' => 'Marikina', 'entity' => 'Warehouse']);
+        WarehouseLocation::factory()->create(['name' => 'Marikina', 'entity' => 'Other']);
+        $rows = $this->spreadsheetHeaders();
+        $rows[] = $this->spreadsheetRow([5 => 'Panel', 6 => 'MARIKINA']);
+
+        $this->actingAs($this->admin())->post(route('admin.inventory.import'), ['csv_file' => $this->csvFile($rows)])
+            ->assertSessionHasErrors('csv_file');
+        $this->assertDatabaseMissing('inventory_items', ['item_description' => 'Panel']);
+    }
+
+    public function test_status_quantity_migration_refuses_a_lossy_rollback(): void
+    {
+        $item = InventoryItem::create(['item_description' => 'Panel', 'status_qty' => -6]);
+        $migration = require database_path('migrations/2026_11_23_150000_extend_inventory_for_spreadsheet_import.php');
+
+        try {
+            $migration->down();
+            $this->fail('A migration rollback must not discard negative quantities.');
+        } catch (\RuntimeException $exception) {
+            $this->assertStringContainsString('unsigned', $exception->getMessage());
+        }
+
+        $this->assertSame(-6, $item->fresh()->status_qty);
+    }
+
+    private function spreadsheetHeaders(): array
+    {
+        return [
+            $this->spreadsheetRow([0 => "CENTRALIZED LED INVENTORY\nLast Update: ONGOING"]),
+            $this->spreadsheetRow([]),
+            $this->spreadsheetRow([]),
+            ['TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'MANUFACTURER', 'MODEL / PIXEL PITCH', 'ITEM DESCRIPTION', 'LOCATION', 'INVENTORY', '', '', '', 'AVAILABLE QTY', '', 'RESERVATION', '', 'HISTORY', '', 'ORIGINAL QTY', 'STATUS', '', 'REMARKS'],
+            ['', '', '', '', '', '', '', 'ON-HAND', 'TOTAL ON-HAND', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM', 'QTY', 'SQM', 'QTY', 'PROJECT DETAILS', 'QTY', 'PROJECT', '', 'QTY', 'PARTICULAR', ''],
+        ];
+    }
+
+    private function spreadsheetRow(array $values): array
+    {
+        return array_replace(array_fill(0, 21, ''), $values);
     }
 
     private function admin(): User
