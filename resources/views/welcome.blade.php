@@ -13,6 +13,12 @@
             'dark',
             savedTheme === 'dark' || (savedTheme === null && prefersDarkTheme)
         );
+
+        document.addEventListener('wheel', (event) => {
+            if (event.ctrlKey || event.metaKey) {
+                event.preventDefault();
+            }
+        }, { passive: false });
     </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
