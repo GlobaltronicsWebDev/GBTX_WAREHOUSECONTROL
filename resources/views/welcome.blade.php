@@ -40,12 +40,12 @@
 </head>
 <body class="min-h-screen bg-white text-slate-950 antialiased dark:bg-slate-950 dark:text-slate-100">
     <main class="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-        <section aria-labelledby="welcome-title" class="relative isolate flex min-h-[320px] flex-col justify-between overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 px-8 py-8 text-white sm:px-12 sm:py-10 lg:min-h-screen">
+        <section aria-labelledby="welcome-title" class="relative isolate flex min-h-80 flex-col justify-between overflow-hidden bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 px-8 py-8 text-white sm:px-12 sm:py-10 lg:min-h-screen">
             <img
                 src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
                 alt=""
                 aria-hidden="true"
-                class="pointer-events-none absolute -bottom-24 -right-24 w-96 opacity-10 sm:-bottom-32 sm:-right-32 sm:w-[36rem]"
+                class="pointer-events-none absolute -bottom-24 -right-24 w-96 opacity-10 sm:-bottom-32 sm:-right-32 sm:w-xl"
             >
 
             <div class="relative z-10 flex items-center gap-3">
@@ -82,7 +82,7 @@
             </div>
         </section>
 
-        <section class="relative flex min-h-[600px] items-center justify-center bg-white px-6 py-10 transition-colors sm:px-10 dark:bg-slate-950 lg:min-h-screen">
+        <section class="relative flex min-h-150 items-center justify-center bg-white px-6 py-10 transition-colors sm:px-10 dark:bg-slate-950 lg:min-h-screen">
         <div class="w-full max-w-xs">
             <header class="mb-8 text-center">
                 <div class="absolute right-6 top-6 z-20">
