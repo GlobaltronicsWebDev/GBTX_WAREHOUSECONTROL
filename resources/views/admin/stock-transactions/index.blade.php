@@ -65,7 +65,7 @@
             </form>
 
             <div class="overflow-x-auto">
-                <table class="w-full min-w-[980px] border-collapse text-left text-[11px]">
+                <table class="w-full min-w-245 border-collapse text-left text-[11px]">
                     <thead class="h-9 border-b border-[#E5E7EB] bg-[#F8F9FA] text-[10px] font-medium uppercase tracking-wide text-slate-500">
                         <tr>
                             <th class="px-3">Reference / Date</th>

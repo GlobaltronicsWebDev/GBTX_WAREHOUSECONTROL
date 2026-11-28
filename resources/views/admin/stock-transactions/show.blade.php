@@ -56,7 +56,7 @@
         <section class="border border-[#E5E7EB] bg-white">
             <h2 class="border-b border-[#E5E7EB] px-4 py-3 text-[12px] font-semibold">Products</h2>
             <div class="overflow-x-auto">
-                <table class="w-full min-w-[680px] text-left text-[11px]">
+                <table class="w-full min-w-170 text-left text-[11px]">
                     <thead class="bg-[#F8F9FA] text-slate-500">
                         <tr>
                             <th class="px-4 py-2">Product ID / SKU</th>

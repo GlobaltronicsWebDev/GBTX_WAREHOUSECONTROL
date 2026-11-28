@@ -78,7 +78,7 @@
     <div id="dashboardSidebarBackdrop" class="fixed inset-0 z-30 hidden bg-slate-950/25 lg:hidden" aria-hidden="true"></div>
 
     <div class="flex min-h-screen">
-        <aside id="dashboardSidebar" class="fixed inset-y-0 left-0 z-40 flex w-[240px] -translate-x-full flex-col border-r border-[#E5E7EB] bg-[#F8F9FA] transition-[width,transform] duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0">
+        <aside id="dashboardSidebar" class="fixed inset-y-0 left-0 z-40 flex w-60 -translate-x-full flex-col border-r border-[#E5E7EB] bg-[#F8F9FA] transition-[width,transform] duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0">
             <div class="flex h-12 shrink-0 items-center gap-2.5 border-b border-[#E5E7EB] px-4">
                 <img
                     src="{{ asset('assets/images/logo/GBTX_ROT.gif') }}"
@@ -142,7 +142,7 @@
                                     <div class="space-y-1 pb-1 pl-3">
                                         <a href="{{ route('admin.warehouses.show', $warehouseNavigationLocation) }}" @if ($isCurrentWarehouse && request()->query('sub_location') === null) aria-current="page" @endif class="block text-[11px] {{ $isCurrentWarehouse && request()->query('sub_location') === null ? 'font-medium text-[#2563EB]' : 'text-[#7891B8] hover:text-[#2563EB]' }}">All items</a>
                                         @foreach ($subLocations as $subLocation)
-                                            <a href="{{ route('admin.warehouses.show', ['location' => $warehouseNavigationLocation, 'sub_location' => $subLocation]) }}" @if ($isCurrentWarehouse && request()->query('sub_location') === $subLocation) aria-current="page" @endif class="block break-words text-[11px] {{ $isCurrentWarehouse && request()->query('sub_location') === $subLocation ? 'font-medium text-[#2563EB]' : 'text-[#7891B8] hover:text-[#2563EB]' }}">{{ $subLocation }}</a>
+                                            <a href="{{ route('admin.warehouses.show', ['location' => $warehouseNavigationLocation, 'sub_location' => $subLocation]) }}" @if ($isCurrentWarehouse && request()->query('sub_location') === $subLocation) aria-current="page" @endif class="block wrap-break-word text-[11px] {{ $isCurrentWarehouse && request()->query('sub_location') === $subLocation ? 'font-medium text-[#2563EB]' : 'text-[#7891B8] hover:text-[#2563EB]' }}">{{ $subLocation }}</a>
                                         @endforeach
                                     </div>
                                 </details>
@@ -240,7 +240,7 @@
         </aside>
 
         @if (request()->routeIs('admin.settings.*', 'admin.users.*'))
-            <aside id="settingsSidebar" class="hidden w-[210px] shrink-0 flex-col border-r border-[#E5E7EB] bg-white lg:sticky lg:top-0 lg:flex lg:h-screen">
+            <aside id="settingsSidebar" class="hidden w-52.5 shrink-0 flex-col border-r border-[#E5E7EB] bg-white lg:sticky lg:top-0 lg:flex lg:h-screen">
                 <div class="flex h-12 shrink-0 items-center gap-2 border-b border-[#E5E7EB] px-4">
                     <svg class="h-4 w-4 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                         <rect x="4" y="4" width="16" height="16" rx="2"/><path stroke-linecap="round" d="M9 8h6M9 12h6M9 16h3"/>
