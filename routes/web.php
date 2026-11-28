@@ -152,6 +152,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/inventory/dashboard', [InventoryItemController::class, 'dashboard'])->name('inventory.dashboard');
     Route::get('/inventory/export', [InventoryCsvController::class, 'export'])->name('inventory.export');
     Route::post('/inventory/import', [InventoryCsvController::class, 'import'])->name('inventory.import');
+    Route::delete('/inventory/selected', [InventoryItemController::class, 'destroySelected'])->name('inventory.destroy-selected');
     Route::resource('inventory', InventoryItemController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::post('/delivery-receipts/{delivery_receipt}/release', [DeliveryReceiptController::class, 'release'])->name('delivery-receipts.release');
     Route::resource('delivery-receipts', DeliveryReceiptController::class)->except(['destroy']);

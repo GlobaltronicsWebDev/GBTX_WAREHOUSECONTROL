@@ -3,8 +3,8 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\InventoryItem;
-use App\Models\StockTransaction;
 use App\Models\Role;
+use App\Models\StockTransaction;
 use App\Models\User;
 use App\Models\WarehouseLocation;
 use Database\Seeders\RoleSeeder;
@@ -550,6 +550,94 @@ class InventoryItemControllerTest extends TestCase
         }
 
         $this->assertDatabaseHas('inventory_items', ['id' => $item->id, 'deleted_at' => null]);
+    }
+
+    public function test_administrator_can_delete_selected_items_on_the_inventory_page_and_preserve_history(): void
+    {
+        $user = User::factory()->create();
+        $user->roles()->attach(Role::where('slug', 'warehouse-admin')->firstOrFail());
+        $first = InventoryItem::create(['item_description' => 'First panel']);
+        $first->histories()->create(['quantity' => 2, 'project' => 'Preserved project']);
+        $second = InventoryItem::create(['item_description' => 'Second panel']);
+        $unselected = InventoryItem::create(['item_description' => 'Unselected panel']);
+
+        $this->actingAs($user)->get(route('admin.inventory.index'))
+            ->assertSee('aria-label="Select all items on this page"', false)
+            ->assertSee('aria-label="Select First panel"', false)
+            ->assertSee('Delete selected')
+            ->assertSee('cannot be restored from the application');
+
+        $this->from(route('admin.inventory.index'))
+            ->delete(route('admin.inventory.destroy-selected'), ['items' => [$first->id, $second->id]])
+            ->assertRedirect(route('admin.inventory.index'))
+            ->assertSessionHas('status', 'Deleted 2 selected inventory item(s).');
+
+        $this->assertSoftDeleted($first);
+        $this->assertSoftDeleted($second);
+        $this->assertNotSoftDeleted($unselected);
+        $this->assertDatabaseHas('inventory_item_histories', ['inventory_item_id' => $first->id, 'project' => 'Preserved project']);
+    }
+
+    public function test_selected_inventory_deletion_rejects_items_outside_the_current_page_or_search(): void
+    {
+        $user = User::factory()->create();
+        $user->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        $oldest = InventoryItem::create(['item_description' => 'Panel old']);
+        for ($number = 1; $number <= 25; $number++) {
+            InventoryItem::create(['item_description' => "Panel {$number}"]);
+        }
+        $latest = InventoryItem::create(['item_description' => 'Other item']);
+        $url = route('admin.inventory.destroy-selected');
+
+        $this->actingAs($user)->get(route('admin.inventory.index', ['search' => 'Panel', 'page' => 2]))
+            ->assertSee('action="'.str_replace('&', '&amp;', route('admin.inventory.destroy-selected', ['search' => 'Panel', 'page' => 2])).'"', false);
+        $this->actingAs($user)->delete($url, ['items' => [$oldest->id, $latest->id]])
+            ->assertSessionHasErrors('items');
+        $this->delete(route('admin.inventory.destroy-selected', ['search' => 'Panel']), ['items' => [$latest->id]])
+            ->assertSessionHasErrors('items');
+        $this->delete(route('admin.inventory.destroy-selected', ['page' => 2]), ['items' => [$oldest->id]])
+            ->assertSessionHas('status', 'Deleted 1 selected inventory item(s).');
+
+        $this->assertSoftDeleted($oldest);
+        $this->assertNotSoftDeleted($latest);
+    }
+
+    public function test_selected_inventory_deletion_validates_items_and_requires_administrator(): void
+    {
+        $item = InventoryItem::create(['item_description' => 'Panel']);
+        $url = route('admin.inventory.destroy-selected');
+        $this->delete($url, ['items' => [$item->id]])->assertRedirect(route('login'));
+        $staff = User::factory()->create();
+        $staff->roles()->attach(Role::where('slug', 'warehouse-staff')->firstOrFail());
+        $this->actingAs($staff)->get(route('admin.inventory.index'))->assertDontSee('Delete selected');
+        $this->delete($url, ['items' => [$item->id]])->assertForbidden();
+
+        $admin = User::factory()->create();
+        $admin->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        $this->actingAs($admin)->delete($url, [])->assertSessionHasErrors('items');
+        $this->delete($url, ['items' => [$item->id, $item->id]])->assertSessionHasErrors('items.0');
+        $this->delete($url, ['items' => range(1, 26)])->assertSessionHasErrors('items');
+        $this->assertNotSoftDeleted($item);
+    }
+
+    public function test_selected_inventory_deletion_rolls_back_if_an_item_cannot_be_deleted(): void
+    {
+        $user = User::factory()->create();
+        $user->roles()->attach(Role::where('slug', 'it-admin')->firstOrFail());
+        $first = InventoryItem::create(['item_description' => 'First panel']);
+        $second = InventoryItem::create(['item_description' => 'Second panel']);
+        Event::listen('eloquent.deleting: '.InventoryItem::class, fn (InventoryItem $item) => $item->is($first) ? false : null);
+
+        try {
+            $this->actingAs($user)->delete(route('admin.inventory.destroy-selected'), [
+                'items' => [$first->id, $second->id],
+            ])->assertInternalServerError();
+        } finally {
+            Event::forget('eloquent.deleting: '.InventoryItem::class);
+        }
+
+        $this->assertNotSoftDeleted($first);
+        $this->assertNotSoftDeleted($second);
     }
 
     public function test_administrator_can_soft_delete_selected_warehouse_items_and_preserve_history(): void
