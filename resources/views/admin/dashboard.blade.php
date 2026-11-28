@@ -43,53 +43,53 @@
             </div>
 
             <div class="flex min-w-0 items-center gap-2 overflow-x-auto pb-1 xl:justify-end xl:pb-0" aria-label="Quick actions">
-                <a href="{{ route('admin.inventory.create') }}" class="flex h-12 w-[58px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-[#2563EB] hover:text-blue-700">
+                <a href="{{ route('admin.inventory.create') }}" class="flex h-12 w-14.5 shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-[#2563EB] hover:text-blue-700">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linejoin="round" d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h4"/></svg>
                     <span>Item Entry</span>
                 </a>
-                <a href="{{ route('admin.stock-in.index') }}" class="flex h-12 w-[58px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-600 hover:text-[#2563EB]">
+                <a href="{{ route('admin.stock-in.index') }}" class="flex h-12 w-14.5 shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-600 hover:text-[#2563EB]">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v14m-5-5 5 5 5-5M4 20h16"/></svg>
                     <span>Stock In</span>
                 </a>
-                <a href="{{ route('admin.stock-out.index') }}" class="flex h-12 w-[58px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-600 hover:text-[#2563EB]">
+                <a href="{{ route('admin.stock-out.index') }}" class="flex h-12 w-14.5 shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-600 hover:text-[#2563EB]">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21V7m5 5-5-5-5 5M4 4h16"/></svg>
                     <span>Stock Out</span>
                 </a>
-                <button type="button" disabled title="Prototype navigation only" class="flex h-12 w-[58px] shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
+                <button type="button" disabled title="Prototype navigation only" class="flex h-12 w-14.5 shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linejoin="round" d="M3 8h18v12H3zM5 8l2-4h10l2 4M12 4v10m-4-4 4 4 4-4"/></svg>
                     <span>Import Entry</span>
                 </button>
-                <button type="button" disabled title="Prototype navigation only" class="flex h-12 w-[58px] shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
+                <button type="button" disabled title="Prototype navigation only" class="flex h-12 w-14.5 shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linejoin="round" d="M3 6h18v14H3zM7 6V4h10v2M7 10h10M7 14h6"/></svg>
                     <span>Projects</span>
                 </button>
-                <a href="{{ route('admin.srf.approved') }}" class="flex h-12 w-[58px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-600 hover:text-[#2563EB]">
+                <a href="{{ route('admin.srf.approved') }}" class="flex h-12 w-14.5 shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-600 hover:text-[#2563EB]">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="m8 12 2.5 2.5L16.5 9"/></svg>
                     <span>Approvals</span>
                 </a>
-                <button type="button" onclick="openInstallationSrfModal()" @disabled(! $canReviewSrf) class="flex h-12 w-[58px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-[#2563EB] disabled:cursor-not-allowed disabled:text-slate-400">
+                <button type="button" onclick="openInstallationSrfModal()" @disabled(! $canReviewSrf) class="flex h-12 w-14.5 shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-[#2563EB] disabled:cursor-not-allowed disabled:text-slate-400">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/></svg>
                     <span>Requisitions</span>
                 </button>
-                <button type="button" disabled title="Prototype navigation only" class="flex h-12 w-[58px] shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
+                <button type="button" disabled title="Prototype navigation only" class="flex h-12 w-14.5 shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linejoin="round" d="M3 7h18v13H3zM7 7V4h10v3M7 12h10M7 16h6"/></svg>
                     <span>Purchases</span>
                 </button>
-                <button type="button" disabled title="Prototype navigation only" class="flex h-12 w-[58px] shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
+                <button type="button" disabled title="Prototype navigation only" class="flex h-12 w-14.5 shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path stroke-linecap="round" d="M3 10h18M7 15h4"/></svg>
                     <span>Payments</span>
                 </button>
-                <a href="{{ route('admin.reports.index') }}" class="flex h-12 w-[58px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-600 hover:text-[#2563EB]">
+                <a href="{{ route('admin.reports.index') }}" class="flex h-12 w-14.5 shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-600 hover:text-[#2563EB]">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linejoin="round" d="M4 19V5m0 14h17"/><path stroke-linejoin="round" d="m7 15 4-4 3 2 6-7"/></svg>
                     <span>Reports</span>
                 </a>
                 @if ($user->canAccessAdminCredentials())
-                    <a href="{{ route('admin.settings.companies') }}" class="flex h-12 w-[58px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-600 hover:text-[#2563EB]">
+                    <a href="{{ route('admin.settings.companies') }}" class="flex h-12 w-14.5 shrink-0 flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-600 hover:text-[#2563EB]">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="m19.4 15 .1.1 1 1.7-1.6 2.8-2-.5a8 8 0 0 1-1.5.9l-.4 2h-3.2l-.4-2a8 8 0 0 1-1.5-.9l-2 .5-1.6-2.8 1-1.7a8 8 0 0 1 0-1.8l-1-1.7 1.6-2.8 2 .5a8 8 0 0 1 1.5-.9l.4-2h3.2l.4 2a8 8 0 0 1 1.5.9l2-.5 1.6 2.8-1 1.7a8 8 0 0 1 0 1.8Z"/></svg>
                         <span>Settings</span>
                     </a>
                 @else
-                    <button type="button" disabled title="Settings are restricted to IT administrators" class="flex h-12 w-[58px] shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
+                    <button type="button" disabled title="Settings are restricted to IT administrators" class="flex h-12 w-14.5 shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 text-[10px] leading-none text-slate-400">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" d="M19.4 15 21 17.8l-1.6 2.8-2-.5a8 8 0 0 1-1.5.9l-.4 2h-3.2l-.4-2a8 8 0 0 1-1.5-.9l-2 .5-1.6-2.8L5.4 15a8 8 0 0 1 0-1.8l-1-1.7L6 8.7l2 .5a8 8 0 0 1 1.5-.9l.4-2h3.2l.4 2a8 8 0 0 1 1.5.9l2-.5 1.6 2.8-1 1.7a8 8 0 0 1 0 1.8Z"/></svg>
                         <span>Settings</span>
                     </button>
@@ -148,7 +148,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table id="transactionsTable" class="w-full min-w-[890px] border-collapse text-left text-[11px]">
+                    <table id="transactionsTable" class="w-full min-w-222.5 border-collapse text-left text-[11px]">
                         <thead class="h-8 border-b border-[#E5E7EB] bg-[#F8F9FA] text-[10px] font-medium text-slate-500">
                             <tr>
                                 <th class="w-8 px-3"><input type="checkbox" aria-label="Select all rows" class="h-3.5 w-3.5 accent-[#2563EB]"></th>
