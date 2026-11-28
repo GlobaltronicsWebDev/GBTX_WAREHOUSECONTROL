@@ -163,7 +163,7 @@ class DeliveryReceiptTest extends TestCase
 
         $this->actingAs(User::factory()->create())->get(route('admin.delivery-receipts.create'))
             ->assertOk()->assertSee('DR to Client')->assertSee('DR Internal')
-            ->assertSee('Add Product')->assertSee($item->item_description)
+            ->assertSee('Add Product')->assertSee('Search product')->assertSee($item->item_description)
             ->assertDontSee('name="received_by"', false);
     }
 
@@ -176,8 +176,10 @@ class DeliveryReceiptTest extends TestCase
         $client = DeliveryReceipt::query()->where('type', 'client')->firstOrFail();
         $internal = DeliveryReceipt::query()->where('type', 'internal')->firstOrFail();
 
-        $this->get(route('admin.delivery-receipts.edit', $client))->assertDontSee('name="received_by"', false);
-        $this->get(route('admin.delivery-receipts.edit', $internal))->assertDontSee('name="received_by"', false);
+        $this->get(route('admin.delivery-receipts.edit', $client))
+            ->assertSee('Search product')->assertDontSee('name="received_by"', false);
+        $this->get(route('admin.delivery-receipts.edit', $internal))
+            ->assertSee('Search product')->assertDontSee('name="received_by"', false);
 
         $data = $this->receiptData($item, 'client');
         unset($data['received_by']);

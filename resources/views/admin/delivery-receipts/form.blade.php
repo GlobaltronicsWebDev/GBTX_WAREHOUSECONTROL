@@ -89,10 +89,36 @@
                 ? 'Select an item to see its current available quantity.'
                 : `Available quantity: ${option.dataset.available} ${option.dataset.unit}`;
         };
-        receiptLines.querySelectorAll('[data-receipt-line]').forEach(updateReceiptAvailability);
+        const initializeReceiptLine = (line) => {
+            const select = line.querySelector('[data-receipt-item]');
+            const search = line.querySelector('[data-receipt-search]');
+            const searchStatus = line.querySelector('[data-receipt-search-status]');
+            const options = Array.from(select.options);
+
+            line.querySelector('[data-receipt-search-container]').hidden = false;
+            search.addEventListener('input', () => {
+                const query = search.value.trim().toLocaleLowerCase();
+                const selectedValue = select.value;
+                let matchCount = 0;
+                const visibleOptions = options.filter((option) => {
+                    if (option.value === '') {
+                        return true;
+                    }
+                    const matches = option.textContent.toLocaleLowerCase().includes(query);
+                    matchCount += Number(matches);
+                    return matches || option.value === selectedValue;
+                });
+
+                select.replaceChildren(...visibleOptions);
+                select.value = selectedValue;
+                searchStatus.textContent = query && matchCount === 0 ? 'No matching products found.' : '';
+            });
+            updateReceiptAvailability(line);
+        };
+        receiptLines.querySelectorAll('[data-receipt-line]').forEach(initializeReceiptLine);
         document.getElementById('add-receipt-line').addEventListener('click', () => {
             receiptLines.insertAdjacentHTML('beforeend', receiptTemplate.innerHTML.replaceAll('__INDEX__', String(nextReceiptIndex++)));
-            updateReceiptAvailability(receiptLines.lastElementChild);
+            initializeReceiptLine(receiptLines.lastElementChild);
         });
         receiptLines.addEventListener('change', (event) => {
             if (event.target.matches('[data-receipt-item]')) {

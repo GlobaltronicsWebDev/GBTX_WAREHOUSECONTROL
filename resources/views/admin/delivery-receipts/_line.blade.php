@@ -1,6 +1,11 @@
 <div data-receipt-line data-line-index="{{ $index }}" class="grid gap-3 border border-[#E5E7EB] p-3 sm:grid-cols-[minmax(0,2fr)_120px_minmax(0,1fr)_auto] sm:items-end">
     <div class="sm:contents">
         <div>
+            <div data-receipt-search-container hidden class="mb-2">
+                <label for="receipt-search-{{ $index }}" class="mb-1 block text-[10px] font-medium text-slate-700">Search product</label>
+                <input id="receipt-search-{{ $index }}" type="search" data-receipt-search autocomplete="off" placeholder="Search by SKU or product name" class="w-full rounded-sm border border-[#E5E7EB] px-2 py-2 text-[11px] outline-none focus:border-[#2563EB]">
+                <p data-receipt-search-status aria-live="polite" class="mt-1 text-[10px] text-slate-500"></p>
+            </div>
             <label for="receipt-item-{{ $index }}" class="mb-1 block text-[10px] font-medium text-slate-700">Product ID / SKU and Product Name <span class="text-red-500">*</span></label>
             <select id="receipt-item-{{ $index }}" name="lines[{{ $index }}][inventory_item_id]" data-receipt-item required class="w-full rounded-sm border border-[#E5E7EB] bg-white px-2 py-2 text-[11px] outline-none focus:border-[#2563EB]">
                 <option value="">Select product</option>
