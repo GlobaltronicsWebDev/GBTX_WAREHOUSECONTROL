@@ -163,10 +163,11 @@ class DeliveryReceiptTest extends TestCase
 
         $this->actingAs(User::factory()->create())->get(route('admin.delivery-receipts.create'))
             ->assertOk()->assertSee('DR to Client')->assertSee('DR Internal')
-            ->assertSee('Add Product')->assertSee($item->item_description);
+            ->assertSee('Add Product')->assertSee($item->item_description)
+            ->assertDontSee('name="received_by"', false);
     }
 
-    public function test_received_by_is_only_shown_on_internal_draft_edit_and_existing_client_data_is_preserved(): void
+    public function test_received_by_is_not_shown_on_draft_edits_and_existing_data_is_preserved(): void
     {
         $user = User::factory()->create();
         $item = $this->inventoryItem();
@@ -176,12 +177,16 @@ class DeliveryReceiptTest extends TestCase
         $internal = DeliveryReceipt::query()->where('type', 'internal')->firstOrFail();
 
         $this->get(route('admin.delivery-receipts.edit', $client))->assertDontSee('name="received_by"', false);
-        $this->get(route('admin.delivery-receipts.edit', $internal))->assertSee('name="received_by"', false);
+        $this->get(route('admin.delivery-receipts.edit', $internal))->assertDontSee('name="received_by"', false);
 
         $data = $this->receiptData($item, 'client');
         unset($data['received_by']);
         $this->put(route('admin.delivery-receipts.update', $client), $data)->assertRedirect();
         $this->assertSame('Receiver', $client->fresh()->received_by);
+
+        $data['type'] = 'internal';
+        $this->put(route('admin.delivery-receipts.update', $internal), $data)->assertRedirect();
+        $this->assertSame('Receiver', $internal->fresh()->received_by);
     }
 
     public function test_unit_changes_after_drafting_require_the_draft_to_be_updated(): void
