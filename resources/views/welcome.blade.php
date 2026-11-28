@@ -120,7 +120,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('login', [], false) }}" class="space-y-5">
+            <form method="POST" action="{{ url('/login') }}" class="space-y-5">
                 @csrf
 
                 <div>
@@ -190,7 +190,7 @@
             @auth
                 <div class="mt-6 flex items-center justify-between rounded-md border border-slate-200 px-4 py-3 text-sm dark:border-slate-700">
                     <span>Signed in as {{ Auth::user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ url('/logout') }}">
                         @csrf
                         <button type="submit" class="font-medium text-blue-600 hover:text-blue-700">Log out</button>
                     </form>
