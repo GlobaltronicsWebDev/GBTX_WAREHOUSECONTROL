@@ -5,15 +5,48 @@
 
 @section('content')
     <style>
-        .receipt-document { background-color: white !important; color: #111; color-scheme: light; font-family: Arial, sans-serif; }
-        .receipt-document table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .receipt-document th, .receipt-document td { border: 1px solid #444; overflow-wrap: anywhere; padding: 5px; text-align: left; vertical-align: top; }
+        .receipt-scroll { overflow-x: auto; }
+        .receipt-document { min-width: 660px; background-color: white !important; color: #111; color-scheme: light; font-family: Arial, sans-serif; font-size: 11px; }
+        .receipt-document * { box-sizing: border-box; }
+        .receipt-brand { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .receipt-brand img { width: 50px; height: 50px; object-fit: contain; filter: grayscale(1); }
+        .receipt-brand-name { border-bottom: 1px solid #111; font-size: 25px; font-style: italic; font-weight: 900; line-height: 1; }
+        .receipt-tagline { font-size: 9px; letter-spacing: 1px; text-align: center; text-transform: uppercase; }
+        .receipt-heading { margin: 8px 0 0; font-size: 19px; font-weight: bold; text-align: center; text-transform: uppercase; }
+        .receipt-top { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
+        .receipt-client-heading { border: 1px solid #111; padding: 8px; }
+        .receipt-client-heading .receipt-heading { margin: 0 0 6px; }
+        .receipt-number { margin: 5px 0 12px; font-size: 14px; text-align: center; }
+        .receipt-fields { display: grid; gap: 5px; }
+        .receipt-client-fields { margin-top: 20px; }
+        .receipt-internal-fields { display: grid; grid-template-columns: 3fr 2fr; gap: 20px; margin-top: 8px; }
+        .receipt-field { display: flex; align-items: baseline; gap: 5px; }
+        .receipt-field strong { flex: none; text-transform: uppercase; }
+        .receipt-field span { flex: 1; min-width: 0; min-height: 15px; border-bottom: 1px solid #555; overflow-wrap: anywhere; }
+        .receipt-draft { margin: 8px 0; border: 1px solid #111; padding: 4px; font-weight: bold; text-align: center; text-transform: uppercase; }
+        .receipt-document table { width: 100%; margin-top: 10px; border-collapse: collapse; table-layout: fixed; }
+        .receipt-document th, .receipt-document td { border: 1px solid #444; overflow-wrap: anywhere; padding: 2px 4px; text-align: left; vertical-align: top; }
+        .receipt-document th { font-size: 10px; text-align: center; text-transform: uppercase; }
+        .receipt-document td { height: 18px; }
         .receipt-document thead { display: table-header-group; }
-        .receipt-document tr, .receipt-signatures { break-inside: avoid; }
+        .receipt-document tr, .receipt-footer, .receipt-signatures { break-inside: avoid; }
+        .receipt-footer { margin-top: 10px; }
+        .receipt-client-footer { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
+        .receipt-remarks { min-height: 50px; border: 1px solid #555; padding: 5px; }
+        .receipt-remarks p { white-space: pre-line; overflow-wrap: anywhere; }
+        .receipt-signatures { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; border: 1px solid #555; padding: 6px; font-size: 10px; }
+        .receipt-client-signatures { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 10px; }
+        .receipt-internal-signatures { margin-top: 10px; }
+        .receipt-signature-line { min-height: 28px; border-bottom: 1px solid #555; overflow-wrap: anywhere; }
+        .receipt-received { display: flex; min-height: 125px; flex-direction: column; justify-content: space-between; border: 1px solid #555; padding: 8px; text-align: center; }
+        .receipt-received-line { border-bottom: 1px solid #555; min-height: 22px; overflow-wrap: anywhere; }
+        .receipt-note { margin-top: 5px; font-size: 9px; }
         @media print {
+            @page { margin: 8mm; }
             #dashboardSidebar, #dashboardSidebarBackdrop, header, .receipt-controls, main > div:first-child { display: none !important; }
             body, main { background: white !important; color: black !important; }
-            .receipt-document { border: 0 !important; box-shadow: none !important; max-width: none !important; padding: 0 !important; }
+            .receipt-scroll { overflow: visible; }
+            .receipt-document { min-width: 0; border: 0 !important; box-shadow: none !important; max-width: none !important; padding: 0 !important; }
         }
     </style>
     <div class="mx-auto max-w-5xl space-y-4 px-3 py-4 sm:px-5">
@@ -26,7 +59,7 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 class="text-[20px] font-semibold">Delivery Receipt {{ $receipt->number }}</h1>
-                    <p class="text-[12px] text-slate-500">{{ ucfirst($receipt->type) }} · {{ ucfirst($receipt->status) }}</p>
+                    <p class="text-[12px] text-slate-500">{{ $receipt->type === 'client' ? 'DR to Client' : 'DR Internal' }} · {{ ucfirst($receipt->status) }}</p>
                     <p class="text-[11px] text-slate-500">Created {{ $receipt->created_at->format('Y-m-d H:i') }} by {{ $receipt->creator?->name ?: 'Unknown user' }}
                         @if ($receipt->released_at)
                             · Released {{ $receipt->released_at->format('Y-m-d H:i') }} by {{ $receipt->releaser?->name ?: 'Unknown user' }}
@@ -50,37 +83,62 @@
             </div>
         </div>
 
-        <article class="receipt-document space-y-4 border border-slate-300 bg-white p-5 text-[12px] shadow-sm sm:p-8">
-            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-black pb-3">
-                <div class="flex items-center gap-3">
-                    <img src="{{ asset('assets/images/logo/globaltronics_logo.png') }}" alt="" class="h-12 w-12 object-contain">
+        <div class="receipt-scroll">
+        <article class="receipt-document border border-slate-300 bg-white p-5 shadow-sm sm:p-8">
+            @if ($receipt->type === 'client')
+                <div class="receipt-top">
                     <div>
-                        <p class="text-[20px] font-bold uppercase">Globaltronics</p>
-                        <p class="text-[9px] uppercase">Leading Digital Innovation</p>
+                        <div class="receipt-brand">
+                            <img src="{{ asset('assets/images/logo/globaltronics_logo.png') }}" alt="">
+                            <div>
+                                <p class="receipt-brand-name">GLOBALTRONICS</p>
+                                <p class="receipt-tagline">Leading Digital Innovation</p>
+                            </div>
+                        </div>
+                        <div class="receipt-fields receipt-client-fields">
+                            <div class="receipt-field"><strong>Client:</strong><span>{{ $receipt->recipient }}</span></div>
+                            <div class="receipt-field"><strong>TIN:</strong><span>{{ $receipt->tin }}</span></div>
+                            <div class="receipt-field"><strong>Address:</strong><span>{{ $receipt->address }}</span></div>
+                            <div class="receipt-field"><strong>Contact Person:</strong><span>{{ $receipt->contact_person }}</span></div>
+                        </div>
+                    </div>
+                    <div class="receipt-client-heading">
+                        <h2 class="receipt-heading">Delivery Receipt</h2>
+                        <p class="receipt-number">No. <strong>{{ $receipt->number }}</strong></p>
+                        <div class="receipt-fields">
+                            <div class="receipt-field"><strong>Date:</strong><span>{{ $receipt->receipt_date->format('Y-m-d') }}</span></div>
+                            <div class="receipt-field"><strong>Terms:</strong><span>{{ $receipt->terms }}</span></div>
+                            <div class="receipt-field"><strong>PO No.:</strong><span>{{ $receipt->purchase_order_number }}</span></div>
+                            <div class="receipt-field"><strong>SO No.:</strong><span>{{ $receipt->sales_order_number }}</span></div>
+                            <div class="receipt-field"><strong>SRF No.:</strong><span>{{ $receipt->request_number }}</span></div>
+                        </div>
                     </div>
                 </div>
-                <div class="text-right">
-                    <h2 class="text-[20px] font-bold uppercase">Delivery Receipt</h2>
-                    <p class="mt-1 font-semibold">{{ $receipt->type === 'client' ? 'DR to Client' : 'DR Internal' }}</p>
-                    <p class="mt-1">DR No.: <strong>{{ $receipt->number }}</strong></p>
+            @else
+                <div class="receipt-brand">
+                    <img src="{{ asset('assets/images/logo/globaltronics_logo.png') }}" alt="">
+                    <div>
+                        <p class="receipt-brand-name">GLOBALTRONICS</p>
+                        <p class="receipt-tagline">Leading Digital Innovation</p>
+                    </div>
                 </div>
-            </div>
-            @if ($receipt->status === 'draft')
-                <p class="border border-black p-2 text-center font-bold uppercase">Draft — not released</p>
+                <h2 class="receipt-heading">Delivery Receipt</h2>
+                <div class="receipt-internal-fields">
+                    <div class="receipt-fields">
+                        <div class="receipt-field"><strong>SR No.:</strong><span>{{ $receipt->request_number }}</span></div>
+                        <div class="receipt-field"><strong>Site / Client:</strong><span>{{ $receipt->recipient }}</span></div>
+                        <div class="receipt-field"><strong>Address:</strong><span>{{ $receipt->address }}</span></div>
+                    </div>
+                    <div class="receipt-fields">
+                        <div class="receipt-field"><strong>DR No.:</strong><span>{{ $receipt->number }}</span></div>
+                        <div class="receipt-field"><strong>PO No.:</strong><span>{{ $receipt->purchase_order_number }}</span></div>
+                        <div class="receipt-field"><strong>Date:</strong><span>{{ $receipt->receipt_date->format('Y-m-d') }}</span></div>
+                    </div>
+                </div>
             @endif
-            <div class="grid gap-x-6 gap-y-2 sm:grid-cols-2">
-                <p><strong>{{ $receipt->type === 'client' ? 'Client' : 'Site / Client' }}:</strong> {{ $receipt->recipient }}</p>
-                <p><strong>Date:</strong> {{ $receipt->receipt_date->format('Y-m-d') }}</p>
-                <p><strong>Address:</strong> {{ $receipt->address ?: '____________________________' }}</p>
-                <p><strong>PO No.:</strong> {{ $receipt->purchase_order_number ?: '________________' }}</p>
-                @if ($receipt->type === 'client')
-                    <p><strong>TIN:</strong> {{ $receipt->tin ?: '____________________________' }}</p>
-                    <p><strong>Terms:</strong> {{ $receipt->terms ?: '________________' }}</p>
-                    <p><strong>Contact Person:</strong> {{ $receipt->contact_person ?: '____________________________' }}</p>
-                    <p><strong>SO No.:</strong> {{ $receipt->sales_order_number ?: '________________' }}</p>
-                @endif
-                <p><strong>{{ $receipt->type === 'client' ? 'SRF No.' : 'SR No.' }}:</strong> {{ $receipt->request_number ?: '________________' }}</p>
-            </div>
+            @if ($receipt->status === 'draft')
+                <p class="receipt-draft">Draft — not released</p>
+            @endif
             <table>
                 <colgroup>
                     @if ($receipt->type === 'internal')
@@ -108,26 +166,43 @@
                             @if ($receipt->type === 'internal') <td>{{ $line->model_serial ?: '—' }}</td> @endif
                         </tr>
                     @endforeach
+                    @for ($row = $receipt->lines->count(); $row < 24; $row++)
+                        <tr aria-hidden="true">
+                            @if ($receipt->type === 'internal') <td>&nbsp;</td> @endif
+                            <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                            @if ($receipt->type === 'internal') <td>&nbsp;</td> @endif
+                        </tr>
+                    @endfor
                 </tbody>
             </table>
-            <div class="min-h-16 border border-slate-600 p-2">
-                <strong>{{ $receipt->type === 'client' ? 'Special Instructions / Remarks' : 'Remarks' }}:</strong>
-                <p class="whitespace-pre-line">{{ $receipt->remarks }}</p>
-            </div>
             @if ($receipt->type === 'client')
-                <p>Received the above items in good order and condition.</p>
-            @endif
-            <div class="receipt-signatures grid grid-cols-2 gap-5 pt-4 text-[10px] sm:grid-cols-5">
-                @foreach (['Prepared by', 'Checked by', 'Approved by', 'Released by', 'Received by'] as $label)
-                    <div class="min-w-0">
-                        <div class="h-8 border-b border-black"></div>
-                        <p class="mt-1">{{ $label }}{{ $label === 'Received by' && $receipt->received_by ? ': '.$receipt->received_by : '' }}</p>
+                <div class="receipt-footer receipt-client-footer">
+                    <div>
+                        <div class="receipt-remarks"><strong>Special Instructions / Remarks:</strong><p>{{ $receipt->remarks }}</p></div>
+                        <div class="receipt-signatures receipt-client-signatures">
+                            @foreach (['Prepared by', 'Checked by', 'Released by', 'Approved by'] as $label)
+                                <div><strong>{{ $label }}:</strong><div class="receipt-signature-line"></div></div>
+                            @endforeach
+                        </div>
                     </div>
-                @endforeach
-            </div>
-            @if ($receipt->type === 'client')
-                <p class="text-[9px]">Operational delivery receipt — not a tax invoice.</p>
+                    <div class="receipt-received">
+                        <p>Received the above items in good order and condition.</p>
+                        <div><div class="receipt-received-line">{{ $receipt->received_by }}</div><strong>Signature over printed name</strong></div>
+                        <div><div class="receipt-received-line"></div><strong>Date</strong></div>
+                    </div>
+                </div>
+                <p class="receipt-note">Operational delivery receipt — not a tax invoice.</p>
+            @else
+                <div class="receipt-footer">
+                    <div class="receipt-remarks"><strong>Remarks:</strong><p>{{ $receipt->remarks }}</p></div>
+                    <div class="receipt-signatures receipt-internal-signatures">
+                        @foreach (['Prepared by', 'Checked by', 'Approved by', 'Released by', 'Received by'] as $label)
+                            <div><strong>{{ $label }}:</strong><div class="receipt-signature-line">{{ $label === 'Received by' ? $receipt->received_by : '' }}</div></div>
+                        @endforeach
+                    </div>
+                </div>
             @endif
         </article>
+        </div>
     </div>
 @endsection
