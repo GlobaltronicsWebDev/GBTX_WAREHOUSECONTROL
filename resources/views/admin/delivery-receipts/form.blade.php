@@ -42,12 +42,18 @@
                     <label for="recipient" class="mb-1 block text-[11px] font-medium text-slate-700">Client / Site <span class="text-red-500">*</span></label>
                     <input id="recipient" name="recipient" required maxlength="255" value="{{ old('recipient', $receipt->recipient) }}" class="w-full rounded-sm border border-[#E5E7EB] px-3 py-2 text-[12px]">
                 </div>
-                @foreach (['address' => 'Address', 'tin' => 'Client TIN', 'contact_person' => 'Contact Person', 'terms' => 'Terms', 'purchase_order_number' => 'PO No.', 'sales_order_number' => 'SO No.', 'request_number' => 'SR / SRF No.', 'received_by' => 'Received By'] as $name => $label)
+                @foreach (['address' => 'Address', 'tin' => 'Client TIN', 'contact_person' => 'Contact Person', 'terms' => 'Terms', 'purchase_order_number' => 'PO No.', 'sales_order_number' => 'SO No.', 'request_number' => 'SR / SRF No.'] as $name => $label)
                     <div>
                         <label for="{{ $name }}" class="mb-1 block text-[11px] font-medium text-slate-700">{{ $label }}</label>
                         <input id="{{ $name }}" name="{{ $name }}" maxlength="255" value="{{ old($name, $receipt->{$name}) }}" class="w-full rounded-sm border border-[#E5E7EB] px-3 py-2 text-[12px]">
                     </div>
                 @endforeach
+                @if (! $receipt->exists || $receipt->type === 'internal')
+                    <div id="received-by-field" @if (! $receipt->exists && old('type', 'client') !== 'internal') hidden @endif>
+                        <label for="received_by" class="mb-1 block text-[11px] font-medium text-slate-700">Received By</label>
+                        <input id="received_by" name="received_by" maxlength="255" value="{{ old('received_by', $receipt->received_by) }}" @disabled(! $receipt->exists && old('type', 'client') !== 'internal') class="w-full rounded-sm border border-[#E5E7EB] px-3 py-2 text-[12px]">
+                    </div>
+                @endif
             </section>
             <section aria-labelledby="receipt-lines-heading" class="space-y-3">
                 <div class="flex items-center justify-between gap-2 border-b border-[#E5E7EB] pb-2">
@@ -78,6 +84,18 @@
 
 @push('scripts')
     <script>
+        const receiptType = document.getElementById('type');
+        const receivedByField = document.getElementById('received-by-field');
+        if (receiptType && receivedByField) {
+            const updateReceivedByField = () => {
+                const isInternal = receiptType.value === 'internal';
+                receivedByField.hidden = !isInternal;
+                document.getElementById('received_by').disabled = !isInternal;
+            };
+            receiptType.addEventListener('change', updateReceivedByField);
+            updateReceivedByField();
+        }
+
         const receiptLines = document.getElementById('receipt-lines');
         const receiptTemplate = document.getElementById('receipt-line-template');
         let nextReceiptIndex = Array.from(receiptLines.querySelectorAll('[data-receipt-line]'))

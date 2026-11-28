@@ -28,6 +28,7 @@
         .receipt-document th, .receipt-document td { border: 1px solid #444; overflow-wrap: anywhere; padding: 2px 4px; text-align: left; vertical-align: top; }
         .receipt-document th { font-size: 10px; text-align: center; text-transform: uppercase; }
         .receipt-document td { height: 18px; }
+        .receipt-document .receipt-client-table td { text-align: center; }
         .receipt-document thead { display: table-header-group; }
         .receipt-document tr, .receipt-footer, .receipt-signatures { break-inside: avoid; }
         .receipt-footer { margin-top: 10px; }
@@ -139,7 +140,7 @@
             @if ($receipt->status === 'draft')
                 <p class="receipt-draft">Draft — not released</p>
             @endif
-            <table>
+            <table @if ($receipt->type === 'client') class="receipt-client-table" @endif>
                 <colgroup>
                     @if ($receipt->type === 'internal')
                         <col style="width: 9%"><col style="width: 9%"><col style="width: 8%"><col style="width: 49%"><col style="width: 25%">
