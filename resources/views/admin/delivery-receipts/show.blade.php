@@ -92,7 +92,7 @@
                             <img src="{{ asset('assets/images/logo/globaltronics_logo.png') }}" alt="">
                             <div>
                                 <p class="receipt-brand-name">GLOBALTRONICS</p>
-                                <p class="receipt-tagline">Leading Digital Innovation</p>
+                                <p class="receipt-tagline">LED By Vision, Build By Trust</p>
                             </div>
                         </div>
                         <div class="receipt-fields receipt-client-fields">
