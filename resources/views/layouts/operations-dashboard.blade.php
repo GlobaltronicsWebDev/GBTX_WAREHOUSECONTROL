@@ -252,7 +252,11 @@
                     <p class="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">General</p>
                     <div class="space-y-0.5">
                         <button type="button" disabled title="Application settings are not connected" class="flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">App</button>
-                        <a href="{{ route('admin.settings.profile') }}" @if (request()->routeIs('admin.settings.profile*')) aria-current="page" @endif class="flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.profile*') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Profile</a>
+                        @if (\Illuminate\Support\Facades\Route::has('admin.settings.profile'))
+                            <a href="{{ route('admin.settings.profile') }}" @if (request()->routeIs('admin.settings.profile*')) aria-current="page" @endif class="flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.profile*') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Profile</a>
+                        @else
+                            <button type="button" disabled title="Profile settings are not connected" class="flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Profile</button>
+                        @endif
                         <a href="{{ route('admin.settings.security') }}" @if (request()->routeIs('admin.settings.security*')) aria-current="page" @endif class="flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.security*') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Security</a>
                         <button type="button" disabled title="API settings are not connected" class="flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">API</button>
                     </div>
@@ -271,7 +275,11 @@
                         <div class="space-y-0.5">
                             <a href="{{ route('admin.settings.companies') }}" @if (request()->routeIs('admin.settings.companies')) aria-current="page" @endif class="flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.companies') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Company</a>
                             <a href="{{ route('admin.settings.departments') }}" @if (request()->routeIs('admin.settings.departments')) aria-current="page" @endif class="flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.departments') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Department</a>
-                            <a href="{{ route('admin.settings.locations') }}" @if (request()->routeIs('admin.settings.locations')) aria-current="page" @endif class="flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.locations') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Warehouse/Location</a>
+                            @if (\Illuminate\Support\Facades\Route::has('admin.settings.locations'))
+                                <a href="{{ route('admin.settings.locations') }}" @if (request()->routeIs('admin.settings.locations')) aria-current="page" @endif class="flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.locations') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Warehouse/Location</a>
+                            @else
+                                <button type="button" disabled title="Warehouse/Location settings are not connected" class="flex h-8 w-full cursor-not-allowed items-center gap-2 rounded-sm px-2 text-left text-slate-400">Warehouse/Location</button>
+                            @endif
                             <a href="{{ route('admin.settings.partners') }}" @if (request()->routeIs('admin.settings.partners')) aria-current="page" @endif class="flex h-8 items-center gap-2 rounded-sm px-2 {{ request()->routeIs('admin.settings.partners') ? 'bg-[#EAECEF] font-medium text-[#2563EB]' : 'text-slate-700 hover:bg-[#EAECEF]' }}">Supplier/Client</a>
                         </div>
 
@@ -337,12 +345,21 @@
                         </div>
 
                         <div class="border-t border-[#E5E7EB] py-1">
+                            @if (\Illuminate\Support\Facades\Route::has('admin.settings.profile'))
                             <a href="{{ route('admin.settings.profile') }}" class="flex h-9 items-center gap-2.5 px-3 text-[12px] text-slate-700 hover:bg-[#F8F9FA]">
                                 <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                                     <circle cx="12" cy="8" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 21a8 8 0 0 1 16 0"/>
                                 </svg>
                                 <span>Profile</span>
                             </a>
+                            @else
+                                <button type="button" disabled title="Profile settings are not connected" class="flex h-9 w-full cursor-not-allowed items-center gap-2.5 px-3 text-left text-[12px] text-slate-400">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                                        <circle cx="12" cy="8" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 21a8 8 0 0 1 16 0"/>
+                                    </svg>
+                                    <span>Profile</span>
+                                </button>
+                            @endif
                             @if (Auth::user()->canAccessAdminCredentials())
                                 <a href="{{ route('admin.settings.companies') }}" class="flex h-9 items-center gap-2.5 px-3 text-[12px] text-slate-700 hover:bg-[#F8F9FA]">
                                     <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
