@@ -165,16 +165,16 @@
                         <button type="button" disabled class="block h-7 w-full cursor-not-allowed text-left text-[12px] text-slate-400">Project Lists</button>
                     </div>
 
-                    <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="logisticsMenu" aria-expanded="false" aria-controls="logisticsMenu">
+                    <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="logisticsMenu" aria-expanded="{{ request()->routeIs('admin.delivery-receipts.*') ? 'true' : 'false' }}" aria-controls="logisticsMenu">
                         <svg class="h-4 w-4 shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h11v11H3zM14 11h4l3 3v4h-7z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="18" cy="18" r="1.5"/>
                         </svg>
                         <span class="sidebar-copy flex-1">Logistics</span>
                         <svg class="sidebar-copy h-3.5 w-3.5 text-slate-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m5 7.5 5 5 5-5"/></svg>
                     </button>
-                    <div id="logisticsMenu" class="sidebar-subnav hidden pb-1 pl-8">
+                    <div id="logisticsMenu" class="sidebar-subnav pb-1 pl-8 {{ request()->routeIs('admin.delivery-receipts.*') ? '' : 'hidden' }}">
                         <button type="button" disabled class="block h-7 w-full cursor-not-allowed text-left text-[12px] text-slate-400">Receiving</button>
-                        <button type="button" disabled class="block h-7 w-full cursor-not-allowed text-left text-[12px] text-slate-400">Delivery</button>
+                        <a href="{{ route('admin.delivery-receipts.index') }}" class="block h-7 w-full text-left text-[12px] {{ request()->routeIs('admin.delivery-receipts.*') ? 'font-medium text-[#2563EB]' : 'text-slate-500 hover:text-slate-700' }}" @if (request()->routeIs('admin.delivery-receipts.*')) aria-current="page" @endif>Delivery Receipts</a>
                     </div>
 
                     <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="importMenu" aria-expanded="false" aria-controls="importMenu">

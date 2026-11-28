@@ -2,7 +2,7 @@
 
 Laravel application for managing user access and Stock Requisition Form (SRF) workflows.
 
-SRFs retain their item details, approvals, history, and printable forms. Item details are stored on each request; the application does not track inventory quantities or reservations.
+SRFs retain their item details, approvals, history, and printable forms. SRF requests do not automatically change inventory; actual stock movements are recorded separately.
 
 ## Requirements
 
@@ -23,6 +23,10 @@ npm run build
 ```
 
 Configure database credentials in `.env` before running migrations.
+
+## Delivery receipts
+
+Create Client and Internal delivery receipts under Logistics. Each type has its own automatically generated DR number. Saving or editing a draft does not change inventory. Releasing a draft checks current stock, deducts the three inventory balances, and records a linked Stock Out transaction; do not record a separate Stock Out for the same delivery. Released receipts cannot be edited or released again. Printed drafts are marked as not released. The Client template is for operational use and should be reviewed before use as an official receipt.
 
 ## Access roles
 

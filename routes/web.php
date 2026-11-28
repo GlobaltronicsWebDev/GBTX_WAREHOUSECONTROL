@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BusinessPartnerController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\CredentialController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DeliveryReceiptController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\InventoryCsvController;
 use App\Http\Controllers\Admin\InventoryItemController;
@@ -152,6 +153,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/inventory/export', [InventoryCsvController::class, 'export'])->name('inventory.export');
     Route::post('/inventory/import', [InventoryCsvController::class, 'import'])->name('inventory.import');
     Route::resource('inventory', InventoryItemController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+    Route::post('/delivery-receipts/{delivery_receipt}/release', [DeliveryReceiptController::class, 'release'])->name('delivery-receipts.release');
+    Route::resource('delivery-receipts', DeliveryReceiptController::class)->except(['destroy']);
     Route::prefix('stock-in')->name('stock-in.')->group(function () {
         Route::get('/', [StockTransactionController::class, 'index'])->defaults('transactionType', 'in')->name('index');
         Route::get('/create', [StockTransactionController::class, 'create'])->defaults('transactionType', 'in')->name('create');
