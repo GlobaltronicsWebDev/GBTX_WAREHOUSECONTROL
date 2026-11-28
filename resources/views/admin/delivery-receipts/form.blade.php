@@ -111,7 +111,12 @@
 
                 select.replaceChildren(...visibleOptions);
                 select.value = selectedValue;
-                searchStatus.textContent = query && matchCount === 0 ? 'No matching products found.' : '';
+                select.size = query && matchCount > 0 ? Math.min(6, Math.max(2, visibleOptions.length)) : 1;
+                searchStatus.textContent = !query
+                    ? ''
+                    : matchCount === 0
+                        ? 'No matching products found.'
+                        : `${matchCount} matching ${matchCount === 1 ? 'product' : 'products'}. Select a product below.`;
             });
             updateReceiptAvailability(line);
         };
