@@ -17,7 +17,7 @@ class InventoryCsvControllerTest extends TestCase
 
     private const CSV_FIELDS = [
         'tag_number', 'date_received', 'po_sku_number', 'manufacturer', 'model_pixel_pitch',
-        'item_description', 'location', 'on_hand', 'total_on_hand', 'per_panel_sqm', 'total_available_sqm',
+        'item_description', 'unit_of_measurement', 'location', 'on_hand', 'total_on_hand', 'per_panel_sqm', 'total_available_sqm',
         'available_qty', 'available_sqm', 'reservation_qty', 'reservation_project_details', 'history_qty',
         'history_project', 'original_qty', 'status_qty', 'status_particular', 'remarks', 'id',
         'warehouse_location_id', 'sub_location', 'additional_histories', 'csv_format',
@@ -34,6 +34,7 @@ class InventoryCsvControllerTest extends TestCase
         $warehouse = WarehouseLocation::factory()->create(['name' => 'Marikina']);
         $item = InventoryItem::create([
             'item_description' => '=dangerous formula',
+            'unit_of_measurement' => 'BOX',
             'warehouse_location_id' => $warehouse->id,
             'sub_location' => '1st Bldg',
             'available_qty' => 12,
@@ -51,12 +52,12 @@ class InventoryCsvControllerTest extends TestCase
         $this->assertCount(3, $rows);
         $this->assertSame([
             'TAG #', 'DATE RECEIVED', 'PO / SKU No.', 'MANUFACTURER', 'MODEL / PIXEL PITCH', 'ITEM DESCRIPTION',
-            'LOCATION', 'INVENTORY', '', '', '', 'AVAILABLE QTY', '', 'RESERVATION', '', 'HISTORY', '',
+            'UNIT OF MEASUREMENT', 'LOCATION', 'INVENTORY', '', '', '', 'AVAILABLE QTY', '', 'RESERVATION', '', 'HISTORY', '',
             'ORIGINAL QTY', 'STATUS', '', 'REMARKS', 'ITEM ID', 'WAREHOUSE ID', 'SUB-LOCATION',
             'ADDITIONAL HISTORIES', 'CSV FORMAT',
         ], $rows[0]);
         $this->assertSame([
-            '', '', '', '', '', '', '', 'ON-HAND', 'TOTAL ON-HAND', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM',
+            '', '', '', '', '', '', '', '', 'ON-HAND', 'TOTAL ON-HAND', 'PER PANEL SQM', 'TOTAL AVAILABLE SQM',
             'QTY', 'SQM', 'QTY', 'PROJECT DETAILS', 'QTY', 'PROJECT', '', 'QTY', 'PARTICULAR', '',
             '', '', '', '', '',
         ], $rows[1]);
@@ -64,6 +65,7 @@ class InventoryCsvControllerTest extends TestCase
         $this->assertSame((string) $item->id, $record['id']);
         $this->assertSame("'=dangerous formula", $record['item_description']);
         $this->assertSame((string) $warehouse->id, $record['warehouse_location_id']);
+        $this->assertSame('BOX', $record['unit_of_measurement']);
         $this->assertSame('1st Bldg', $record['sub_location']);
         $this->assertSame('4', $record['history_qty']);
         $this->assertSame('Client Alpha', $record['history_project']);

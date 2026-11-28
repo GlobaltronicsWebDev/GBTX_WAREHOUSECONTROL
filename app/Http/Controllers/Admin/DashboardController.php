@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\SrfRequisition;
+use App\Models\StockTransaction;
 use App\Models\TransactionNotification;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -74,6 +75,7 @@ class DashboardController extends Controller
 
         return view('admin.reports.index', [
             'srfCount' => $srfQuery->distinct('srf_number')->count('srf_number'),
+            'stockTransactionCount' => StockTransaction::query()->count(),
         ]);
     }
 

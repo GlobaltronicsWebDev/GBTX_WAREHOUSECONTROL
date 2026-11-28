@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\InventoryItem;
+use App\Models\StockTransaction;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\WarehouseLocation;
@@ -216,6 +217,44 @@ class InventoryItemControllerTest extends TestCase
         $this->get(route('admin.inventory.edit', $item))->assertSee('value="-166" type="number" min="-4294967295"', false);
         $this->get(route('admin.warehouses.show', $warehouse))->assertDontSee('Updated panel');
         $this->get(route('admin.warehouses.show', $destination))->assertSee('Updated panel');
+    }
+
+    public function test_item_unit_cannot_be_changed_after_stock_transaction_history_exists(): void
+    {
+        $user = User::factory()->create();
+        $warehouse = WarehouseLocation::factory()->create(['is_active' => true, 'navigation_enabled' => true]);
+        $item = InventoryItem::create([
+            'item_description' => 'Panel',
+            'warehouse_location_id' => $warehouse->id,
+            'unit_of_measurement' => 'PCS',
+        ]);
+        $transaction = StockTransaction::query()->create([
+            'reference_number' => 'SI-2026-000001',
+            'type' => 'in',
+            'transaction_date' => '2026-11-28',
+            'supplier_name' => 'Example Supplier',
+        ]);
+        $transaction->lines()->create([
+            'inventory_item_id' => $item->id,
+            'product_name' => 'Panel',
+            'quantity' => 1,
+            'unit_of_measurement' => 'PCS',
+            'stock_before' => 0,
+            'stock_after' => 1,
+        ]);
+        $data = $this->itemData($warehouse->id);
+        $data['unit_of_measurement'] = 'BOX';
+
+        $this->actingAs($user)
+            ->from(route('admin.inventory.edit', $item))
+            ->put(route('admin.inventory.update', $item), $data)
+            ->assertRedirect(route('admin.inventory.edit', $item))
+            ->assertSessionHasErrors('unit_of_measurement');
+
+        $this->assertDatabaseHas('inventory_items', [
+            'id' => $item->id,
+            'unit_of_measurement' => 'PCS',
+        ]);
     }
 
     public function test_item_update_rejects_inactive_warehouse_and_invalid_fields(): void

@@ -77,8 +77,9 @@ class InventoryItemController extends Controller
             })
             ->orderBy('name')
             ->get();
+        $unitOfMeasurementLocked = $item?->stockTransactionLines()->exists() ?? false;
 
-        return view('admin.inventory.create', compact('warehouseLocations', 'item'));
+        return view('admin.inventory.create', compact('warehouseLocations', 'item', 'unitOfMeasurementLocked'));
     }
 
     public function store(Request $request, InventoryItemValidator $validator, InventoryItemWriter $writer): RedirectResponse
@@ -94,8 +95,13 @@ class InventoryItemController extends Controller
 
     public function update(Request $request, InventoryItem $inventory, InventoryItemValidator $validator, InventoryItemWriter $writer): RedirectResponse
     {
-        $validated = $validator->validate($request->all(), $inventory);
-        DB::transaction(fn () => $writer->save($inventory, $validated));
+        DB::transaction(function () use ($request, $inventory, $validator, $writer): void {
+            $lockedInventory = InventoryItem::query()
+                ->lockForUpdate()
+                ->findOrFail($inventory->id);
+            $validated = $validator->validate($request->all(), $lockedInventory);
+            $writer->save($lockedInventory, $validated);
+        });
 
         return redirect()
             ->route('admin.inventory.index')

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\InventoryCsvController;
 use App\Http\Controllers\Admin\InventoryItemController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\StockTransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WarehouseDashboardController;
 use App\Http\Controllers\Admin\WarehouseLocationController;
@@ -151,6 +152,22 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/inventory/export', [InventoryCsvController::class, 'export'])->name('inventory.export');
     Route::post('/inventory/import', [InventoryCsvController::class, 'import'])->name('inventory.import');
     Route::resource('inventory', InventoryItemController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+    Route::prefix('stock-in')->name('stock-in.')->group(function () {
+        Route::get('/', [StockTransactionController::class, 'index'])->defaults('transactionType', 'in')->name('index');
+        Route::get('/create', [StockTransactionController::class, 'create'])->defaults('transactionType', 'in')->name('create');
+        Route::post('/', [StockTransactionController::class, 'store'])->defaults('transactionType', 'in')->name('store');
+        Route::get('/export', [StockTransactionController::class, 'export'])->defaults('transactionType', 'in')->name('export');
+        Route::get('/{transaction}/attachment', [StockTransactionController::class, 'attachment'])->defaults('transactionType', 'in')->name('attachment');
+        Route::get('/{transaction}', [StockTransactionController::class, 'show'])->defaults('transactionType', 'in')->name('show');
+    });
+    Route::prefix('stock-out')->name('stock-out.')->group(function () {
+        Route::get('/', [StockTransactionController::class, 'index'])->defaults('transactionType', 'out')->name('index');
+        Route::get('/create', [StockTransactionController::class, 'create'])->defaults('transactionType', 'out')->name('create');
+        Route::post('/', [StockTransactionController::class, 'store'])->defaults('transactionType', 'out')->name('store');
+        Route::get('/export', [StockTransactionController::class, 'export'])->defaults('transactionType', 'out')->name('export');
+        Route::get('/{transaction}/attachment', [StockTransactionController::class, 'attachment'])->defaults('transactionType', 'out')->name('attachment');
+        Route::get('/{transaction}', [StockTransactionController::class, 'show'])->defaults('transactionType', 'out')->name('show');
+    });
     Route::get('/warehouses/{location}', [WarehouseDashboardController::class, 'show'])->name('warehouses.show');
     Route::delete('/warehouses/{location}/inventory/selected', [WarehouseDashboardController::class, 'destroySelected'])->name('warehouses.inventory.destroy-selected');
     Route::delete('/warehouses/{location}/inventory/all', [WarehouseDashboardController::class, 'destroyAll'])->name('warehouses.inventory.destroy-all');

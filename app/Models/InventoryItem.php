@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'manufacturer',
     'model_pixel_pitch',
     'item_description',
+    'unit_of_measurement',
     'location',
     'warehouse_location_id',
     'sub_location',
@@ -104,5 +105,15 @@ class InventoryItem extends Model
     public function histories(): HasMany
     {
         return $this->hasMany(InventoryItemHistory::class)->orderBy('id');
+    }
+
+    /**
+     * Stock movement lines recorded for this inventory item.
+     *
+     * @return HasMany<StockTransactionLine, $this>
+     */
+    public function stockTransactionLines(): HasMany
+    {
+        return $this->hasMany(StockTransactionLine::class);
     }
 }

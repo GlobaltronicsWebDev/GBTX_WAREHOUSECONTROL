@@ -107,7 +107,7 @@
 
                 <p class="sidebar-section-label px-2 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Operations</p>
                 <div class="space-y-0.5">
-                    <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="inventoryMenu" aria-expanded="{{ request()->routeIs('admin.inventory.dashboard') ? 'true' : 'false' }}" aria-controls="inventoryMenu">
+                    <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="inventoryMenu" aria-expanded="{{ request()->routeIs('admin.inventory.*', 'admin.stock-in.*', 'admin.stock-out.*') ? 'true' : 'false' }}" aria-controls="inventoryMenu">
                         <svg class="h-4 w-4 shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                             <path stroke-linejoin="round" d="m3 7 9-4 9 4-9 4-9-4Z"/><path stroke-linejoin="round" d="M3 7v10l9 4 9-4V7M12 11v10"/>
                         </svg>
@@ -116,9 +116,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="m5 7.5 5 5 5-5"/>
                         </svg>
                     </button>
-                    <div id="inventoryMenu" class="sidebar-subnav pb-1 pl-8 {{ request()->routeIs('admin.inventory.dashboard') ? '' : 'hidden' }}">
+                    <div id="inventoryMenu" class="sidebar-subnav pb-1 pl-8 {{ request()->routeIs('admin.inventory.*', 'admin.stock-in.*', 'admin.stock-out.*') ? '' : 'hidden' }}">
                         <a href="{{ route('admin.inventory.dashboard') }}" class="block h-7 w-full text-left text-[12px] {{ request()->routeIs('admin.inventory.dashboard') ? 'font-medium text-[#2563EB]' : 'text-slate-500 hover:text-slate-700' }}" @if (request()->routeIs('admin.inventory.dashboard')) aria-current="page" @endif>Dashboard</a>
                         <a href="{{ route('admin.inventory.index') }}" class="block h-7 w-full text-left text-[12px] {{ request()->routeIs('admin.inventory.index', 'admin.inventory.create') ? 'font-medium text-[#2563EB]' : 'text-slate-500 hover:text-slate-700' }}">Inventory List</a>
+                        <a href="{{ route('admin.stock-in.index') }}" class="block h-7 w-full text-left text-[12px] {{ request()->routeIs('admin.stock-in.*') ? 'font-medium text-[#2563EB]' : 'text-slate-500 hover:text-slate-700' }}" @if (request()->routeIs('admin.stock-in.*')) aria-current="page" @endif>Stock In</a>
+                        <a href="{{ route('admin.stock-out.index') }}" class="block h-7 w-full text-left text-[12px] {{ request()->routeIs('admin.stock-out.*') ? 'font-medium text-[#2563EB]' : 'text-slate-500 hover:text-slate-700' }}" @if (request()->routeIs('admin.stock-out.*')) aria-current="page" @endif>Stock Out</a>
                     </div>
 
                     <button type="button" class="sidebar-nav-button flex h-8 w-full items-center gap-2.5 rounded-sm px-2 text-left text-slate-700 hover:bg-[#EAECEF]" data-menu-toggle="warehouseMenu" aria-expanded="{{ request()->routeIs('admin.warehouses.*') ? 'true' : 'false' }}" aria-controls="warehouseMenu">

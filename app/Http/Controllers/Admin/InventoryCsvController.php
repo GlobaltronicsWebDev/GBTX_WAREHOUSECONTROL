@@ -34,6 +34,7 @@ class InventoryCsvController extends Controller
         'manufacturer' => ['MANUFACTURER', ''],
         'model_pixel_pitch' => ['MODEL / PIXEL PITCH', ''],
         'item_description' => ['ITEM DESCRIPTION', ''],
+        'unit_of_measurement' => ['UNIT OF MEASUREMENT', ''],
         'location' => ['LOCATION', ''],
         'on_hand' => ['INVENTORY', 'ON-HAND'],
         'total_on_hand' => ['', 'TOTAL ON-HAND'],
@@ -57,7 +58,7 @@ class InventoryCsvController extends Controller
     ];
 
     private const TEXT_FIELDS = [
-        'tag_number', 'po_sku_number', 'manufacturer', 'model_pixel_pitch', 'item_description',
+        'tag_number', 'po_sku_number', 'manufacturer', 'model_pixel_pitch', 'item_description', 'unit_of_measurement',
         'location', 'sub_location', 'reservation_project_details', 'history_project', 'status_particular', 'remarks',
     ];
 
@@ -190,6 +191,9 @@ class InventoryCsvController extends Controller
                             if ($item === null) {
                                 throw ValidationException::withMessages(['id' => 'Item ID was not found or has been deleted.']);
                             }
+                        }
+                        if (! isset($data['unit_of_measurement']) || trim((string) $data['unit_of_measurement']) === '') {
+                            $data['unit_of_measurement'] = $item?->unit_of_measurement ?? 'PCS';
                         }
                         if (! $legacy && $data['warehouse_location_id'] !== null && $data['location'] !== null) {
                             $warehouse = WarehouseLocation::query()->find($data['warehouse_location_id']);

@@ -300,7 +300,7 @@
                 <div class="flex items-center justify-between border-b border-[#E5E7EB] px-4 py-3">
                     <div>
                         <h2 id="srfModalTitle" class="text-[16px] font-semibold text-slate-900">Create Stock Requisition Form</h2>
-                        <p class="mt-1 text-[11px] text-slate-500">Item details are saved with the SRF; inventory quantities are not tracked.</p>
+                        <p class="mt-1 text-[11px] text-slate-500">SRF saves request details only. Use Stock Out to record quantities actually released.</p>
                     </div>
                     <button type="button" onclick="closeInstallationSrfModal()" class="px-2 py-1 text-[18px] leading-none text-slate-500 hover:bg-[#F8F9FA]" aria-label="Close">×</button>
                 </div>

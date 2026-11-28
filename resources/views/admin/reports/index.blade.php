@@ -17,10 +17,13 @@
         <section class="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4" aria-label="Available reports">
             <article class="flex min-h-32 flex-col border border-[#E5E7EB] bg-white p-4">
                 <h1 class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Stock Movement Reports</h1>
-                <p class="mt-2 font-mono text-[25px] font-semibold leading-7 tabular-nums text-slate-800">—</p>
+                <p class="mt-2 font-mono text-[25px] font-semibold leading-7 tabular-nums text-slate-800">{{ number_format($stockTransactionCount) }}</p>
                 <div class="mt-auto flex items-center justify-between gap-2 pt-4">
-                    <span class="text-[10px] text-slate-500">Inventory movement is not tracked</span>
-                    <span class="text-[10px] text-slate-400">Unavailable</span>
+                    <span class="text-[10px] text-slate-500">Stock In and Stock Out records</span>
+                    <span class="flex gap-2 text-[10px]">
+                        <a href="{{ route('admin.stock-in.index') }}" class="font-medium text-[#2563EB] hover:underline">Stock In</a>
+                        <a href="{{ route('admin.stock-out.index') }}" class="font-medium text-[#2563EB] hover:underline">Stock Out</a>
+                    </span>
                 </div>
             </article>
             <article class="flex min-h-32 flex-col border border-[#E5E7EB] bg-white p-4">
@@ -35,7 +38,7 @@
                 <h2 class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Inventory Stock List Reports</h2>
                 <p class="mt-2 font-mono text-[25px] font-semibold leading-7 tabular-nums text-slate-800">—</p>
                 <div class="mt-auto flex items-center justify-between gap-2 pt-4">
-                    <span class="text-[10px] text-slate-500">Inventory records are not tracked</span>
+                    <span class="text-[10px] text-slate-500">Inventory stock-list reporting is not available</span>
                     <span class="text-[10px] text-slate-400">Unavailable</span>
                 </div>
             </article>
@@ -43,7 +46,7 @@
                 <h2 class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Inventory Aging Reports</h2>
                 <p class="mt-2 font-mono text-[25px] font-semibold leading-7 tabular-nums text-slate-800">—</p>
                 <div class="mt-auto flex items-center justify-between gap-2 pt-4">
-                    <span class="text-[10px] text-slate-500">Inventory records are not tracked</span>
+                    <span class="text-[10px] text-slate-500">Inventory aging reporting is not available</span>
                     <span class="text-[10px] text-slate-400">Unavailable</span>
                 </div>
             </article>

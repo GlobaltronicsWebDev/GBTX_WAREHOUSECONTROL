@@ -64,6 +64,12 @@
                 <textarea id="item_description" name="item_description" required rows="3" class="w-full rounded-sm border border-[#E5E7EB] px-3 py-2 text-[12px] outline-none focus:border-[#2563EB]">{{ old('item_description', $item?->item_description) }}</textarea>
             </div>
 
+            <div class="max-w-sm">
+                <label for="unit_of_measurement" class="mb-1 block text-[11px] font-medium text-slate-700">Unit of Measurement <span class="text-red-500">*</span></label>
+                <input id="unit_of_measurement" name="unit_of_measurement" value="{{ old('unit_of_measurement', $item?->unit_of_measurement ?? 'PCS') }}" maxlength="50" required @readonly($unitOfMeasurementLocked) class="w-full rounded-sm border border-[#E5E7EB] px-3 py-2 text-[12px] outline-none focus:border-[#2563EB]">
+                <p class="mt-1 text-[10px] text-slate-500">{{ $unitOfMeasurementLocked ? 'Locked because stock transactions already exist for this item.' : 'This unit is used consistently for all stock transactions on this item.' }}</p>
+            </div>
+
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach ([
                     'on_hand' => 'On-hand',

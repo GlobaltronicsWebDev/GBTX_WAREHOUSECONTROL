@@ -6,6 +6,7 @@ use App\Models\InventoryItem;
 use App\Models\WarehouseLocation;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class InventoryItemValidator
 {
@@ -30,6 +31,7 @@ class InventoryItemValidator
             'manufacturer' => ['nullable', 'string', 'max:255'],
             'model_pixel_pitch' => ['nullable', 'string', 'max:255'],
             'item_description' => ['required', 'string', 'max:10000'],
+            'unit_of_measurement' => ['sometimes', 'required', 'string', 'max:50'],
             'warehouse_location_id' => [$allowMissingWarehouse ? 'nullable' : 'required', 'integer', $warehouseRule],
             'on_hand' => ['required', 'integer', 'min:0'],
             'total_on_hand' => ['required', 'integer', 'min:0'],
@@ -49,6 +51,15 @@ class InventoryItemValidator
             'status_particular' => ['nullable', 'string', 'max:255'],
             'remarks' => ['nullable', 'string', 'max:10000'],
         ])->validate();
+
+        if ($item !== null
+            && isset($validated['unit_of_measurement'])
+            && $validated['unit_of_measurement'] !== $item->unit_of_measurement
+            && $item->stockTransactionLines()->exists()) {
+            throw ValidationException::withMessages([
+                'unit_of_measurement' => 'The unit of measurement cannot be changed after stock transactions have been recorded.',
+            ]);
+        }
 
         $warehouseLocation = isset($validated['warehouse_location_id'])
             ? WarehouseLocation::query()->findOrFail($validated['warehouse_location_id'])

@@ -187,7 +187,7 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Stock Movement Reports');
         $response->assertSee('Transaction Listing Reports');
         $response->assertSee('Inventory Stock List Reports');
-        $response->assertSee('Inventory records are not tracked');
+        $response->assertSee('Inventory stock-list reporting is not available');
     }
 
     public function test_transaction_report_filters_by_status_and_only_shows_the_users_srf_records(): void
