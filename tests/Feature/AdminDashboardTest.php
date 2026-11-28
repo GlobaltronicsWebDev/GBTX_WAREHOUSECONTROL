@@ -11,6 +11,8 @@ use App\Models\TransactionNotification;
 use App\Models\User;
 use App\Models\WarehouseLocation;
 use Database\Seeders\RoleSeeder;
+use DOMDocument;
+use DOMXPath;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -284,6 +286,26 @@ class AdminDashboardTest extends TestCase
     {
         $this->get(route('admin.inventory.dashboard'))
             ->assertRedirect('/login');
+    }
+
+    public function test_stock_transaction_quick_actions_replace_sidebar_links(): void
+    {
+        $user = User::factory()->create();
+
+        foreach (['admin.dashboard', 'admin.inventory.dashboard'] as $dashboardRoute) {
+            $response = $this->actingAs($user)->get(route($dashboardRoute));
+            $response->assertOk();
+
+            $document = new DOMDocument;
+            $document->loadHTML($response->getContent(), LIBXML_NOERROR | LIBXML_NOWARNING);
+            $xpath = new DOMXPath($document);
+
+            foreach (['in' => 'Stock In', 'out' => 'Stock Out'] as $type => $label) {
+                $url = route("admin.stock-{$type}.index");
+                $this->assertSame(1, $xpath->query("//div[contains(@aria-label, 'quick actions') or @aria-label='Quick actions']/a[@href='{$url}'][span[normalize-space(.)='{$label}']]")->length);
+                $this->assertSame(0, $xpath->query("//div[@id='inventoryMenu']/a[@href='{$url}']")->length);
+            }
+        }
     }
 
     public function test_authenticated_user_can_view_inventory_dashboard_prototype(): void
